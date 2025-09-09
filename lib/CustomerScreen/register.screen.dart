@@ -189,6 +189,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         color: Color(0xFF787B7B),
                       ),
                     ),
+                    initialCountryCode: 'IN',
+                    onChanged: (phone) {
+                      print(phone.completeNumber);
+                    },
                   ),
                   SizedBox(height: 30.h),
                   TextFormField(
