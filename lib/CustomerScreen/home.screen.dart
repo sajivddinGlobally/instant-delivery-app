@@ -24,24 +24,24 @@ class _HomeScreenState extends State<HomeScreen> {
       "title": "For Smaller Good",
     },
     {
-      "image": "assets/SvgImage/bikes.svg",
+      "image": "assets/SvgImage/sco.svg",
       "name": "Bike",
-      "title": "Choose from Our Fleet",
+      //"title": "Choose from Our Fleet",
     },
     {
-      "image": "assets/SvgImage/auto.svg",
+      "image": "assets/SvgImage/tempo.svg",
       "name": "Auto Tempo",
-      "title": "Choose from Our Fleet",
+      //"title": "Choose from Our Fleet",
     },
     {
       "image": "assets/SvgImage/packer.svg",
       "name": "Packer &  Mover",
-      "title": "Choose from Our Fleet",
+      //"title": "Choose from Our Fleet",
     },
     {
       "image": "assets/SvgImage/india.svg",
       "name": "All India Parcel",
-      "title": "Choose from Our Fleet",
+      // "title": "Choose from Our Fleet",
     },
   ];
 
@@ -260,23 +260,297 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 9.w),
-                          child: Text(
-                            //  "Choose from Our Fleet",
-                            myList[index]['title'],
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF000000),
-                              letterSpacing: -1,
+                        if (index == 0 || index == 1)
+                          Padding(
+                            padding: EdgeInsets.only(left: 9.w),
+                            child: Text(
+                              //  "Choose from Our Fleet",
+                              myList[index]['title'],
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFF000000),
+                                letterSpacing: -1,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   );
                 },
+              ),
+            ),
+            SizedBox(height: 30.h),
+            Row(
+              children: [
+                SizedBox(width: 24.w),
+                Text(
+                  "Current Shipment",
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF353535),
+                  ),
+                ),
+                Spacer(),
+                Text(
+                  "View All",
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF2490A9),
+                  ),
+                ),
+                SizedBox(width: 24.w),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            Padding(
+              padding: EdgeInsets.only(left: 24.w, right: 24.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(
+                      left: 16.w,
+                      right: 16.w,
+                      top: 14.h,
+                      bottom: 14.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFFFFFFF),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Color.fromARGB(153, 237, 237, 237),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 40.w,
+                              height: 40.h,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFFFFFFFF),
+                                border: Border.all(
+                                  color: Color.fromARGB(102, 237, 237, 237),
+                                ),
+                              ),
+                              child: SvgPicture.asset(
+                                "assets/SvgImage/id.svg",
+                                width: 20.w,
+                                height: 20.h,
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "#HWDSF776567DS",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF353535),
+                                  ),
+                                ),
+                                Text(
+                                  "#On the way . 24 June",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xFFABABAB),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            IconButton(
+                              style: IconButton.styleFrom(
+                                minimumSize: Size(15.w, 30.h),
+                                padding: EdgeInsets.only(right: 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () {},
+                              icon: Icon(
+                                Icons.arrow_forward_ios_outlined,
+                                color: Color(0xFF353535),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 15.h),
+                        Row(
+                          children: [
+                            /// Line with circles
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      height: 2,
+                                      color: Colors.teal,
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.teal,
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      height: 2,
+                                      color: Colors.teal,
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.radio_button_checked,
+                                    color: Colors.teal,
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      height: 2,
+                                      decoration: const BoxDecoration(
+                                        border: Border(
+                                          top: BorderSide(
+                                            color: Colors.teal,
+                                            width: 2,
+                                            style: BorderStyle.solid,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.radio_button_unchecked,
+                                    color: Colors.grey,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+
+                            // Column(
+                            //   crossAxisAlignment: CrossAxisAlignment.end,
+                            //   children: const [
+                            //     Icon(
+                            //       Icons.radio_button_unchecked,
+                            //       color: Colors.grey,
+                            //     ),
+                            //     SizedBox(height: 4),
+                            //     Text(
+                            //       "To",
+                            //       style: TextStyle(
+                            //         fontSize: 12,
+                            //         color: Colors.grey,
+                            //       ),
+                            //     ),
+                            //     Text(
+                            //       "California, US",
+                            //       style: TextStyle(
+                            //         fontWeight: FontWeight.w500,
+                            //         fontSize: 13,
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // /// Progress line
+                  // Row(
+                  //   children: [
+                  //     /// From
+                  //     Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: const [
+                  //         Icon(Icons.check_circle, color: Colors.teal),
+                  //         SizedBox(height: 4),
+                  //         Text(
+                  //           "From",
+                  //           style: TextStyle(fontSize: 12, color: Colors.grey),
+                  //         ),
+                  //         Text(
+                  //           "Delhi, India",
+                  //           style: TextStyle(
+                  //             fontWeight: FontWeight.w500,
+                  //             fontSize: 13,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+
+                  //     const SizedBox(width: 8),
+
+                  //     /// Line with circles
+                  //     Expanded(
+                  //       child: Row(
+                  //         children: [
+                  //           Expanded(
+                  //             child: Container(height: 2, color: Colors.teal),
+                  //           ),
+                  //           const Icon(Icons.check_circle, color: Colors.teal),
+                  //           Expanded(
+                  //             child: Container(height: 2, color: Colors.teal),
+                  //           ),
+                  //           const Icon(
+                  //             Icons.radio_button_checked,
+                  //             color: Colors.teal,
+                  //           ),
+                  //           Expanded(
+                  //             child: Container(
+                  //               height: 2,
+                  //               decoration: const BoxDecoration(
+                  //                 border: Border(
+                  //                   top: BorderSide(
+                  //                     color: Colors.teal,
+                  //                     width: 2,
+                  //                     style: BorderStyle.solid,
+                  //                   ),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ),
+                  //           const Icon(
+                  //             Icons.radio_button_unchecked,
+                  //             color: Colors.grey,
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+
+                  //     const SizedBox(width: 8),
+
+                  //     /// To
+                  //     // Column(
+                  //     //   crossAxisAlignment: CrossAxisAlignment.end,
+                  //     //   children: const [
+                  //     //     Icon(
+                  //     //       Icons.radio_button_unchecked,
+                  //     //       color: Colors.grey,
+                  //     //     ),
+                  //     //     SizedBox(height: 4),
+                  //     //     Text(
+                  //     //       "To",
+                  //     //       style: TextStyle(fontSize: 12, color: Colors.grey),
+                  //     //     ),
+                  //     //     Text(
+                  //     //       "California, US",
+                  //     //       style: TextStyle(
+                  //     //         fontWeight: FontWeight.w500,
+                  //     //         fontSize: 13,
+                  //     //       ),
+                  //     //     ),
+                  //     //   ],
+                  //     // ),
+                  //   ],
+                  // ),
+                ],
               ),
             ),
             SizedBox(height: 30.h),
