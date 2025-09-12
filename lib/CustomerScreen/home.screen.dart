@@ -24,12 +24,12 @@ class _HomeScreenState extends State<HomeScreen> {
       "title": "For Smaller Good",
     },
     {
-      "image": "assets/SvgImage/sco.svg",
+      "image": "assets/b.png",
       "name": "Bike",
       //"title": "Choose from Our Fleet",
     },
     {
-      "image": "assets/SvgImage/tempo.svg",
+      "image": "assets/t.png",
       "name": "Auto Tempo",
       //"title": "Choose from Our Fleet",
     },
@@ -52,23 +52,21 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            Container(
-              width: 440.w,
-              height: 848.h,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment(0.50, -0.00),
-                  end: Alignment(0.50, 1.00),
-                  colors: [const Color(0xFF82ECF3), Colors.white],
+            Positioned.fill(
+              child: Container(
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment(0.50, -0.00),
+                    end: Alignment(0.50, 1.00),
+                    colors: [const Color(0xFF82ECF3), Colors.white],
+                  ),
                 ),
               ),
             ),
             SvgPicture.asset("assets/SvgImage/bg.svg"),
-            Positioned(
-              top: 40.h,
-              left: 24.w,
-              right: 24.w,
+            Padding(
+              padding: EdgeInsets.only(left: 21.w, right: 21.w, top: 35.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -212,10 +210,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             SizedBox(height: 30.h),
                             Center(
-                              child: SvgPicture.asset(
-                                //"assets/SvgImage/truc.svg",
-                                myList[index]['image'],
-                              ),
+                              child:
+                                  myList[index]['image'].toString().endsWith(
+                                    ".svg",
+                                  )
+                                  ? SvgPicture.asset(myList[index]['image'])
+                                  : Image.asset(myList[index]['image']),
                             ),
                             Padding(
                               padding: EdgeInsets.only(left: 9.w, top: 4.h),
@@ -248,6 +248,104 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       );
                     },
+                  ),
+                  SizedBox(height: 20.h),
+                  Row(
+                    children: [
+                      Text(
+                        "Current Shipment",
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF353535),
+                        ),
+                      ),
+                      Spacer(),
+                      Text(
+                        "View All",
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF2490A9),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 18.h),
+                  Container(
+                    padding: EdgeInsets.only(
+                      left: 16.w,
+                      right: 16.w,
+                      top: 14.h,
+                      bottom: 14.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFFFFFFF),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Color.fromARGB(153, 237, 237, 237),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 40.w,
+                              height: 40.h,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFFFFFFFF),
+                                border: Border.all(
+                                  color: Color.fromARGB(102, 237, 237, 237),
+                                ),
+                              ),
+                              child: SvgPicture.asset(
+                                "assets/SvgImage/id.svg",
+                                width: 20.w,
+                                height: 20.h,
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "#HWDSF776567DS",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF353535),
+                                  ),
+                                ),
+                                Text(
+                                  "#On the way . 24 June",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xFFABABAB),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            IconButton(
+                              style: IconButton.styleFrom(
+                                minimumSize: Size(15.w, 30.h),
+                                padding: EdgeInsets.only(right: 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () {},
+                              icon: Icon(
+                                Icons.arrow_forward_ios_outlined,
+                                color: Color(0xFF353535),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
