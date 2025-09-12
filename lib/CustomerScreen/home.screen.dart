@@ -147,6 +147,42 @@ class _HomeScreenState extends State<HomeScreen> {
                     prefixIcon: Icon(Icons.search, color: Color(0xFF2490A9)),
                   ),
                 ),
+                SizedBox(height: 16.h),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFFFFFF),
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(
+                      color: Color.fromARGB(51, 237, 237, 237),
+                      width: 1.w,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 15,
+                        spreadRadius: 0,
+                        offset: Offset(0, 0),
+                        color: Color.fromARGB(15, 118, 118, 118),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: 24.w,
+                      right: 24.w,
+                      top: 16.h,
+                      bottom: 16.h,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        cardbuild("assets/SvgImage/chec.svg", "Check Rate"),
+                        cardbuild("assets/SvgImage/picku.svg", "Pick Up"),
+                        cardbuild("assets/SvgImage/dro.svg", "Drop Off"),
+                        cardbuild("assets/SvgImage/his.svg", "History"),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
