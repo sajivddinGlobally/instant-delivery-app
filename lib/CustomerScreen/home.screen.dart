@@ -56,7 +56,11 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            Positioned.fill(
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.of(context).size.height / 1,
               child: Container(
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
