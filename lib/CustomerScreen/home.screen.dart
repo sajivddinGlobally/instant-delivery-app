@@ -1,3 +1,5 @@
+import 'package:another_stepper/dto/stepper_data.dart';
+import 'package:another_stepper/widgets/another_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -44,6 +46,8 @@ class _HomeScreenState extends State<HomeScreen> {
       // "title": "Choose from Our Fleet",
     },
   ];
+
+  int activeStep = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -274,154 +278,213 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 18.h),
                   Container(
                     padding: EdgeInsets.only(
-                      left: 16.w,
-                      right: 16.w,
+                      // left: 16.w,
+                      // right: 16.w,
                       top: 14.h,
                       bottom: 14.h,
                     ),
                     decoration: BoxDecoration(
                       color: Color(0xFFFFFFFF),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10.r),
                       border: Border.all(
                         color: Color.fromARGB(153, 237, 237, 237),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          spreadRadius: 0,
+                          blurRadius: 17.39,
+                          offset: Offset(0, 0),
+                          color: Color.fromARGB(15, 118, 118, 118),
+                        ),
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 40.w,
-                              height: 40.h,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFFFFFFFF),
-                                border: Border.all(
-                                  color: Color.fromARGB(102, 237, 237, 237),
-                                ),
-                              ),
-                              child: SvgPicture.asset(
-                                "assets/SvgImage/id.svg",
-                                width: 20.w,
-                                height: 20.h,
-                              ),
-                            ),
-                            SizedBox(width: 12.w),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "#HWDSF776567DS",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF353535),
+                        Padding(
+                          padding: EdgeInsets.only(left: 16.w, right: 16.w),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40.w,
+                                height: 40.h,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFFFFFFFF),
+                                  border: Border.all(
+                                    color: Color.fromARGB(102, 237, 237, 237),
                                   ),
                                 ),
-                                Text(
-                                  "#On the way . 24 June",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFFABABAB),
-                                  ),
+                                child: SvgPicture.asset(
+                                  "assets/SvgImage/id.svg",
+                                  width: 20.w,
+                                  height: 20.h,
                                 ),
-                              ],
-                            ),
-                            Spacer(),
-                            IconButton(
-                              style: IconButton.styleFrom(
-                                minimumSize: Size(15.w, 30.h),
-                                padding: EdgeInsets.only(right: 0),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.arrow_forward_ios_outlined,
-                                color: Color(0xFF353535),
-                                size: 16.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20.h),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Row(
+                              SizedBox(width: 12.w),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Container(
-                                      height: 2,
-                                      color: Colors.teal,
+                                  Text(
+                                    "#HWDSF776567DS",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF353535),
                                     ),
                                   ),
-                                  const Icon(
-                                    Icons.check_circle,
-                                    color: Colors.teal,
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      height: 2,
-                                      color: Colors.teal,
+                                  Text(
+                                    "#On the way . 24 June",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xFFABABAB),
                                     ),
-                                  ),
-                                  const Icon(
-                                    Icons.radio_button_checked,
-                                    color: Colors.teal,
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      height: 2,
-                                      decoration: const BoxDecoration(
-                                        border: Border(
-                                          top: BorderSide(
-                                            color: Colors.teal,
-                                            width: 2,
-                                            style: BorderStyle.solid,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const Icon(
-                                    Icons.radio_button_unchecked,
-                                    color: Colors.grey,
                                   ),
                                 ],
                               ),
-                            ),
-
-                            // Column(
-                            //   crossAxisAlignment: CrossAxisAlignment.end,
-                            //   children:  [
-                            //     Icon(
-                            //       Icons.radio_button_unchecked,
-                            //       color: Colors.grey,
-                            //     ),
-                            //     SizedBox(height: 4),
-                            //     Text(
-                            //       "To",
-                            //       style: TextStyle(
-                            //         fontSize: 12,
-                            //         color: Colors.grey,
-                            //       ),
-                            //     ),
-                            //     Text(
-                            //       "California, US",
-                            //       style: TextStyle(
-                            //         fontWeight: FontWeight.w500,
-                            //         fontSize: 13,
-                            //       ),
-                            //     ),
-                            //   ],
-                            // ),
-                          ],
+                              Spacer(),
+                              IconButton(
+                                style: IconButton.styleFrom(
+                                  minimumSize: Size(15.w, 30.h),
+                                  padding: EdgeInsets.only(right: 0),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                onPressed: () {},
+                                icon: Icon(
+                                  Icons.arrow_forward_ios_outlined,
+                                  color: Color(0xFF353535),
+                                  size: 16.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 15.h),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AnotherStepper(
+                                stepperList: [
+                                  StepperData(
+                                    iconWidget: const Icon(
+                                      Icons.check_circle,
+                                      color: Color(0xFF2490A9),
+                                    ),
+                                  ),
+                                  StepperData(
+                                    iconWidget: const Icon(
+                                      Icons.check_circle,
+                                      color: Color(0xFF2490A9),
+                                    ),
+                                  ),
+                                  StepperData(
+                                    iconWidget: const Icon(
+                                      Icons.check_circle,
+                                      color: Color(0xFF2490A9),
+                                    ),
+                                  ),
+                                  StepperData(),
+                                  StepperData(),
+                                ],
+                                stepperDirection: Axis.horizontal,
+                                activeBarColor: Color(0xFF2490A9),
+                                inActiveBarColor: Color(0xFFEDEDED),
+                                activeIndex: 2,
+                                barThickness: 2,
+                              ),
+                              SizedBox(height: 10.h),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: 16.w,
+                                  right: 16.w,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "From",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF2490A9),
+                                          ),
+                                        ),
+                                        SizedBox(height: 1),
+                                        Text(
+                                          "Delhi, India",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF353535),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Spacer(),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          "To",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF2490A9),
+                                          ),
+                                        ),
+                                        SizedBox(height: 1),
+                                        Text(
+                                          "California, US",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF353535),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  SizedBox(height: 20.h),
+                  Row(
+                    children: [
+                      Text(
+                        "Recent Shipment",
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF353535),
+                        ),
+                      ),
+                      Spacer(),
+                      Text(
+                        "View All",
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF2490A9),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.h),
+                  Shipment(),
+                  SizedBox(height: 30.h),
                 ],
               ),
             ),
@@ -447,6 +510,109 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class Shipment extends StatefulWidget {
+  const Shipment({super.key});
+
+  @override
+  State<Shipment> createState() => _ShipmentState();
+}
+
+class _ShipmentState extends State<Shipment> {
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: 1,
+      itemBuilder: (context, index) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                left: 16.w,
+                right: 16.w,
+                top: 14.h,
+                bottom: 14.h,
+              ),
+              decoration: BoxDecoration(
+                color: Color(0xFFFFFFFF),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: Color.fromARGB(153, 237, 237, 237)),
+                boxShadow: [
+                  BoxShadow(
+                    spreadRadius: 0,
+                    blurRadius: 17.39,
+                    offset: Offset(0, 0),
+                    color: Color.fromARGB(15, 118, 118, 118),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40.w,
+                    height: 40.h,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFFFFFFF),
+                      border: Border.all(
+                        color: Color.fromARGB(102, 237, 237, 237),
+                      ),
+                    ),
+                    child: SvgPicture.asset(
+                      "assets/SvgImage/id.svg",
+                      width: 20.w,
+                      height: 20.h,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "#HWDSF776567DS",
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF353535),
+                        ),
+                      ),
+                      Text(
+                        "#On the way . 24 June",
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFFABABAB),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Spacer(),
+                  IconButton(
+                    style: IconButton.styleFrom(
+                      minimumSize: Size(15.w, 30.h),
+                      padding: EdgeInsets.only(right: 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.arrow_forward_ios_outlined,
+                      color: Color(0xFF353535),
+                      size: 16.sp,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -39,6 +39,9 @@ dependencies:
   flutter_svg: ^2.2.1
   intl_phone_field: ^3.2.0
   otp_pin_field: ^1.4.1
+  another_stepper: ^1.2.2
+
+ 
 
 dev_dependencies:
   flutter_test:
