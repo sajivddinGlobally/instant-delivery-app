@@ -482,7 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 10.h),
                   Shipment(),
                   SizedBox(height: 30.h),
                 ],
@@ -528,89 +528,83 @@ class _ShipmentState extends State<Shipment> {
       padding: EdgeInsets.zero,
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
-      itemCount: 1,
+      itemCount: 3,
       itemBuilder: (context, index) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.only(
-                left: 16.w,
-                right: 16.w,
-                top: 14.h,
-                bottom: 14.h,
+        return Container(
+          margin: EdgeInsets.only(top: 14.h),
+          padding: EdgeInsets.only(
+            left: 16.w,
+            right: 16.w,
+            top: 14.h,
+            bottom: 14.h,
+          ),
+          decoration: BoxDecoration(
+            color: Color(0xFFFFFFFF),
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(color: Color.fromARGB(153, 237, 237, 237)),
+            boxShadow: [
+              BoxShadow(
+                spreadRadius: 0,
+                blurRadius: 17.39,
+                offset: Offset(0, 0),
+                color: Color.fromARGB(15, 118, 118, 118),
               ),
-              decoration: BoxDecoration(
-                color: Color(0xFFFFFFFF),
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: Color.fromARGB(153, 237, 237, 237)),
-                boxShadow: [
-                  BoxShadow(
-                    spreadRadius: 0,
-                    blurRadius: 17.39,
-                    offset: Offset(0, 0),
-                    color: Color.fromARGB(15, 118, 118, 118),
-                  ),
-                ],
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40.w,
+                height: 40.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFFFFFFF),
+                  border: Border.all(color: Color.fromARGB(102, 237, 237, 237)),
+                ),
+                child: SvgPicture.asset(
+                  "assets/SvgImage/id.svg",
+                  width: 20.w,
+                  height: 20.h,
+                ),
               ),
-              child: Row(
+              SizedBox(width: 12.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 40.w,
-                    height: 40.h,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFFFFFFFF),
-                      border: Border.all(
-                        color: Color.fromARGB(102, 237, 237, 237),
-                      ),
-                    ),
-                    child: SvgPicture.asset(
-                      "assets/SvgImage/id.svg",
-                      width: 20.w,
-                      height: 20.h,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "#HWDSF776567DS",
-                        style: GoogleFonts.inter(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF353535),
-                        ),
-                      ),
-                      Text(
-                        "#On the way . 24 June",
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFFABABAB),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  IconButton(
-                    style: IconButton.styleFrom(
-                      minimumSize: Size(15.w, 30.h),
-                      padding: EdgeInsets.only(right: 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.arrow_forward_ios_outlined,
+                  Text(
+                    "#HWDSF776567DS",
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
                       color: Color(0xFF353535),
-                      size: 16.sp,
+                    ),
+                  ),
+                  Text(
+                    "#On the way . 24 June",
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFFABABAB),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+              Spacer(),
+              IconButton(
+                style: IconButton.styleFrom(
+                  minimumSize: Size(15.w, 30.h),
+                  padding: EdgeInsets.only(right: 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () {},
+                icon: Icon(
+                  Icons.arrow_forward_ios_outlined,
+                  color: Color(0xFF353535),
+                  size: 16.sp,
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
