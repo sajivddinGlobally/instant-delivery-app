@@ -1,5 +1,6 @@
 import 'package:another_stepper/dto/stepper_data.dart';
 import 'package:another_stepper/widgets/another_stepper.dart';
+import 'package:delivery_mvp_app/CustomerScreen/instantDelivery.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -206,53 +207,63 @@ class _HomeScreenState extends State<HomeScreen> {
                       childAspectRatio: 0.80,
                     ),
                     itemBuilder: (context, index) {
-                      return Container(
-                        width: 158.w,
-                        height: 181.h,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: Color(0xFFE8E8E8)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 30.h),
-                            Center(
-                              child:
-                                  myList[index]['image'].toString().endsWith(
-                                    ".svg",
-                                  )
-                                  ? SvgPicture.asset(myList[index]['image'])
-                                  : Image.asset(myList[index]['image']),
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => InstantDeliveryScreen(),
                             ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 9.w, top: 4.h),
-                              child: Text(
-                                // "Trucks",
-                                myList[index]['name'],
-                                style: GoogleFonts.inter(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF000000),
-                                  letterSpacing: -1,
-                                ),
+                          );
+                        },
+                        child: Container(
+                          width: 158.w,
+                          height: 181.h,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(color: Color(0xFFE8E8E8)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 30.h),
+                              Center(
+                                child:
+                                    myList[index]['image'].toString().endsWith(
+                                      ".svg",
+                                    )
+                                    ? SvgPicture.asset(myList[index]['image'])
+                                    : Image.asset(myList[index]['image']),
                               ),
-                            ),
-                            if (index == 0 || index == 1)
                               Padding(
-                                padding: EdgeInsets.only(left: 9.w),
+                                padding: EdgeInsets.only(left: 9.w, top: 4.h),
                                 child: Text(
-                                  //  "Choose from Our Fleet",
-                                  myList[index]['title'],
+                                  // "Trucks",
+                                  myList[index]['name'],
                                   style: GoogleFonts.inter(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w400,
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.w700,
                                     color: Color(0xFF000000),
                                     letterSpacing: -1,
                                   ),
                                 ),
                               ),
-                          ],
+                              if (index == 0 || index == 1)
+                                Padding(
+                                  padding: EdgeInsets.only(left: 9.w),
+                                  child: Text(
+                                    //  "Choose from Our Fleet",
+                                    myList[index]['title'],
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xFF000000),
+                                      letterSpacing: -1,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       );
                     },
