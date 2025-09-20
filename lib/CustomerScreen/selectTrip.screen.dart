@@ -90,8 +90,10 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                     ],
                   ),
                   child: ListView(
+                    padding: EdgeInsets.zero,
                     controller: scrollController,
                     children: [
+                      SizedBox(height: 14.h),
                       Center(
                         child: Container(
                           width: 50.w,
@@ -503,6 +505,7 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 20.h),
                     ],
                   ),
                 );

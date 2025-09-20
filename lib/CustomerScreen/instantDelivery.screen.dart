@@ -47,7 +47,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
             child: DraggableScrollableSheet(
               initialChildSize: 0.40, // bottom sheet height (35% of screen)
               // minChildSize: 0.15,
-              // maxChildSize: 0.9,35
+              maxChildSize: 0.9,
               builder: (context, scrollController) {
                 return Container(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -246,7 +246,6 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 30.h),
                     ],
                   ),
                 );
