@@ -1,3 +1,4 @@
+import 'package:delivery_mvp_app/CustomerScreen/pickup.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -411,10 +412,10 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                       SizedBox(height: 20.h),
                       Container(
                         padding: EdgeInsets.only(
-                          left: 15.w,
-                          right: 15.w,
-                          top: 10.h,
-                          bottom: 10.h,
+                          left: 8.w,
+                          right: 10.w,
+                          top: 6.h,
+                          bottom: 6.h,
                         ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10.r),
@@ -426,10 +427,11 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                         child: Row(
                           children: [
                             Transform.scale(
-                              scale: 1.2,
-                              child: SizedBox(
-                                height: 20.h,
-                                width: 25.w,
+                              scale: 1,
+                              child: Container(
+                                //color: Colors.amber,
+                                height: 25.h,
+                                width: 30.w,
                                 child: Checkbox(
                                   shape: CircleBorder(),
                                   activeColor: Color(0xFF222222),
@@ -444,6 +446,7 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                             ),
                             Container(
                               margin: EdgeInsets.only(left: 10.w),
+                              //color: Colors.amber,
                               width: 275.w,
                               child: Text.rich(
                                 TextSpan(
@@ -483,7 +486,14 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                             borderRadius: BorderRadius.circular(10.r),
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => PickupScreen(),
+                            ),
+                          );
+                        },
                         child: Text(
                           "Book Now",
                           style: GoogleFonts.inter(
