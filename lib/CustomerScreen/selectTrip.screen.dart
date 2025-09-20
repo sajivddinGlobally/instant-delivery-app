@@ -4,14 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SelectTriPage extends StatefulWidget {
-  const SelectTriPage({super.key});
+class SelectTripScreen extends StatefulWidget {
+  const SelectTripScreen({super.key});
 
   @override
-  State<SelectTriPage> createState() => _SelectTriPageState();
+  State<SelectTripScreen> createState() => _SelectTripScreenState();
 }
 
-class _SelectTriPageState extends State<SelectTriPage> {
+class _SelectTripScreenState extends State<SelectTripScreen> {
   List<Map<String, dynamic>> selectTrip = [
     {
       "image": "assets/b.png",

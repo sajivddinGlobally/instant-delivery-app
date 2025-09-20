@@ -1,4 +1,4 @@
-import 'package:delivery_mvp_app/CustomerScreen/selectTrip.page.dart';
+import 'package:delivery_mvp_app/CustomerScreen/selectTrip.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -232,7 +232,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                             Navigator.push(
                               context,
                               CupertinoPageRoute(
-                                builder: (context) => SelectTriPage(),
+                                builder: (context) => SelectTripScreen(),
                               ),
                             );
                           },
