@@ -12,6 +12,27 @@ class SelectTriPage extends StatefulWidget {
 }
 
 class _SelectTriPageState extends State<SelectTriPage> {
+  List<Map<String, dynamic>> selectTrip = [
+    {
+      "image": "assets/b.png",
+      "name": "Delivery Go",
+      "ammount": "₹170.71",
+      "discount": "₹188.71",
+    },
+    {
+      "image": "assets/t.png",
+      "name": "Delivery Go",
+      "ammount": "₹170.71",
+      "discount": "₹188.71",
+    },
+    {
+      "image": "assets/car.png",
+      "name": "Delivery Premier",
+      "ammount": "₹223.63",
+      "discount": "₹188.71",
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +66,7 @@ class _SelectTriPageState extends State<SelectTriPage> {
           ),
           Expanded(
             child: DraggableScrollableSheet(
-              // initialChildSize: 0.80, // bottom sheet height (35% of screen)
+              initialChildSize: 0.40, // bottom sheet height (35% of screen)
               // minChildSize: 0.15,
               // maxChildSize: 0.9,
               builder: (context, scrollController) {
@@ -90,7 +111,7 @@ class _SelectTriPageState extends State<SelectTriPage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 18.h),
+                      SizedBox(height: 14.h),
                       Container(
                         width: double.infinity,
                         height: 160.h,
@@ -208,34 +229,95 @@ class _SelectTriPageState extends State<SelectTriPage> {
                           ],
                         ),
                       ),
-
                       ListView.builder(
                         padding: EdgeInsets.zero,
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        itemCount: 2,
+                        itemCount: selectTrip.length,
                         itemBuilder: (context, index) {
                           return Padding(
                             padding: EdgeInsets.only(top: 10.h),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Image.asset(
-                                  "assets/b.png",
+                                  // "assets/b.png",
+                                  selectTrip[index]["image"].toString(),
                                   width: 50.w,
                                   height: 50.h,
+                                  fit: BoxFit.contain,
                                 ),
-                                SizedBox(width: 20.w),
+                                //  SizedBox(width: 20.w),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Trip ${index + 1}",
-                                      style: GoogleFonts.inter(fontSize: 16.sp),
+                                      //"Delivery Go",
+                                      selectTrip[index]['name'],
+                                      style: GoogleFonts.inter(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff000000),
+                                        letterSpacing: -1,
+                                      ),
                                     ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "8:46pm",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF000000),
+                                            letterSpacing: 1,
+                                          ),
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        CircleAvatar(
+                                          radius: 4.r,
+                                          backgroundColor: Color(0xFFD9D9D9),
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        Text(
+                                          "4 min away",
+                                          style: GoogleFonts.inter(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF000000),
+                                            letterSpacing: 1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text(
-                                      "Details here",
-                                      style: GoogleFonts.inter(fontSize: 14.sp),
+                                      // "₹170.71",
+                                      selectTrip[index]['ammount'],
+                                      style: GoogleFonts.inter(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xfF000000),
+                                        letterSpacing: -0.5,
+                                      ),
                                     ),
+                                    if (index == 0 || index == 1)
+                                      Text(
+                                        //"₹188.71",
+                                        selectTrip[index]['discount'],
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF6B6B6B),
+                                          letterSpacing: 0,
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                          decorationColor: Color(0xFF6B6B6B),
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ],

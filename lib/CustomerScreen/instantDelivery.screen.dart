@@ -45,7 +45,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
           ),
           Expanded(
             child: DraggableScrollableSheet(
-              initialChildSize: 0.50, // bottom sheet height (35% of screen)
+              initialChildSize: 0.40, // bottom sheet height (35% of screen)
               // minChildSize: 0.15,
               // maxChildSize: 0.9,35
               builder: (context, scrollController) {
