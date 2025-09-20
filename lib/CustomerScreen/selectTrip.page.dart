@@ -33,6 +33,8 @@ class _SelectTriPageState extends State<SelectTriPage> {
     },
   ];
 
+  bool isCheck = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -324,6 +326,172 @@ class _SelectTriPageState extends State<SelectTriPage> {
                             ),
                           );
                         },
+                      ),
+                      SizedBox(height: 20.h),
+                      Container(
+                        padding: EdgeInsets.only(
+                          left: 15.w,
+                          right: 15.w,
+                          top: 6.h,
+                          bottom: 6.h,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: Color.fromARGB(127, 0, 0, 0),
+                            width: 1.w,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset("assets/SvgImage/v.svg"),
+                            SizedBox(width: 8.w),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "....8980",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.black,
+                                    letterSpacing: -1,
+                                  ),
+                                ),
+                                Text(
+                                  "Shaikh niyo",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color.fromARGB(127, 0, 0, 0),
+                                    letterSpacing: -1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Spacer(),
+                            Container(
+                              width: 1.w,
+                              height: 40.h,
+                              color: Color.fromARGB(127, 0, 0, 0),
+                            ),
+                            Spacer(),
+                            SvgPicture.asset("assets/SvgImage/ed.svg"),
+                            SizedBox(width: 8.w),
+                            Text(
+                              "Note",
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF000000),
+                                letterSpacing: -1,
+                              ),
+                            ),
+                            Spacer(),
+                            Container(
+                              width: 1.w,
+                              height: 40.h,
+                              color: Color.fromARGB(127, 0, 0, 0),
+                            ),
+                            Spacer(),
+                            SvgPicture.asset("assets/SvgImage/addpromo.svg"),
+                            SizedBox(width: 8.w),
+                            Text(
+                              "Add Promo",
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF0690AF),
+                                letterSpacing: -1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                      Container(
+                        padding: EdgeInsets.only(
+                          left: 15.w,
+                          right: 15.w,
+                          top: 10.h,
+                          bottom: 10.h,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: Color(0xFF000000),
+                            width: 1.w,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Transform.scale(
+                              scale: 1.2,
+                              child: SizedBox(
+                                height: 20.h,
+                                width: 25.w,
+                                child: Checkbox(
+                                  shape: CircleBorder(),
+                                  activeColor: Color(0xFF222222),
+                                  value: isCheck,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isCheck = value!;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(left: 10.w),
+                              width: 275.w,
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          "I confirm that I have read, consent and agree to the",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                        letterSpacing: -1,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: " Terms and Conditions",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xFF086E86),
+                                        letterSpacing: -1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(double.infinity, 50.h),
+                          backgroundColor: Color(0xFF006970),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                        ),
+                        onPressed: () {},
+                        child: Text(
+                          "Book Now",
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFFFFFFFF),
+                          ),
+                        ),
                       ),
                     ],
                   ),
