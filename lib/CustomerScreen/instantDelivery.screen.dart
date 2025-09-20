@@ -18,237 +18,239 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            //flex: 1,
-            child: Stack(
-              children: [
-                Text("dadfafasfadf", style: GoogleFonts.inter(fontSize: 50.sp)),
-                Padding(
-                  padding: EdgeInsets.only(top: 50.h, left: 20.w),
-                  child: FloatingActionButton(
-                    backgroundColor: Color(0xFFFFFFFF),
-                    shape: CircleBorder(),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 8.w),
-                      child: Icon(
-                        Icons.arrow_back_ios,
-                        color: Color(0xFF1D3557),
-                      ),
-                    ),
+          Stack(
+            children: [
+              Container(
+                height: 150.h,
+                child: Text(
+                  "dadfafasfadf",
+                  style: GoogleFonts.inter(fontSize: 50.sp),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 50.h, left: 20.w),
+                child: FloatingActionButton(
+                  backgroundColor: Color(0xFFFFFFFF),
+                  shape: CircleBorder(),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 8.w),
+                    child: Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           Expanded(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                color: Color(0xFFFFFFFF),
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20.h),
-                  Padding(
-                    padding: EdgeInsets.only(left: 20.w),
-                    child: Text(
-                      "Instant Delivery",
-                      style: GoogleFonts.inter(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF111111),
-                        letterSpacing: -1,
-                      ),
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.50, // bottom sheet height (35% of screen)
+              // minChildSize: 0.15,
+              // maxChildSize: 0.9,35
+              builder: (context, scrollController) {
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFFFFFF),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16.r),
+                      topRight: Radius.circular(16.r),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        spreadRadius: 5,
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          RideCard(),
-                          SizedBox(height: 20.h),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  margin: EdgeInsets.only(left: 20.w),
-                                  padding: EdgeInsets.only(
-                                    left: 10.w,
-                                    right: 10.w,
-                                    top: 5.h,
-                                    bottom: 5.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4.r),
-                                    color: Color(0xFFFFFFFF),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        offset: Offset(0, 0),
-                                        spreadRadius: 0,
-                                        blurRadius: 1,
-                                        color: Color.fromARGB(63, 0, 0, 0),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 30.w,
-                                        height: 30.h,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Color(0xFF086E86),
-                                        ),
-                                        child: Icon(
-                                          Icons.location_on,
-                                          color: Color(0xFFDE4B65),
-                                        ),
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "ARH Hardware",
-                                            style: GoogleFonts.inter(
-                                              fontSize: 16.sp,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xFF000000),
-                                            ),
-                                          ),
-                                          Text(
-                                            "Sri Saranakara Road",
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12.sp,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color.fromARGB(
-                                                127,
-                                                0,
-                                                0,
-                                                0,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  margin: EdgeInsets.only(
-                                    left: 10.w,
-                                    right: 10.w,
-                                  ),
-                                  padding: EdgeInsets.only(
-                                    left: 10.w,
-                                    right: 10.w,
-                                    top: 5.h,
-                                    bottom: 5.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4.r),
-                                    color: Color(0xFFFFFFFF),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        offset: Offset(0, 0),
-                                        spreadRadius: 0,
-                                        blurRadius: 1,
-                                        color: Color.fromARGB(63, 0, 0, 0),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 30.w,
-                                        height: 30.h,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Color(0xFF086E86),
-                                        ),
-                                        child: Icon(
-                                          Icons.location_on,
-                                          color: Color(0xFFDE4B65),
-                                        ),
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "ARH Hardware",
-                                            style: GoogleFonts.inter(
-                                              fontSize: 16.sp,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xFF000000),
-                                            ),
-                                          ),
-                                          Text(
-                                            "Sri Saranakara Road",
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12.sp,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color.fromARGB(
-                                                127,
-                                                0,
-                                                0,
-                                                0,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                  child: ListView(
+                    controller: scrollController,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 50.w,
+                          height: 5.h,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10.r),
                           ),
-                          SizedBox(height: 20.h),
-                          Container(
-                            margin: EdgeInsets.only(left: 20.w, right: 20.w),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: Size(double.infinity, 50.h),
-                                backgroundColor: Color(0xFF006970),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
+                        ),
+                      ),
+                      SizedBox(height: 15.h),
+                      Text(
+                        "Instant Delivery",
+                        style: GoogleFonts.inter(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF111111),
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      RideCard(),
+                      SizedBox(height: 20.h),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.only(
+                                left: 10.w,
+                                right: 10.w,
+                                top: 5.h,
+                                bottom: 5.h,
                               ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (context) => SelectTriPage(),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.r),
+                                color: Color(0xFFFFFFFF),
+                                boxShadow: [
+                                  BoxShadow(
+                                    offset: Offset(0, 0),
+                                    spreadRadius: 0,
+                                    blurRadius: 1,
+                                    color: Color.fromARGB(63, 0, 0, 0),
                                   ),
-                                );
-                              },
-                              child: Text(
-                                "Next",
-                                style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFFFFFFFF),
-                                ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 30.w,
+                                    height: 30.h,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Color(0xFF086E86),
+                                    ),
+                                    child: Icon(
+                                      Icons.location_on,
+                                      color: Color(0xFFDE4B65),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "ARH Hardware",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF000000),
+                                        ),
+                                      ),
+                                      Text(
+                                        "Sri Saranakara Road",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color.fromARGB(127, 0, 0, 0),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                          SizedBox(height: 30.h),
-                        ],
+                            Container(
+                              margin: EdgeInsets.only(left: 10.w, right: 10.w),
+                              padding: EdgeInsets.only(
+                                left: 10.w,
+                                right: 10.w,
+                                top: 5.h,
+                                bottom: 5.h,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.r),
+                                color: Color(0xFFFFFFFF),
+                                boxShadow: [
+                                  BoxShadow(
+                                    offset: Offset(0, 0),
+                                    spreadRadius: 0,
+                                    blurRadius: 1,
+                                    color: Color.fromARGB(63, 0, 0, 0),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 30.w,
+                                    height: 30.h,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Color(0xFF086E86),
+                                    ),
+                                    child: Icon(
+                                      Icons.location_on,
+                                      color: Color(0xFFDE4B65),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "ARH Hardware",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF000000),
+                                        ),
+                                      ),
+                                      Text(
+                                        "Sri Saranakara Road",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color.fromARGB(127, 0, 0, 0),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      SizedBox(height: 20.h),
+                      Container(
+                        margin: EdgeInsets.only(left: 20.w, right: 20.w),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, 50.h),
+                            backgroundColor: Color(0xFF006970),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => SelectTriPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Next",
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFFFFFFFF),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 30.h),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -271,7 +273,7 @@ class _RideCardState extends State<RideCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(left: 20.w, right: 20.w, top: 20.h),
+      margin: EdgeInsets.only(top: 20.h),
       width: 333.w,
       height: 177.h,
       decoration: BoxDecoration(
