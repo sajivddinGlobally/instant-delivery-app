@@ -1,3 +1,4 @@
+import 'package:delivery_mvp_app/CustomerScreen/selectPayment.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -85,38 +86,48 @@ class _PickupScreenState extends State<PickupScreen> {
                                 color: Color(0xFF000000),
                               ),
                             ),
-                            Container(
-                              width: 54.w,
-                              height: 45.h,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(6.r),
-                                color: Color(0xFF000000),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "2",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                      letterSpacing: -1,
-                                      height: 1.1,
-                                    ),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => SelectPaymentScreen(),
                                   ),
-                                  Text(
-                                    "Min",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.white,
-                                      letterSpacing: -1,
-                                      height: 1.1,
+                                );
+                              },
+                              child: Container(
+                                width: 54.w,
+                                height: 45.h,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6.r),
+                                  color: Color(0xFF000000),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "2",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        letterSpacing: -1,
+                                        height: 1.1,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    Text(
+                                      "Min",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.white,
+                                        letterSpacing: -1,
+                                        height: 1.1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],

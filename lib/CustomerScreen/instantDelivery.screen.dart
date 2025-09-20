@@ -2,7 +2,9 @@ import 'package:delivery_mvp_app/CustomerScreen/selectTrip.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class InstantDeliveryScreen extends StatefulWidget {
   const InstantDeliveryScreen({super.key});
@@ -12,42 +14,100 @@ class InstantDeliveryScreen extends StatefulWidget {
 }
 
 class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
+  GoogleMapController? _mapController;
+  LatLng? _currentLatLng;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    LocationPermission permission;
+
+    permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Location permission denied")),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Location permission permanently denied. Please enable it from settings.",
+          ),
+        ),
+      );
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    setState(() {
+      _currentLatLng = LatLng(position.latitude, position.longitude);
+    });
+
+    _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng!));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              Container(
-                height: 150.h,
-                child: Text(
-                  "dadfafasfadf",
-                  style: GoogleFonts.inter(fontSize: 50.sp),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 50.h, left: 20.w),
-                child: FloatingActionButton(
-                  backgroundColor: Color(0xFFFFFFFF),
-                  shape: CircleBorder(),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8.w),
-                    child: Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
+          Expanded(
+            // flex: 2,
+            child: _currentLatLng == null
+                ? Center(child: CircularProgressIndicator())
+                : Stack(
+                    children: [
+                      GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: _currentLatLng!,
+                          zoom: 15,
+                        ),
+                        onMapCreated: (controller) {
+                          _mapController = controller;
+                        },
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 50.h, left: 20.w),
+                        child: FloatingActionButton(
+                          backgroundColor: Color(0xFFFFFFFF),
+                          shape: CircleBorder(),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 8.w),
+                            child: Icon(
+                              Icons.arrow_back_ios,
+                              color: Color(0xFF1D3557),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-            ],
           ),
           Expanded(
             child: DraggableScrollableSheet(
-              initialChildSize: 0.40, // bottom sheet height (35% of screen)
-              // minChildSize: 0.15,
-              maxChildSize: 0.9,
+              initialChildSize: 1,
+              minChildSize: 1,
+              maxChildSize: 1,
               builder: (context, scrollController) {
                 return Container(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -66,8 +126,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                     ],
                   ),
                   child: ListView(
+                    padding: EdgeInsets.zero,
                     controller: scrollController,
                     children: [
+                      SizedBox(height: 10.h),
                       Center(
                         child: Container(
                           width: 50.w,
@@ -78,7 +140,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 15.h),
+                      SizedBox(height: 10.h),
                       Text(
                         "Instant Delivery",
                         style: GoogleFonts.inter(
@@ -246,6 +308,7 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 20.h),
                     ],
                   ),
                 );
@@ -395,18 +458,28 @@ class _RideCardState extends State<RideCard> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 6.h),
+                      //SizedBox(height: 6.h),
                       Divider(
                         color: Color.fromARGB(102, 120, 119, 141),
                         thickness: 2,
                       ),
-                      SizedBox(height: 10.h),
-                      Text(
-                        "Masjid Al Ma...",
+                      TextField(
                         style: GoogleFonts.inter(
-                          fontSize: 16.sp,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFF000000),
+                        ),
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.zero,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                          hintText: "Masjid Al Ma...",
+                          hintStyle: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF000000),
+                          ),
                         ),
                       ),
                     ],
@@ -423,7 +496,7 @@ class _RideCardState extends State<RideCard> {
                         color: Color(0xFF000000),
                       ),
                     ),
-                    SizedBox(height: 25.h),
+                    SizedBox(height: 20.h),
                     IconButton(
                       onPressed: () {},
                       icon: Icon(
