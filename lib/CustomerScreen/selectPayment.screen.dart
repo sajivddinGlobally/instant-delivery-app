@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SelectPaymentScreen extends StatefulWidget {
@@ -11,6 +12,7 @@ class SelectPaymentScreen extends StatefulWidget {
 }
 
 class _SelectPaymentScreenState extends State<SelectPaymentScreen> {
+  String? selectedMethod;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,6 +107,81 @@ class _SelectPaymentScreenState extends State<SelectPaymentScreen> {
               ],
             ),
           ),
+          Column(
+            children: [
+              paymentCard("cash", "assets/SvgImage/cas.svg", "Cash"),
+              Divider(color: Color(0xFF78778D)),
+              paymentCard("**** 3919", "assets/SvgImage/se.svg", "**** 3919"),
+              Divider(color: Color(0xFF78778D)),
+              paymentCard("**** 8980", "assets/SvgImage/v.svg", "**** 8980"),
+              Divider(color: Color(0xFF78778D)),
+              paymentCard("Point", "assets/SvgImage/yello.svg", "Point"),
+              Divider(color: Color(0xFF78778D)),
+              paymentCard(
+                "Pay With LankaQR/UPI/Alipay",
+                "assets/SvgImage/lanka.svg",
+                "Pay With LankaQR/UPI/Alipay",
+              ),
+            ],
+          ),
+
+          Divider(color: Color(0xFF78778D)),
+          SizedBox(height: 10.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(width: 25.w),
+              Text(
+                "Add Payment Method",
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF086E86),
+                ),
+              ),
+              Spacer(),
+              IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.add, color: Color(0xFF086E86)),
+              ),
+              SizedBox(width: 10.w),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget paymentCard(String methodValue, String iconPath, String title) {
+    return Padding(
+      padding: EdgeInsets.only(left: 25.w, right: 20.w),
+      child: Row(
+        children: [
+          Radio<String>(
+            value: methodValue,
+            groupValue: selectedMethod,
+            onChanged: (value) {
+              setState(() {
+                selectedMethod = value;
+              });
+            },
+            activeColor: Color(0xFF086E86), // 🔹 fill color
+          ),
+          // SizedBox(width: 10.w),
+          SvgPicture.asset(iconPath),
+          SizedBox(width: 10.w),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF000000),
+              letterSpacing: -1,
+            ),
+          ),
+          Spacer(),
+          Icon(Icons.arrow_forward_ios, color: Color(0xFF000000), weight: 1.w),
         ],
       ),
     );
