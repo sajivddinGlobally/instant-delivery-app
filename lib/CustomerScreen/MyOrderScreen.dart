@@ -1,16 +1,17 @@
+import 'package:another_stepper/widgets/another_stepper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({super.key});
+class MyOrderScreen extends StatefulWidget {
+  const MyOrderScreen({super.key});
 
   @override
-  State<CheckoutScreen> createState() => _CheckoutScreenState();
+  State<MyOrderScreen> createState() => _MyOrderScreenState();
 }
 
-class _CheckoutScreenState extends State<CheckoutScreen> {
+class _MyOrderScreenState extends State<MyOrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +53,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             ),
           ),
-          
+          Padding(
+            padding: EdgeInsets.only(left: 20.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnotherStepper(
+                  stepperList: [],
+                  stepperDirection: Axis.vertical,
+                  activeBarColor: const Color(0xFF2490A9),
+                  inActiveBarColor: const Color(0xFFEDEDED),
+                  verticalGap: 30, // gap between steps
+                  barThickness: 2,
+                  activeIndex: 1, // highlight till 2nd step
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

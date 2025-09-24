@@ -1,5 +1,4 @@
-import 'package:delivery_mvp_app/CustomerScreen/checkout.screen.dart';
-import 'package:delivery_mvp_app/CustomerScreen/pickup.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/MyOrderScreen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/selectPayment.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -568,7 +567,7 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                               Navigator.push(
                                 context,
                                 CupertinoPageRoute(
-                                  builder: (context) => CheckoutScreen(),
+                                  builder: (context) => MyOrderScreen(),
                                 ),
                               );
                             },

@@ -1,7 +1,7 @@
 import 'package:another_stepper/dto/stepper_data.dart';
 import 'package:another_stepper/widgets/another_stepper.dart';
 import 'package:delivery_mvp_app/CustomerScreen/instantDelivery.screen.dart';
-import 'package:delivery_mvp_app/CustomerScreen/order.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/orderList.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/payment.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/profile.screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -544,7 +544,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             )
           : selectIndex == 1
-          ? OrderScreen()
+          ? OrderListScreen()
           : selectIndex == 2
           ? PaymentScreen()
           : ProfileScreen(),
