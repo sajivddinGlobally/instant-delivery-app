@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -128,15 +129,135 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                           ),
                           SizedBox(height: 5.h),
                           Text(
-                            "Instant Delivery",
+                            "Confirm Details",
                             style: GoogleFonts.inter(
                               fontSize: 20.sp,
                               fontWeight: FontWeight.w400,
                               color: Color(0xFF111111),
-                              letterSpacing: -1,
+                              letterSpacing: -1.1,
                             ),
                           ),
+                          SizedBox(height: 15.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.location_on_outlined,
+                                    color: Color(0xFFDE4B65),
+                                  ),
+                                  SizedBox(height: 7.h),
+                                  CircleAvatar(
+                                    backgroundColor: Color(0xFF28B877),
+                                    radius: 2.r,
+                                  ),
+                                  SizedBox(height: 6.h),
+                                  CircleAvatar(
+                                    backgroundColor: Color(0xFF28B877),
+                                    radius: 2.r,
+                                  ),
+                                  SizedBox(height: 6.h),
+                                  CircleAvatar(
+                                    backgroundColor: Color(0xFF28B877),
+                                    radius: 2.r,
+                                  ),
+                                  SizedBox(height: 7.h),
+                                  Icon(
+                                    Icons.circle_outlined,
+                                    color: Color(0xFF28B877),
+                                    size: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    weight: 20,
+                                  ),
+                                ],
+                              ),
 
+                              SizedBox(width: 20.w),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 2.h),
+                                  Container(
+                                    width: 285.w,
+                                    // color: Colors.amber,
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Pickup Location",
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12.sp,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xFF77869E),
+                                              ),
+                                            ),
+                                            SizedBox(height: 4.h),
+                                            Text(
+                                              "32 Samwell Sq, Chevron",
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(0xFF111111),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Spacer(),
+                                        Container(
+                                          width: 35.w,
+                                          height: 28.h,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              5.r,
+                                            ),
+                                            color: Color(0xFFF7F7F7),
+                                          ),
+                                          child: Center(
+                                            child: SvgPicture.asset(
+                                              "assets/SvgImage/bikess.svg",
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 18.h),
+                                  Text(
+                                    "Delivery Location",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xFF77869E),
+                                    ),
+                                  ),
+                                  Text(
+                                    "21b, Karimu Kotun Street, Victoria Island",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF111111),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16.h),
+                          Row(
+                            children: [
+                              buildAddress(),
+                              SizedBox(width: 25.w),
+                              buildAddress(),
+                            ],
+                          ),
+                               SizedBox(height: 16.h),
                           SizedBox(height: 15.h),
                           Container(
                             margin: EdgeInsets.only(left: 15.w, right: 15.w),
@@ -174,6 +295,31 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                 ),
               ],
             ),
+    );
+  }
+
+  Widget buildAddress() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "What you are sending",
+          style: GoogleFonts.inter(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF77869E),
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          "Electronics/Gadgets",
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF111111),
+          ),
+        ),
+      ],
     );
   }
 }

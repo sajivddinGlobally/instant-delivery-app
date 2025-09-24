@@ -379,6 +379,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                 ),
               ),
+              SizedBox(height: 10.h),
             ],
           ),
         ),
