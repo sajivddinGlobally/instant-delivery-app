@@ -1,3 +1,4 @@
+import 'package:delivery_mvp_app/CustomerScreen/lookCourier.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -90,11 +91,10 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                   myLocationEnabled: true,
                   myLocationButtonEnabled: true,
                 ),
-
                 DraggableScrollableSheet(
-                  initialChildSize: 0.53, // 🔹 Sheet shuru me 45% height lega
+                  initialChildSize: 0.62, // 🔹 Sheet shuru me 45% height lega
                   minChildSize: 0.25, // 🔹 Sabse chhoti height
-                  maxChildSize: 0.53, // 🔹 Upar drag karke max kitna khule
+                  maxChildSize: 0.62, // 🔹 Upar drag karke max kitna khule
                   builder: (context, scrollController) {
                     return Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -137,7 +137,7 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                               letterSpacing: -1.1,
                             ),
                           ),
-                          SizedBox(height: 15.h),
+                          SizedBox(height: 10.h),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -147,38 +147,37 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                                   Icon(
                                     Icons.location_on_outlined,
                                     color: Color(0xFFDE4B65),
-                                  ),
-                                  SizedBox(height: 7.h),
-                                  CircleAvatar(
-                                    backgroundColor: Color(0xFF28B877),
-                                    radius: 2.r,
+                                    size: 22.sp,
                                   ),
                                   SizedBox(height: 6.h),
                                   CircleAvatar(
                                     backgroundColor: Color(0xFF28B877),
                                     radius: 2.r,
                                   ),
-                                  SizedBox(height: 6.h),
+                                  SizedBox(height: 5.h),
                                   CircleAvatar(
                                     backgroundColor: Color(0xFF28B877),
                                     radius: 2.r,
                                   ),
-                                  SizedBox(height: 7.h),
+                                  SizedBox(height: 5.h),
+                                  CircleAvatar(
+                                    backgroundColor: Color(0xFF28B877),
+                                    radius: 2.r,
+                                  ),
+                                  SizedBox(height: 6.h),
                                   Icon(
                                     Icons.circle_outlined,
                                     color: Color(0xFF28B877),
-                                    size: 20.sp,
+                                    size: 17.sp,
                                     fontWeight: FontWeight.bold,
                                     weight: 20,
                                   ),
                                 ],
                               ),
-
-                              SizedBox(width: 20.w),
+                              SizedBox(width: 16.w),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 2.h),
                                   Container(
                                     width: 285.w,
                                     // color: Colors.amber,
@@ -198,7 +197,6 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                                                 color: Color(0xFF77869E),
                                               ),
                                             ),
-                                            SizedBox(height: 4.h),
                                             Text(
                                               "32 Samwell Sq, Chevron",
                                               style: GoogleFonts.inter(
@@ -249,41 +247,68 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 16.h),
+                          SizedBox(height: 15.h),
                           Row(
                             children: [
-                              buildAddress(),
+                              buildAddress(
+                                "What you are sending",
+                                "Electronics/Gadgets",
+                              ),
                               SizedBox(width: 25.w),
-                              buildAddress(),
+                              buildAddress("Receipient", "Donald Duck"),
                             ],
                           ),
-                               SizedBox(height: 16.h),
                           SizedBox(height: 15.h),
-                          Container(
-                            margin: EdgeInsets.only(left: 15.w, right: 15.w),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: Size(double.infinity, 50.h),
-                                backgroundColor: Color(0xFF006970),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.r),
+                          buildAddress(
+                            "Receipient contact number",
+                            "08123456789",
+                          ),
+                          SizedBox(height: 15.h),
+                          Row(
+                            children: [
+                              buildAddress("Payment", "Card"),
+                              SizedBox(width: 25.w),
+                              buildAddress("Estimated fee:", "\$150"),
+                            ],
+                          ),
+                          Center(
+                            child: TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                "Edit Details",
+                                style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF006970),
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Color(0xFF006970),
                                 ),
                               ),
-                              onPressed: () {
-                                // Navigator.push(
-                                //   context,
-                                //   CupertinoPageRoute(
-                                //     builder: (context) => SelectTripScreen(),
-                                //   ),
-                                // );
-                              },
-                              child: Text(
-                                "Next",
-                                style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFFFFFFFF),
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(double.infinity, 50.h),
+                              backgroundColor: Color(0xFF006970),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (context) => LookCourierScreen(),
                                 ),
+                              );
+                            },
+                            child: Text(
+                              "Look for courier",
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFFFFFFFF),
                               ),
                             ),
                           ),
@@ -298,21 +323,21 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
     );
   }
 
-  Widget buildAddress() {
+  Widget buildAddress(String title, String subtitle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "What you are sending",
+          title,
           style: GoogleFonts.inter(
             fontSize: 12.sp,
             fontWeight: FontWeight.w400,
             color: Color(0xFF77869E),
           ),
         ),
-        SizedBox(height: 6.h),
+        SizedBox(height: 4.h),
         Text(
-          "Electronics/Gadgets",
+          subtitle,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
