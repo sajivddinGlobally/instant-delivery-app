@@ -2,6 +2,7 @@ import 'package:delivery_mvp_app/CustomerScreen/deliveryHistory.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -70,6 +71,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icons.markunread_mailbox_rounded,
             "Invite Friends",
             () {},
+          ),
+          SizedBox(height: 50.h),
+          InkWell(
+            onTap: () {},
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(width: 24.w),
+                SvgPicture.asset("assets/SvgImage/signout.svg"),
+                SizedBox(width: 10.w),
+                Text(
+                  "Sign out",
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Color.fromARGB(186, 29, 53, 87),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

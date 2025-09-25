@@ -116,9 +116,9 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                 ),
 
                 DraggableScrollableSheet(
-                  initialChildSize: 0.70, // 🔹 Sheet shuru me 45% height lega
+                  initialChildSize: 0.80, // 🔹 Sheet shuru me 45% height lega
                   minChildSize: 0.35, // 🔹 Sabse chhoti height
-                  maxChildSize: 0.7, // 🔹 Upar drag karke max kitna khule
+                  maxChildSize: 0.8, // 🔹 Upar drag karke max kitna khule
                   builder: (context, scrollController) {
                     return Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -163,10 +163,10 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 14.h),
+                          SizedBox(height: 10.h),
                           Container(
                             width: double.infinity,
-                            height: 160.h,
+                            height: 170.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20.r),
                               border: Border.all(
@@ -186,7 +186,6 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                                     fit: BoxFit.cover,
                                   ),
                                 ),
-                                SizedBox(height: 8.h),
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -251,29 +250,30 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
                                 SizedBox(height: 6.h),
                                 Container(
                                   margin: EdgeInsets.only(left: 18.w),
-                                  width: 82.w,
+                                  width: 65.w,
                                   height: 22.h,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(4.r),
-                                    color: Color(0xFF3B6CE9),
+                                    color: const Color(0xFF3B6CE9),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
                                       Icon(
                                         Icons.bolt,
                                         color: Colors.white,
-                                        size: 20.sp,
+                                        size: 16.sp,
                                       ),
+                                      SizedBox(width: 3.w),
                                       Text(
                                         "Faster",
                                         style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
+                                          fontSize: 12.sp,
                                           fontWeight: FontWeight.w500,
                                           color: Colors.white,
-                                          letterSpacing: 1,
+                                          letterSpacing: -0.5,
                                         ),
                                       ),
                                     ],

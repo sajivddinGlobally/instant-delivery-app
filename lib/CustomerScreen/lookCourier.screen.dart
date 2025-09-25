@@ -98,9 +98,9 @@ class _LookCourierScreenState extends State<LookCourierScreen> {
                   ),
                 ),
                 DraggableScrollableSheet(
-                  initialChildSize: 0.33, // 🔹 Sheet shuru me 45% height lega
+                  initialChildSize: 0.28, // 🔹 Sheet shuru me 45% height lega
                   minChildSize: 0.25, // 🔹 Sabse chhoti height
-                  maxChildSize: 0.33, // 🔹 Upar drag karke max kitna khule
+                  maxChildSize: 0.28, // 🔹 Upar drag karke max kitna khule
                   builder: (context, scrollController) {
                     return Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -165,6 +165,12 @@ class _LookCourierScreenState extends State<LookCourierScreen> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.grey,
+                                ),
+                                child: ClipOval(
+                                  child: Image.asset(
+                                    "assets/alli.png",
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                               SizedBox(width: 13.w),
@@ -392,7 +398,6 @@ class _LookCourierScreenState extends State<LookCourierScreen> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 10.h),
                         ],
                       ),
                     );

@@ -1,5 +1,5 @@
 import 'package:another_stepper/widgets/another_stepper.dart';
-import 'package:delivery_mvp_app/CustomerScreen/detail.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/productFillDetaisl.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -34,7 +34,7 @@ class _MyOrderScreenState extends State<MyOrderScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 40.h),
+          SizedBox(height: 50.h),
           Center(
             child: Text(
               "Checkout",
@@ -45,7 +45,7 @@ class _MyOrderScreenState extends State<MyOrderScreen> {
               ),
             ),
           ),
-          SizedBox(height: 30.h),
+          SizedBox(height: 50.h),
           Container(
             margin: EdgeInsets.only(left: 20.w),
             child: Text(
@@ -221,7 +221,9 @@ class _MyOrderScreenState extends State<MyOrderScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  CupertinoPageRoute(builder: (context) => DetailScreen()),
+                  CupertinoPageRoute(
+                    builder: (context) => ProductFillDetaislScreen(),
+                  ),
                 );
               },
               child: Text(

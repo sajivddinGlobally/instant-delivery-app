@@ -42,7 +42,7 @@ class _ReasonScreenState extends State<ReasonScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 40.h),
+          SizedBox(height: 50.h),
           Center(
             child: Text(
               "Cancellation Reasons",
@@ -53,7 +53,7 @@ class _ReasonScreenState extends State<ReasonScreen> {
               ),
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 30.h),
           Expanded(
             child: ListView.separated(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),

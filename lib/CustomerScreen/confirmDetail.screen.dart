@@ -1,3 +1,4 @@
+import 'package:delivery_mvp_app/CustomerScreen/deliveryDetail.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/lookCourier.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -92,9 +93,9 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                   myLocationButtonEnabled: true,
                 ),
                 DraggableScrollableSheet(
-                  initialChildSize: 0.62, // 🔹 Sheet shuru me 45% height lega
+                  initialChildSize: 0.56, // 🔹 Sheet shuru me 45% height lega
                   minChildSize: 0.25, // 🔹 Sabse chhoti height
-                  maxChildSize: 0.62, // 🔹 Upar drag karke max kitna khule
+                  maxChildSize: 0.56, // 🔹 Upar drag karke max kitna khule
                   builder: (context, scrollController) {
                     return Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -209,8 +210,8 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                                         ),
                                         Spacer(),
                                         Container(
-                                          width: 35.w,
-                                          height: 28.h,
+                                          width: 32.w,
+                                          height: 32.h,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(
                                               5.r,
@@ -273,7 +274,15 @@ class _ConfirmDetailScreenState extends State<ConfirmDetailScreen> {
                           ),
                           Center(
                             child: TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) =>
+                                        DeliveryDetailScreen(),
+                                  ),
+                                );
+                              },
                               child: Text(
                                 "Edit Details",
                                 style: GoogleFonts.inter(

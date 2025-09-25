@@ -78,12 +78,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  SvgPicture.asset("assets/SvgImage/bg.svg"),
+                  SvgPicture.asset(
+                    "assets/SvgImage/bg.svg",
+                    //width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height / 2,
+                  ),
                   Padding(
                     padding: EdgeInsets.only(
                       left: 21.w,
                       right: 21.w,
-                      top: 35.h,
+                      top: 50.h,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

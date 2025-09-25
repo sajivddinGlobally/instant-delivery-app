@@ -9,14 +9,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class DetailScreen extends StatefulWidget {
-  const DetailScreen({super.key});
+class ProductFillDetaislScreen extends StatefulWidget {
+  const ProductFillDetaislScreen({super.key});
 
   @override
-  State<DetailScreen> createState() => _DetailScreenState();
+  State<ProductFillDetaislScreen> createState() =>
+      _ProductFillDetaislScreenState();
 }
 
-class _DetailScreenState extends State<DetailScreen> {
+class _ProductFillDetaislScreenState extends State<ProductFillDetaislScreen> {
   File? image;
   final picker = ImagePicker();
 

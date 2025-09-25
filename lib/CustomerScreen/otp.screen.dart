@@ -22,7 +22,7 @@ class _OtpScreenState extends State<OtpScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 50.h),
+            SizedBox(height: 70.h),
             Center(
               child: Image.asset(
                 "assets/scooter.png",

@@ -34,6 +34,7 @@ class _OnbordingScreenState extends State<OnbordingScreen> {
                   fontSize: 30.sp,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF086E86),
+                  height: 1,
                 ),
               ),
             ),

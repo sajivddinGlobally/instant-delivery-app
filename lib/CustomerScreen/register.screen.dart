@@ -22,7 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 50.h),
+            SizedBox(height: 66.h),
             Center(
               child: Image.asset(
                 "assets/scooter.png",

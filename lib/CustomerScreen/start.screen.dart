@@ -28,11 +28,11 @@ class _StartScreenState extends State<StartScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFF9FAFB),
       body: Center(
-        // child: SvgPicture.asset(
-        //   "assets/SvgImage/bike.svg",
-        //   color: Colors.black,
-        // ),
-        child: Image.asset("assets/scooter.png"),
+        child: SvgPicture.asset(
+          "assets/SvgImage/delivery.svg",
+          color: Colors.black,
+        ),
+        //child: Image.asset("assets/scooter.png"),
       ),
     );
   }

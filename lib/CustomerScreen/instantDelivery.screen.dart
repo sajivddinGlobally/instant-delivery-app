@@ -90,11 +90,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                   myLocationEnabled: true,
                   myLocationButtonEnabled: true,
                 ),
-
                 DraggableScrollableSheet(
-                  initialChildSize: 0.53, // 🔹 Sheet shuru me 45% height lega
+                  initialChildSize: 0.45, // 🔹 Sheet shuru me 45% height lega
                   minChildSize: 0.25, // 🔹 Sabse chhoti height
-                  maxChildSize: 0.53, // 🔹 Upar drag karke max kitna khule
+                  maxChildSize: 0.45, // 🔹 Upar drag karke max kitna khule
                   builder: (context, scrollController) {
                     return Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -330,7 +329,6 @@ class _RideCardState extends State<RideCard> {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 135.h,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(13.r),
@@ -402,9 +400,8 @@ class _RideCardState extends State<RideCard> {
               ),
             ],
           ),
-          //SizedBox(height: 10.h),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            padding: EdgeInsets.only(left: 16.w, right: 16.w),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -447,11 +444,11 @@ class _RideCardState extends State<RideCard> {
                     ),
                   ],
                 ),
-                SizedBox(width: 10.w),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    // crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       TextField(
                         style: GoogleFonts.inter(
@@ -466,17 +463,17 @@ class _RideCardState extends State<RideCard> {
                           hintStyle: GoogleFonts.inter(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
-                            color: Colors.black,
+                            color: Colors.black54,
                           ),
                         ),
                       ),
-                      SizedBox(height: 4.h),
+
                       Divider(
                         color: Color.fromARGB(102, 120, 119, 141),
                         thickness: 2,
                         height: 2,
                       ),
-                      SizedBox(height: 4.h),
+
                       TextField(
                         style: GoogleFonts.inter(
                           fontSize: 15.sp,
@@ -490,22 +487,20 @@ class _RideCardState extends State<RideCard> {
                           hintStyle: GoogleFonts.inter(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
-                            color: Colors.black,
+                            color: Colors.black54,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     IconButton(
                       onPressed: () {},
                       icon: Icon(Icons.favorite_border, color: Colors.black),
                     ),
-                    SizedBox(height: 6.h),
                     IconButton(
                       onPressed: () {},
                       icon: Icon(Icons.add, color: Colors.black),
@@ -518,194 +513,5 @@ class _RideCardState extends State<RideCard> {
         ],
       ),
     );
-
-    // return Container(
-    //   width: MediaQuery.of(context).size.width,
-    //   height: 155.h,
-    //   decoration: BoxDecoration(
-    //     color: Colors.white,
-    //     borderRadius: BorderRadius.circular(13.r),
-    //     boxShadow: [
-    //       BoxShadow(
-    //         offset: Offset(0, 2),
-    //         blurRadius: 3,
-    //         spreadRadius: 2,
-    //         color: Color.fromARGB(28, 0, 0, 0),
-    //       ),
-    //     ],
-    //   ),
-    //   child: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       Row(
-    //         mainAxisAlignment: MainAxisAlignment.start,
-    //         crossAxisAlignment: CrossAxisAlignment.start,
-    //         children: [
-    //           Container(
-    //             width: 160.w,
-    //             height: 40.h,
-    //             decoration: BoxDecoration(color: Color(0xFFEFEFEF)),
-    //             child: Row(
-    //               mainAxisAlignment: MainAxisAlignment.center,
-    //               children: [
-    //                 Icon(
-    //                   Icons.check_circle,
-    //                   color: Color(0xFF222222),
-    //                   size: 20.sp,
-    //                 ),
-    //                 SizedBox(width: 10.w),
-    //                 Text(
-    //                   "One Way",
-    //                   style: GoogleFonts.inter(
-    //                     fontSize: 15.sp,
-    //                     fontWeight: FontWeight.w600,
-    //                     color: Color(0xFF000000),
-    //                     letterSpacing: -1,
-    //                   ),
-    //                 ),
-    //               ],
-    //             ),
-    //           ),
-    //           Container(
-    //             width: 160.w,
-    //             height: 40.h,
-    //             decoration: BoxDecoration(color: Colors.transparent),
-    //             child: Row(
-    //               mainAxisAlignment: MainAxisAlignment.center,
-    //               children: [
-    //                 Icon(
-    //                   Icons.check_circle,
-    //                   color: Color(0xFF222222),
-    //                   size: 20.sp,
-    //                 ),
-    //                 SizedBox(width: 10.w),
-    //                 Text(
-    //                   "Return Way",
-    //                   style: GoogleFonts.inter(
-    //                     fontSize: 15.sp,
-    //                     fontWeight: FontWeight.w600,
-    //                     color: Color(0xFF000000),
-    //                     letterSpacing: -1,
-    //                   ),
-    //                 ),
-    //               ],
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //       SizedBox(height: 10.h),
-    //       Padding(
-    //         padding: EdgeInsets.only(left: 16.w, right: 10.w),
-    //         child: Row(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             Column(
-    //               children: [
-    //                 Text(
-    //                   "Pickup",
-    //                   style: GoogleFonts.inter(
-    //                     fontSize: 15.sp,
-    //                     fontWeight: FontWeight.bold,
-    //                     color: Color(0xFF000000),
-    //                     letterSpacing: -1,
-    //                   ),
-    //                 ),
-    //                 SizedBox(height: 8.h),
-    //                 CircleAvatar(backgroundColor: Color(0xFF086E86), radius: 4),
-    //                 SizedBox(height: 4.h),
-    //                 CircleAvatar(backgroundColor: Color(0xFF086E86), radius: 4),
-    //                 SizedBox(height: 4.h),
-    //                 CircleAvatar(backgroundColor: Color(0xFF086E86), radius: 4),
-    //                 SizedBox(height: 8.h),
-    //                 Text(
-    //                   "Drop",
-    //                   style: GoogleFonts.inter(
-    //                     fontSize: 14.sp,
-    //                     fontWeight: FontWeight.bold,
-    //                     color: Color(0xFF000000),
-    //                     letterSpacing: -1,
-    //                   ),
-    //                 ),
-    //               ],
-    //             ),
-    //             SizedBox(width: 6.w),
-    //             Expanded(
-    //               child: Column(
-    //                 crossAxisAlignment: CrossAxisAlignment.start,
-    //                 mainAxisAlignment: MainAxisAlignment.end,
-    //                 children: [
-    //                   TextField(
-    //                     style: GoogleFonts.inter(
-    //                       fontSize: 15.sp,
-    //                       fontWeight: FontWeight.w500,
-    //                       color: Color(0xFF000000),
-    //                     ),
-    //                     decoration: InputDecoration(
-    //                       contentPadding: EdgeInsets.zero,
-    //                       border: OutlineInputBorder(
-    //                         borderSide: BorderSide.none,
-    //                       ),
-    //                       hintText: "ARH.VVK.Road",
-    //                       hintStyle: GoogleFonts.inter(
-    //                         fontSize: 14.sp,
-    //                         fontWeight: FontWeight.w500,
-    //                         color: Color(0xFF000000),
-    //                       ),
-    //                     ),
-    //                   ),
-    //                   Divider(
-    //                     color: Color.fromARGB(102, 120, 119, 141),
-    //                     thickness: 2,
-    //                   ),
-    //                   TextField(
-    //                     style: GoogleFonts.inter(
-    //                       fontSize: 15.sp,
-    //                       fontWeight: FontWeight.w500,
-    //                       color: Color(0xFF000000),
-    //                     ),
-    //                     decoration: InputDecoration(
-    //                       contentPadding: EdgeInsets.zero,
-    //                       border: OutlineInputBorder(
-    //                         borderSide: BorderSide.none,
-    //                       ),
-    //                       hintText: "Masjid Al Ma...",
-    //                       hintStyle: GoogleFonts.inter(
-    //                         fontSize: 14.sp,
-    //                         fontWeight: FontWeight.w500,
-    //                         color: Color(0xFF000000),
-    //                       ),
-    //                     ),
-    //                   ),
-    //                 ],
-    //               ),
-    //             ),
-    //             Column(
-    //               crossAxisAlignment: CrossAxisAlignment.end,
-    //               mainAxisAlignment: MainAxisAlignment.center,
-    //               children: [
-    //                 IconButton(
-    //                   onPressed: () {},
-    //                   icon: Icon(
-    //                     Icons.favorite_border,
-    //                     color: Color(0xFF000000),
-    //                   ),
-    //                 ),
-    //                 SizedBox(height: 10.h),
-    //                 IconButton(
-    //                   onPressed: () {},
-    //                   icon: Icon(
-    //                     Icons.add,
-    //                     fontWeight: FontWeight.bold,
-    //                     color: Color(0xFF000000),
-    //                   ),
-    //                 ),
-    //               ],
-    //             ),
-    //           ],
-    //         ),
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 }
