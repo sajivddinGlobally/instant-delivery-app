@@ -1,3 +1,4 @@
+import 'package:delivery_mvp_app/CustomerScreen/reason.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -97,9 +98,9 @@ class _LookCourierScreenState extends State<LookCourierScreen> {
                   ),
                 ),
                 DraggableScrollableSheet(
-                  initialChildSize: 0.50, // 🔹 Sheet shuru me 45% height lega
+                  initialChildSize: 0.33, // 🔹 Sheet shuru me 45% height lega
                   minChildSize: 0.25, // 🔹 Sabse chhoti height
-                  maxChildSize: 0.50, // 🔹 Upar drag karke max kitna khule
+                  maxChildSize: 0.33, // 🔹 Upar drag karke max kitna khule
                   builder: (context, scrollController) {
                     return Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -245,47 +246,149 @@ class _LookCourierScreenState extends State<LookCourierScreen> {
                               ),
                             ],
                           ),
-
-                          SizedBox(height: 15.h),
-
+                          SizedBox(height: 30.h),
                           Center(
                             child: TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      backgroundColor: Colors.transparent,
+                                      elevation: 0,
+                                      contentPadding: EdgeInsets.zero,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          10.r,
+                                        ),
+                                      ),
+                                      content: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            10.r,
+                                          ),
+                                          color: Colors.white,
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                            left: 25.w,
+                                            right: 25.w,
+                                            top: 25.h,
+                                            bottom: 20.h,
+                                          ),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                "Are you sure you want to cancel this order?",
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 16.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              SizedBox(height: 30.h),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Expanded(
+                                                    child: ElevatedButton(
+                                                      style: ElevatedButton.styleFrom(
+                                                        padding:
+                                                            EdgeInsets.zero,
+
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10.r,
+                                                              ),
+                                                        ),
+                                                        backgroundColor: Color(
+                                                          0xFF086E86,
+                                                        ),
+                                                      ),
+                                                      onPressed: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          CupertinoPageRoute(
+                                                            builder: (context) =>
+                                                                ReasonScreen(),
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Text(
+                                                        "Yes, cancel",
+                                                        style:
+                                                            GoogleFonts.inter(
+                                                              fontSize: 14.sp,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 12.w),
+                                                  Expanded(
+                                                    child: ElevatedButton(
+                                                      style: ElevatedButton.styleFrom(
+                                                        backgroundColor:
+                                                            Colors.white,
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10.r,
+                                                              ),
+                                                          side: BorderSide(
+                                                            color: Color(
+                                                              0xFF086E86,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text(
+                                                        "No, go back",
+                                                        style:
+                                                            GoogleFonts.inter(
+                                                              fontSize: 14.sp,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: Color(
+                                                                0xFF086E86,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                               child: Text(
-                                "Edit Details",
+                                "Cancel",
                                 style: GoogleFonts.inter(
-                                  fontSize: 14.sp,
+                                  fontSize: 15.sp,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFF006970),
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: Color(0xFF006970),
+                                  color: Color(0xFFDC2836),
                                 ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 10.h),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: Size(double.infinity, 50.h),
-                              backgroundColor: Color(0xFF006970),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => LookCourierScreen(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              "Look for courier",
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFFFFFFFF),
                               ),
                             ),
                           ),
