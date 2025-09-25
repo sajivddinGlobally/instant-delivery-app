@@ -219,9 +219,83 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
                 ),
               ],
             ),
+            SizedBox(height: 15.h),
+            Row(
+              children: [
+                buildAddress("What you are sending", "Electronics/Gadgets"),
+                SizedBox(width: 25.w),
+                buildAddress("Receipient", "Donald Duck"),
+              ],
+            ),
+            SizedBox(height: 15.h),
+            buildAddress("Receipient contact number", "08123456789"),
+            SizedBox(height: 15.h),
+            Row(
+              children: [
+                buildAddress("Payment", "Card"),
+                SizedBox(width: 25.w),
+                buildAddress("Fee", "\$150"),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              "Pickup image(s)",
+              style: GoogleFonts.inter(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF77869E),
+              ),
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 64.w,
+                  height: 64.h,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFD9D9D9),
+                    borderRadius: BorderRadius.circular(5.r),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 5.w),
+                  width: 64.w,
+                  height: 64.h,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFD9D9D9),
+                    borderRadius: BorderRadius.circular(5.r),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget buildAddress(String title, String subtitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.inter(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF77869E),
+          ),
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          subtitle,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF111111),
+          ),
+        ),
+      ],
     );
   }
 }
