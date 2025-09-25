@@ -57,7 +57,13 @@ class _LookCourierScreenState extends State<LookCourierScreen> {
       _currentLatLng = LatLng(position.latitude, position.longitude);
     });
 
-    _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng!));
+    //_mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng!));
+    // Ye UI update ke turant baad safe call hoga
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_mapController != null && _currentLatLng != null) {
+        _mapController!.animateCamera(CameraUpdate.newLatLng(_currentLatLng!));
+      }
+    });
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:delivery_mvp_app/CustomerScreen/review.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -122,10 +123,10 @@ class _ReasonScreenState extends State<ReasonScreen> {
                 ),
               ),
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   CupertinoPageRoute(builder: (context) => DetailScreen()),
-                // );
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(builder: (context) => ReviewScreen()),
+                );
               },
               child: Text(
                 "Continue",
