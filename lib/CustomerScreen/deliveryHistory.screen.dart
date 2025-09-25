@@ -140,7 +140,7 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
                         children: [
                           Container(
                             width: 35.w,
-                            height: 28.h,
+                            height: 35.h,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(5.r),
                               color: Color(0xFFF7F7F7),

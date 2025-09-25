@@ -180,14 +180,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                                 borderRadius: BorderRadius.circular(10.r),
                               ),
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => ReviewScreen(),
-                                ),
-                              );
-                            },
+                            onPressed: () {},
                             child: Text(
                               "Done",
                               style: GoogleFonts.inter(

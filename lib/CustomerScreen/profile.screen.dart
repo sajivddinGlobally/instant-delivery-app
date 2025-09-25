@@ -20,7 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 50.h),
+          SizedBox(height: 70.h),
           Center(
             child: Container(
               width: 72.w,
