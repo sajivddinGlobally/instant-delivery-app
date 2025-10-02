@@ -16,7 +16,7 @@ class _StartScreenState extends State<StartScreen> {
     // TODO: implement initState
     super.initState();
     Future.delayed(Duration(seconds: 3), () {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         CupertinoPageRoute(builder: (context) => OnbordingScreen()),
       );
