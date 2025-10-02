@@ -1,4 +1,4 @@
-import 'package:delivery_mvp_app/CustomerScreen/home.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/otpPage/controller/otpController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +7,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:otp_pin_field/otp_pin_field.dart';
 
 class OtpScreen extends StatefulWidget {
-  const OtpScreen({super.key});
+  final String token;
+  const OtpScreen({super.key, required this.token});
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> {
+class _OtpScreenState extends State<OtpScreen> with OtpController<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +73,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   ),
                   SizedBox(height: 26.h),
                   OtpPinField(
-                    maxLength: 4,
+                    maxLength: 6,
                     fieldHeight: 46.h,
                     fieldWidth: 50.w,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -92,7 +93,11 @@ class _OtpScreenState extends State<OtpScreen> {
                         OtpPinFieldDecoration.defaultPinBoxDecoration,
 
                     onSubmit: (text) {},
-                    onChange: (text) {},
+                    onChange: (value) {
+                      setState(() {
+                        otp = value;
+                      });
+                    },
                   ),
                   SizedBox(height: 20.h),
                   Text.rich(
@@ -126,20 +131,24 @@ class _OtpScreenState extends State<OtpScreen> {
                         side: BorderSide.none,
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        CupertinoPageRoute(builder: (context) => HomeScreen()),
-                      );
+                    onPressed: () async {
+                      sendOTP(widget.token);
                     },
-                    child: Text(
-                      "Verify",
-                      style: GoogleFonts.inter(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFFFFFFFF),
-                      ),
-                    ),
+                    child: loading
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : Text(
+                            "Verify",
+                            style: GoogleFonts.inter(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFFFFFFFF),
+                            ),
+                          ),
                   ),
                   SizedBox(height: 25.h),
                   Center(

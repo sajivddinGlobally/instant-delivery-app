@@ -1,0 +1,68 @@
+
+
+@url = http://192.168.1.43:4567
+
+//Register for client
+###
+POST {{url}}/api/v1/user/register HTTP/1.1
+Content-type: application/json
+
+{
+      "firstName": "Khan123",
+      "lastName": "Khan",
+      "email": "khan112345@gmail.com",
+      "phone": "234561789866",
+      "password": "12345678"
+}
+
+
+//registerVerify
+###
+POST {{url}}/api/v1/user/registerVerify HTTP/1.1
+Content-type: application/json
+
+{
+    "token": "bUst8TblncX9MtwdAbnNNPaADtWrmepFQfxlHbqu",
+    "otp": "123456"
+}
+
+//login
+###
+POST {{url}}/api/v1/user/login HTTP/1.1
+Content-type: application/json
+
+{
+    "loginType": "khan123@gmail.com",
+    "password": "12345678"
+}
+
+//verifyUser
+###
+POST {{url}}/api/v1/user/verifyUser HTTP/1.1
+Content-type: application/json
+
+{
+    "token": "hO2AKqjk8AibGs1FJvgff1QUxHGL9Rd4Swg0hpGk",
+    "otp": "123456"
+}
+
+//forgotPassword
+###
+POST {{url}}/api/v1/user/forgotPassword HTTP/1.1
+Content-type: application/json
+
+{
+    "loginType": "zn@gmail.com"
+}
+
+//forgotPasswordVerify
+###
+POST {{url}}/api/v1/user/forgotPasswordVerify HTTP/1.1
+Content-type: application/json
+
+{
+    "token": "7iHB1D37hLH91i9eWoGmYmr7JKOQHK42eVrr5IX7",
+    "otp": "123456",
+    "newPassword": "12345678",
+    "confirmPassword": "12345678"
+}

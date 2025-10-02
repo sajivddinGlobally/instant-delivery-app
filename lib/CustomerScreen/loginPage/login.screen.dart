@@ -1,5 +1,5 @@
-import 'package:delivery_mvp_app/CustomerScreen/otp.screen.dart';
-import 'package:delivery_mvp_app/CustomerScreen/register.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/home.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/registerPage/register.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -155,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        CupertinoPageRoute(builder: (context) => OtpScreen()),
+                        CupertinoPageRoute(builder: (context) => HomeScreen()),
                       );
                     },
                     child: Text(

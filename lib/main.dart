@@ -1,9 +1,16 @@
+import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/start.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox("folder");
+
   runApp(ProviderScope(child: const MyApp()));
 }
 
@@ -13,6 +20,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    var box = Hive.box("folder");
+    var token = box.get("token");
+    log("=====================================");
+    log(token ?? "No token found");
+
     return ScreenUtilInit(
       designSize: Size(375, 812),
       minTextAdapt: true,

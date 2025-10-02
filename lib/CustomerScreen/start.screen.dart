@@ -32,7 +32,14 @@ class _StartScreenState extends State<StartScreen> {
         //   "assets/SvgImage/delivery.svg",
         //   color: Colors.black,
         // ),
-        child: Image.asset("assets/scooter.png"),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset("assets/scooter.png"),
+            CircularProgressIndicator(),
+          ],
+        ),
       ),
     );
   }
