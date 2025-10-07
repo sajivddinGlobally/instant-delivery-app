@@ -39,7 +39,7 @@ mixin OtpController<T extends StatefulWidget> on State<T> {
           loading = false;
           otp = "";
         });
-        otpKey.currentState!.clearOtp();
+        registerVerifyotpKey.currentState!.clearOtp();
       }
     } catch (e, st) {
       log("${e.toString()} / ${st.toString()}");

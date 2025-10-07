@@ -74,7 +74,7 @@ class _OtpScreenState extends State<OtpScreen> with OtpController<OtpScreen> {
                   ),
                   SizedBox(height: 26.h),
                   OtpPinField(
-                    key: otpKey,
+                    key: registerVerifyotpKey,
                     maxLength: 6,
                     fieldHeight: 46.h,
                     fieldWidth: 46.w,

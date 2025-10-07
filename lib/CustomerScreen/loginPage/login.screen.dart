@@ -1,4 +1,3 @@
-import 'package:delivery_mvp_app/CustomerScreen/home.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginController.dart';
 import 'package:delivery_mvp_app/CustomerScreen/registerPage/register.screen.dart';
 import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
@@ -22,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen>
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
       body: Form(
-        key: formKey,
+        key: loginformKey,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +69,10 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(
+                            color: Color(0xFF006970),
+                            width: 1.w,
+                          ),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
@@ -78,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                         focusedErrorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(color: Colors.red, width: 1.w),
                         ),
                         hintText: "youremailaddress@address.com",
                         hintStyle: GoogleFonts.inter(
@@ -112,7 +114,10 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(
+                            color: Color(0xFF006970),
+                            width: 1.w,
+                          ),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
@@ -120,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                         focusedErrorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(color: Colors.red, width: 1.w),
                         ),
                         hintText: "Password",
                         hintStyle: GoogleFonts.inter(

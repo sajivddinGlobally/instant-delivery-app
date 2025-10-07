@@ -18,7 +18,7 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
   bool isLoading = false;
 
   void registerUser() async {
-    if (!formKey.currentState!.validate()) {
+    if (!registerformKey.currentState!.validate()) {
       setState(() => isLoading = false);
       return;
     }

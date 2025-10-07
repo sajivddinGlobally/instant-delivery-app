@@ -75,7 +75,7 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
                   ),
                   SizedBox(height: 26.h),
                   OtpPinField(
-                    key: otpKey,
+                    key: loginVerifyotpKey,
                     maxLength: 6,
                     fieldHeight: 46.h,
                     fieldWidth: 46.w,

@@ -39,7 +39,7 @@ mixin LoginVerifyController<T extends LoginVerifyScreen> on State<T> {
           loading = false;
           otp = "";
         });
-        otpKey.currentState!.clearOtp();
+        loginVerifyotpKey.currentState!.clearOtp();
       }
     } catch (e, st) {
       log("${e.toString()} / ${st.toString()}");

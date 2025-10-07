@@ -20,7 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: formKey,
+      key: registerformKey,
       child: Scaffold(
         backgroundColor: Color(0xFFFFFFFF),
         body: SingleChildScrollView(
@@ -81,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.r),
                                 borderSide: BorderSide(
-                                  color: Color(0xFF1D3557),
+                                  color: Color(0xFF006970),
                                   width: 1.w,
                                 ),
                               ),
@@ -195,7 +195,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(
+                            color: Color(0xFF006970),
+                            width: 1.w,
+                          ),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
@@ -203,7 +206,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                         ),
                         focusedErrorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(color: Colors.red, width: 1.w),
                         ),
                         hintText: "You Phone Number",
                         hintStyle: GoogleFonts.inter(
@@ -242,7 +245,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(
+                            color: Color(0xFF006970),
+                            width: 1.w,
+                          ),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
@@ -250,7 +256,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                         ),
                         focusedErrorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(color: Colors.red, width: 1.w),
                         ),
                         hintText: "Your Email",
                         hintStyle: GoogleFonts.inter(
@@ -289,7 +295,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(
+                            color: Color(0xFF006970),
+                            width: 1.w,
+                          ),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
@@ -297,7 +306,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                         ),
                         focusedErrorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(5.r),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(color: Colors.red, width: 1.w),
                         ),
                         hintText: "Your Password",
                         hintStyle: GoogleFonts.inter(

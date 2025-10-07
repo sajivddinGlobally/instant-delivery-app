@@ -1,7 +1,9 @@
+import 'package:delivery_mvp_app/CustomerScreen/home.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/onbording.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
@@ -15,10 +17,23 @@ class _StartScreenState extends State<StartScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
     Future.delayed(Duration(seconds: 3), () {
-      Navigator.pushReplacement(
+      var box = Hive.box("folder");
+      var token = box.get("token");
+
+      Navigator.pushAndRemoveUntil(
         context,
-        CupertinoPageRoute(builder: (context) => OnbordingScreen()),
+        CupertinoPageRoute(
+          builder: (context) {
+            if (token == null) {
+              return OnbordingScreen();
+            } else {
+              return HomeScreen();
+            }
+          },
+        ),
+        (route) => false,
       );
     });
   }
