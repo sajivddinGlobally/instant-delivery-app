@@ -4,6 +4,7 @@ import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 Dio callPrettyDio() {
@@ -20,46 +21,38 @@ Dio callPrettyDio() {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
-        options.headers.addAll({'Content-Type': 'application/json'});
+        handler.next(options);
       },
-      onError: (DioException error, handler) {
+      onResponse: (response, handler) {
+        handler.next(response);
+      },
+      onError: (DioException e, handler) {
         final globalContext = navigatorKey.currentContext;
-        String message = "Something went wrong";
-        if (error.response != null) {
-          final data = error.response!.data;
-          if (data is Map<String, dynamic>) {
-            message = data['message'] ?? data.toString();
-          } else {
-            message = data.toString();
-          }
-        } else {
-          message = error.message ?? error.toString();
-        }
-
-        log("Dio Error: $message", stackTrace: error.stackTrace);
-
         if (globalContext != null) {
-          if (error.response?.statusCode == 401) {
+          if (e.response!.statusCode == 401) {
             ScaffoldMessenger.of(globalContext).showSnackBar(
-              const SnackBar(
-                content: Text("Token expired. Please login again."),
+              SnackBar(
+                content: Text("Token expire please login again."),
                 backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                margin: EdgeInsets.only(left: 15.w, bottom: 15.h, right: 15.w),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.r),
+                  side: BorderSide.none,
+                ),
               ),
             );
             Navigator.pushAndRemoveUntil(
               globalContext,
-              CupertinoPageRoute(builder: (_) => LoginScreen()),
+              CupertinoPageRoute(builder: (context) => LoginScreen()),
               (route) => false,
             );
-          } else {
-            ScaffoldMessenger.of(globalContext).showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: Colors.red),
-            );
           }
+        } else {
+          log("Global context is null, cannot show SnackBar or navigate");
         }
-        handler.next(error);
+        handler.next(e);
       },
-      onResponse: (response, handler) {},
     ),
   );
 

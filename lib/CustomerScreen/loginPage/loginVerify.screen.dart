@@ -1,4 +1,4 @@
-import 'package:delivery_mvp_app/CustomerScreen/otpPage/controller/otpController.dart';
+import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginVerifyController.dart';
 import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -7,15 +7,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:otp_pin_field/otp_pin_field.dart';
 
-class OtpScreen extends StatefulWidget {
+class LoginVerifyScreen extends StatefulWidget {
   final String token;
-  const OtpScreen({super.key, required this.token});
+  const LoginVerifyScreen({super.key, required this.token});
 
   @override
-  State<OtpScreen> createState() => _OtpScreenState();
+  State<LoginVerifyScreen> createState() => _LoginVerifyScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> with OtpController<OtpScreen> {
+class _LoginVerifyScreenState extends State<LoginVerifyScreen>
+    with LoginVerifyController<LoginVerifyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,9 +134,11 @@ class _OtpScreenState extends State<OtpScreen> with OtpController<OtpScreen> {
                         side: BorderSide.none,
                       ),
                     ),
-                    onPressed: () async {
-                      sendOTP(widget.token);
-                    },
+                    onPressed: loading
+                        ? null
+                        : () async {
+                            verifyLogin(widget.token);
+                          },
                     child: loading
                         ? Center(
                             child: Padding(

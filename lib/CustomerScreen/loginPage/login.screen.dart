@@ -1,5 +1,7 @@
 import 'package:delivery_mvp_app/CustomerScreen/home.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginController.dart';
 import 'package:delivery_mvp_app/CustomerScreen/registerPage/register.screen.dart';
+import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -13,197 +15,225 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  bool isShow = true;
+class _LoginScreenState extends State<LoginScreen>
+    with LoginController<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 66.h),
-            Center(
-              child: Image.asset(
-                "assets/scooter.png",
-                width: 84.w,
-                height: 72.h,
+      body: Form(
+        key: formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 66.h),
+              Center(
+                child: Image.asset(
+                  "assets/scooter.png",
+                  width: 84.w,
+                  height: 72.h,
+                ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 24.w, right: 24.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 28.h),
-                  Text(
-                    "Welcome",
-                    style: GoogleFonts.inter(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF111111),
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    "Please input your details",
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF4F4F4F),
-                    ),
-                  ),
-                  SizedBox(height: 35.h),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Color(0xFFF0F5F5),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      hintText: "youremailaddress@address.com",
-                      hintStyle: GoogleFonts.inter(
-                        fontSize: 14.sp,
+              Padding(
+                padding: EdgeInsets.only(left: 24.w, right: 24.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 28.h),
+                    Text(
+                      "Welcome",
+                      style: GoogleFonts.inter(
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.w400,
-                        color: Color(0xFF293540),
+                        color: Color(0xFF111111),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 30.h),
-                  TextFormField(
-                    obscureText: isShow ? true : false,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Color(0xFFF0F5F5),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      hintText: "Password",
-                      hintStyle: GoogleFonts.inter(
-                        fontSize: 14.sp,
+                    SizedBox(height: 4.h),
+                    Text(
+                      "Please input your details",
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
-                        color: Color(0xFF293540),
+                        color: Color(0xFF4F4F4F),
                       ),
-                      suffixIcon: TextButton(
-                        onPressed: () {
-                          setState(() {
-                            isShow = !isShow;
-                          });
-                        },
+                    ),
+                    SizedBox(height: 35.h),
+                    TextFormField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Color(0xFFF0F5F5),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.r),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.r),
+                          borderSide: BorderSide.none,
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.r),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.r),
+                          borderSide: BorderSide.none,
+                        ),
+                        hintText: "youremailaddress@address.com",
+                        hintStyle: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF293540),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Email is required";
+                        }
+                        String pattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+                        RegExp regex = RegExp(pattern);
+                        if (!regex.hasMatch(value.trim())) {
+                          return "Enter a valid email";
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 30.h),
+                    TextFormField(
+                      controller: passwordController,
+                      obscureText: isShow ? true : false,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Color(0xFFF0F5F5),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.r),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.r),
+                          borderSide: BorderSide.none,
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.r),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.r),
+                          borderSide: BorderSide.none,
+                        ),
+                        hintText: "Password",
+                        hintStyle: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF293540),
+                        ),
+                        suffixIcon: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              isShow = !isShow;
+                            });
+                          },
+                          child: Text(
+                            isShow ? "Show" : "Hide",
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF1D3557),
+                            ),
+                          ),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Password is required";
+                        }
+                        return null;
+                      },
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {},
                         child: Text(
-                          isShow ? "Show" : "Hide",
+                          "Forgot Password?",
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF111111),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 30.h),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(327.w, 50.h),
+                        backgroundColor: Color(0xFF006970),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                          side: BorderSide.none,
+                        ),
+                      ),
+                      onPressed: loadind ? null : loginUser,
+                      child: loadind
+                          ? Center(
+                              child: SizedBox(
+                                width: 30.w,
+                                height: 30.h,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              "Login",
+                              style: GoogleFonts.inter(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFFFFFFFF),
+                              ),
+                            ),
+                    ),
+                    SizedBox(height: 7.h),
+                    Center(
+                      child: Text.rich(
+                        TextSpan(
+                          text: "Need an account? ",
                           style: GoogleFonts.inter(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF1D3557),
+                            color: Color(0xFF4F4F4F),
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Forgot Password?",
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF111111),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 30.h),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(327.w, 50.h),
-                      backgroundColor: Color(0xFF006970),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                        side: BorderSide.none,
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        CupertinoPageRoute(builder: (context) => HomeScreen()),
-                      );
-                    },
-                    child: Text(
-                      "Login",
-                      style: GoogleFonts.inter(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFFFFFFFF),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 7.h),
-                  Center(
-                    child: Text.rich(
-                      TextSpan(
-                        text: "Need an account? ",
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF4F4F4F),
-                        ),
-                        children: [
-                          TextSpan(
-                            text: "Sign up",
-                            style: GoogleFonts.inter(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF006970),
+                          children: [
+                            TextSpan(
+                              text: "Sign up",
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF006970),
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (_) => RegisterScreen(),
+                                    ),
+                                  );
+                                },
                             ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (_) => RegisterScreen(),
-                                  ),
-                                );
-                              },
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 10.h),
-                ],
+                    SizedBox(height: 10.h),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

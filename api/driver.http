@@ -32,7 +32,7 @@ POST {{url}}/api/v1/user/login HTTP/1.1
 Content-type: application/json
 
 {
-    "loginType": "khan123@gmail.com",
+    "loginType": "a@gmail.com",
     "password": "12345678"
 }
 
@@ -42,7 +42,7 @@ POST {{url}}/api/v1/user/verifyUser HTTP/1.1
 Content-type: application/json
 
 {
-    "token": "hO2AKqjk8AibGs1FJvgff1QUxHGL9Rd4Swg0hpGk",
+    "token": "c5mREktpsWTOLpUjFIHERqa006DEEbV6EE9zHXd3",
     "otp": "123456"
 }
 

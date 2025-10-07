@@ -1,9 +1,11 @@
 import 'package:delivery_mvp_app/CustomerScreen/deliveryHistory.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,6 +17,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
+    var box = Hive.box("folder");
+    var token = box.get("token");
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
       body: Column(
@@ -74,7 +78,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SizedBox(height: 50.h),
           InkWell(
-            onTap: () {},
+            onTap: () {
+              box.clear();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Sign out successfully"),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                  margin: EdgeInsets.only(
+                    left: 15.w,
+                    bottom: 15.h,
+                    right: 15.w,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.r),
+                    side: BorderSide.none,
+                  ),
+                ),
+              );
+              Navigator.pushAndRemoveUntil(
+                context,
+                CupertinoPageRoute(builder: (context) => LoginScreen()),
+                (route) => false,
+              );
+            },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [

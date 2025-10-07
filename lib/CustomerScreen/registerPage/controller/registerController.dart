@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:delivery_mvp_app/CustomerScreen/otpPage/otp.screen.dart';
 import 'package:delivery_mvp_app/config/network/api.state.dart';
 import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
