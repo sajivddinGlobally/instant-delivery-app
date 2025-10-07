@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen>
                           borderRadius: BorderRadius.circular(5.r),
                           borderSide: BorderSide(color: Colors.red, width: 1.w),
                         ),
-                        hintText: "youremailaddress@address.com",
+                        hintText: "email or phone number",
                         hintStyle: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
