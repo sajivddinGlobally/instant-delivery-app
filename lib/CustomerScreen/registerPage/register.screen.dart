@@ -340,10 +340,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                             },
                       child: isLoading
                           ? Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(5.0),
+                              child: SizedBox(
+                                width: 30.w,
+                                height: 30.h,
                                 child: CircularProgressIndicator(
                                   color: Colors.white,
+                                  strokeWidth: 2.w,
                                 ),
                               ),
                             )

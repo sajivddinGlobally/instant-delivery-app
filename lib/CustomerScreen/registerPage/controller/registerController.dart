@@ -38,10 +38,15 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
         Navigator.pushAndRemoveUntil(
           context,
           CupertinoPageRoute(
-            builder: (context) => OtpScreen(token: response.data.token),
+            builder: (context) => OtpScreen(token: response.data!.token),
           ),
           (route) => false,
         );
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        Fluttertoast.showToast(msg: response.message);
         setState(() {
           isLoading = false;
         });
@@ -50,10 +55,10 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
       setState(() {
         isLoading = false;
       });
-      log(st.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      log("${e.toString()} / ${st.toString()}");
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      // );
     }
   }
 }

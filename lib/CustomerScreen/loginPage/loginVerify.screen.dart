@@ -9,7 +9,14 @@ import 'package:otp_pin_field/otp_pin_field.dart';
 
 class LoginVerifyScreen extends StatefulWidget {
   final String token;
-  const LoginVerifyScreen({super.key, required this.token});
+  final String email;
+  final String pass;
+  const LoginVerifyScreen({
+    super.key,
+    required this.token,
+    required this.email,
+    required this.pass,
+  });
 
   @override
   State<LoginVerifyScreen> createState() => _LoginVerifyScreenState();
@@ -94,7 +101,6 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
                     ),
                     otpPinFieldDecoration:
                         OtpPinFieldDecoration.defaultPinBoxDecoration,
-
                     onSubmit: (text) {},
                     onChange: (value) {
                       setState(() {
@@ -119,7 +125,10 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
                             fontWeight: FontWeight.w500,
                             color: Color(0xFF006970),
                           ),
-                          recognizer: TapGestureRecognizer()..onTap = () {},
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              resendOTP(widget.email, widget.pass);
+                            },
                         ),
                       ],
                     ),
@@ -141,10 +150,12 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
                           },
                     child: loading
                         ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 30.w,
+                              height: 30.h,
                               child: CircularProgressIndicator(
                                 color: Colors.white,
+                                strokeWidth: 2.w,
                               ),
                             ),
                           )

@@ -4,6 +4,7 @@ import 'package:delivery_mvp_app/CustomerScreen/loginPage/loginVerify.screen.dar
 import 'package:delivery_mvp_app/config/network/api.state.dart';
 import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
+import 'package:delivery_mvp_app/data/Model/loginBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/loginVerifyBodyModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -47,6 +48,21 @@ mixin LoginVerifyController<T extends LoginVerifyScreen> on State<T> {
         loading = false;
       });
       Fluttertoast.showToast(msg: "Error");
+    }
+  }
+
+  void resendOTP(email, pass) async {
+    final body = LoginBodyModel(loginType: email, password: pass);
+    try {
+      final service = APIStateNetwork(callPrettyDio());
+      final response = await service.login(body);
+      if (response.error == false) {
+        Fluttertoast.showToast(msg: response.message);
+      } else {
+        Fluttertoast.showToast(msg: response.message);
+      }
+    } catch (e, st) {
+      log("${e.toString()} / ${st.toString()}");
     }
   }
 }

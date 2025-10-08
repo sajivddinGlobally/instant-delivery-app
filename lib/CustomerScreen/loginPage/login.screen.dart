@@ -1,9 +1,10 @@
+import 'package:delivery_mvp_app/CustomerScreen/forgotPage/forgotPassword.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginController.dart';
 import 'package:delivery_mvp_app/CustomerScreen/registerPage/register.screen.dart';
-import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -89,17 +90,24 @@ class _LoginScreenState extends State<LoginScreen>
                           color: Color(0xFF293540),
                         ),
                       ),
+
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Email is required";
+                        if (value == null || value.trim().isEmpty) {
+                          return "Please enter email or phone number";
                         }
-                        String pattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-                        RegExp regex = RegExp(pattern);
-                        if (!regex.hasMatch(value.trim())) {
-                          return "Enter a valid email";
+                        String input = value.trim();
+                        final emailRegex = RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        );
+                        final phoneRegex = RegExp(r'^[6-9]\d{9}$');
+                        if (emailRegex.hasMatch(input) ||
+                            phoneRegex.hasMatch(input)) {
+                          return null;
+                        } else {
+                          return "Enter a valid email or 10-digit phone number";
                         }
-                        return null;
                       },
+                      keyboardType: TextInputType.emailAddress,
                     ),
                     SizedBox(height: 30.h),
                     TextFormField(
@@ -159,7 +167,14 @@ class _LoginScreenState extends State<LoginScreen>
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => ForgotPasswordPage(),
+                            ),
+                          );
+                        },
                         child: Text(
                           "Forgot Password?",
                           style: GoogleFonts.inter(

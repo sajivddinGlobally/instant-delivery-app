@@ -23,7 +23,7 @@ mixin OtpController<T extends StatefulWidget> on State<T> {
       if (response.error == false) {
         var box = Hive.box("folder");
         await box.put("token", response.data);
-        
+
         Fluttertoast.showToast(msg: response.message);
         Navigator.pushAndRemoveUntil(
           context,
