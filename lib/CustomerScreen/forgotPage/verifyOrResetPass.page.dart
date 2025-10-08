@@ -1,4 +1,4 @@
-import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
+import 'package:delivery_mvp_app/CustomerScreen/forgotPage/controller/verifyOrResetController.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,15 +6,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:otp_pin_field/otp_pin_field.dart';
 
 class VerifyOrResetpassPage extends StatefulWidget {
-  const VerifyOrResetpassPage({super.key});
+  final String token;
+  const VerifyOrResetpassPage({super.key, required this.token});
 
   @override
   State<VerifyOrResetpassPage> createState() => _VerifyOrResetpassPageState();
 }
 
-class _VerifyOrResetpassPageState extends State<VerifyOrResetpassPage> {
-  String otp = "";
-  bool isShow = false;
+class _VerifyOrResetpassPageState extends State<VerifyOrResetpassPage>
+    with VerifyOrResetController<VerifyOrResetpassPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +53,7 @@ class _VerifyOrResetpassPageState extends State<VerifyOrResetpassPage> {
               ),
               SizedBox(height: 26.h),
               OtpPinField(
-                key: registerVerifyotpKey,
+                key: forgotVerifyOTPKey,
                 maxLength: 6,
                 fieldHeight: 50.h,
                 fieldWidth: 44.w,
@@ -104,7 +104,7 @@ class _VerifyOrResetpassPageState extends State<VerifyOrResetpassPage> {
               ),
               SizedBox(height: 30.h),
               TextFormField(
-                //controller: passwordController,
+                controller: newPassController,
                 obscureText: isShow ? true : false,
                 decoration: InputDecoration(
                   filled: true,
@@ -159,7 +159,7 @@ class _VerifyOrResetpassPageState extends State<VerifyOrResetpassPage> {
               ),
               SizedBox(height: 20.h),
               TextFormField(
-                //controller: passwordController,
+                controller: confirmPassController,
                 obscureText: isShow ? true : false,
                 decoration: InputDecoration(
                   filled: true,
@@ -222,15 +222,27 @@ class _VerifyOrResetpassPageState extends State<VerifyOrResetpassPage> {
                     side: BorderSide.none,
                   ),
                 ),
-                onPressed: () async {},
-                child: Text(
-                  "Verify",
-                  style: GoogleFonts.inter(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                ),
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        verifyOrResetPassword(widget.token);
+                      },
+                child: isLoading
+                    ? Center(
+                        child: SizedBox(
+                          width: 30.w,
+                          height: 30.h,
+                          child: CircularProgressIndicator(strokeWidth: 2.w),
+                        ),
+                      )
+                    : Text(
+                        "Verify",
+                        style: GoogleFonts.inter(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFFFFFFF),
+                        ),
+                      ),
               ),
             ],
           ),

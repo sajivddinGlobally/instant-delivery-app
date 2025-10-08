@@ -1,4 +1,4 @@
-import 'package:delivery_mvp_app/CustomerScreen/forgotPage/forgotPassword.page.dart';
+import 'package:delivery_mvp_app/CustomerScreen/forgotPage/forgotSendOTP.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/controller/loginController.dart';
 import 'package:delivery_mvp_app/CustomerScreen/registerPage/register.screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -171,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen>
                           Navigator.push(
                             context,
                             CupertinoPageRoute(
-                              builder: (context) => ForgotPasswordPage(),
+                              builder: (context) => ForgotSendOTPPage(),
                             ),
                           );
                         },
