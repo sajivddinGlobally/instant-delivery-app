@@ -76,8 +76,8 @@ class _OtpScreenState extends State<OtpScreen> with OtpController<OtpScreen> {
                   OtpPinField(
                     key: registerVerifyotpKey,
                     maxLength: 6,
-                    fieldHeight: 45.h,
-                    fieldWidth: 45.w,
+                    fieldHeight: 50.h,
+                    fieldWidth: 44.w,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     keyboardType: TextInputType.number,
                     otpPinFieldStyle: OtpPinFieldStyle(

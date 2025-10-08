@@ -77,9 +77,9 @@ class _LoginVerifyScreenState extends State<LoginVerifyScreen>
                   OtpPinField(
                     key: loginVerifyotpKey,
                     maxLength: 6,
-                    fieldHeight: 46.h,
-                    fieldWidth: 46.w,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    fieldHeight: 50.h,
+                    fieldWidth: 44.w,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     keyboardType: TextInputType.number,
                     otpPinFieldStyle: OtpPinFieldStyle(
                       textStyle: GoogleFonts.inter(
