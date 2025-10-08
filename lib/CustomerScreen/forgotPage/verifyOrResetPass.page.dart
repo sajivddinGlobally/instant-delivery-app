@@ -7,7 +7,12 @@ import 'package:otp_pin_field/otp_pin_field.dart';
 
 class VerifyOrResetpassPage extends StatefulWidget {
   final String token;
-  const VerifyOrResetpassPage({super.key, required this.token});
+  final String email;
+  const VerifyOrResetpassPage({
+    super.key,
+    required this.token,
+    required this.email,
+  });
 
   @override
   State<VerifyOrResetpassPage> createState() => _VerifyOrResetpassPageState();
@@ -97,7 +102,10 @@ class _VerifyOrResetpassPageState extends State<VerifyOrResetpassPage>
                         fontWeight: FontWeight.w500,
                         color: Color(0xFF006970),
                       ),
-                      recognizer: TapGestureRecognizer()..onTap = () {},
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          forgotResendOTP(widget.email);
+                        },
                     ),
                   ],
                 ),

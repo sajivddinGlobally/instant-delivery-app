@@ -3,6 +3,7 @@ import 'package:delivery_mvp_app/CustomerScreen/forgotPage/verifyOrResetPass.pag
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
 import 'package:delivery_mvp_app/config/network/api.state.dart';
 import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
+import 'package:delivery_mvp_app/data/Model/forgotSendOTPBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/verifyOrResetPassBodyModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +55,22 @@ mixin VerifyOrResetController<T extends VerifyOrResetpassPage> on State<T> {
       setState(() {
         isLoading = false;
       });
+      log("${e.toString()} / ${st.toString()}");
+    }
+  }
+
+  void forgotResendOTP(email) async {
+    final body = ForgotSentOtpBodyModel(loginType: email);
+    try {
+      final service = APIStateNetwork(callPrettyDio());
+      final response = await service.forgotSendOTP(body);
+      if (response.error == false) {
+        Fluttertoast.showToast(msg: response.message);
+      } else {
+        Fluttertoast.showToast(msg: response.message);
+        forgotVerifyOTPKey.currentState!.clearOtp();
+      }
+    } catch (e, st) {
       log("${e.toString()} / ${st.toString()}");
     }
   }

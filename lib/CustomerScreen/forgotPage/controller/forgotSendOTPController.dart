@@ -33,8 +33,10 @@ mixin ForgotSendOTPController<T extends ForgotSendOTPPage> on State<T> {
         Navigator.push(
           context,
           CupertinoPageRoute(
-            builder: (context) =>
-                VerifyOrResetpassPage(token: response.data!.token),
+            builder: (context) => VerifyOrResetpassPage(
+              token: response.data!.token,
+              email: emailController.text,
+            ),
           ),
         );
         setState(() {
