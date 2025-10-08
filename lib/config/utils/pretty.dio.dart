@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 Dio callPrettyDio() {
@@ -21,6 +22,12 @@ Dio callPrettyDio() {
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
+        var box = Hive.box("folder");
+        var token = box.get("token");
+        options.headers.addAll({
+          "Content-type": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        });
         handler.next(options);
       },
       onResponse: (response, handler) {
