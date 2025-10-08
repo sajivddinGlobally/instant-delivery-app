@@ -161,7 +161,7 @@ class _VerifyOrResetpassPageState extends State<VerifyOrResetpassPage>
                 SizedBox(height: 20.h),
                 TextFormField(
                   controller: confirmPassController,
-                  obscureText: isShow ? true : false,
+                  obscureText: show ? true : false,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Color(0xFFF0F5F5),
@@ -193,11 +193,11 @@ class _VerifyOrResetpassPageState extends State<VerifyOrResetpassPage>
                     suffixIcon: TextButton(
                       onPressed: () {
                         setState(() {
-                          isShow = !isShow;
+                          show = !show;
                         });
                       },
                       child: Text(
-                        isShow ? "Show" : "Hide",
+                        show ? "Show" : "Hide",
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,

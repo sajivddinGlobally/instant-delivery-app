@@ -14,6 +14,7 @@ mixin VerifyOrResetController<T extends VerifyOrResetpassPage> on State<T> {
   final confirmPassController = TextEditingController();
   String otp = "";
   bool isShow = false;
+  bool show = false;
   bool isLoading = false;
 
   final GlobalKey<OtpPinFieldState> forgotVerifyOTPKey =
