@@ -12,27 +12,27 @@ class ForgotSentOtpResModel {
     String message;
     int code;
     bool error;
-    Data data;
+    Data? data;
 
     ForgotSentOtpResModel({
         required this.message,
         required this.code,
         required this.error,
-        required this.data,
+         this.data,
     });
 
     factory ForgotSentOtpResModel.fromJson(Map<String, dynamic> json) => ForgotSentOtpResModel(
         message: json["message"],
         code: json["code"],
         error: json["error"],
-        data: Data.fromJson(json["data"]),
+        data: json["data"] != null ? Data.fromJson(json["data"]) : null,
     );
 
     Map<String, dynamic> toJson() => {
         "message": message,
         "code": code,
         "error": error,
-        "data": data.toJson(),
+        "data": data?.toJson(),
     };
 }
 

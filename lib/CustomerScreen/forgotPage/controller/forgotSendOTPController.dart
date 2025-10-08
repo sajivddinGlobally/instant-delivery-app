@@ -30,11 +30,11 @@ mixin ForgotSendOTPController<T extends ForgotSendOTPPage> on State<T> {
       final response = await service.forgotSendOTP(body);
       if (response.error == false) {
         Fluttertoast.showToast(msg: response.message);
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           CupertinoPageRoute(
             builder: (context) =>
-                VerifyOrResetpassPage(token: response.data.token),
+                VerifyOrResetpassPage(token: response.data!.token),
           ),
         );
         setState(() {

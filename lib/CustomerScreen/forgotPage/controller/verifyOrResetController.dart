@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:delivery_mvp_app/CustomerScreen/forgotPage/verifyOrResetPass.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
 import 'package:delivery_mvp_app/config/network/api.state.dart';
