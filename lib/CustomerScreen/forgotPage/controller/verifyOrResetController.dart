@@ -49,7 +49,10 @@ mixin VerifyOrResetController<T extends VerifyOrResetpassPage> on State<T> {
         setState(() {
           isLoading = false;
         });
+        forgotVerifyOTPKey.currentState!.clearOtp();
         log(respnose.message);
+        newPassController.clear();
+        confirmPassController.clear();
       }
     } catch (e, st) {
       setState(() {

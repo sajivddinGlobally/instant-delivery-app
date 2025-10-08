@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var box = Hive.box("folder");
-    var token = box.get("token")?.toString();
+    var token = box.get("token");
     log("=====================================");
     log(token ?? "No token found");
 

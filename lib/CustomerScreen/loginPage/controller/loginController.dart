@@ -38,7 +38,7 @@ mixin LoginController<T extends LoginScreen> on State<T> {
           context,
           CupertinoPageRoute(
             builder: (context) => LoginVerifyScreen(
-              token: response.data.token,
+              token: response.data!.token,
               email: emailController.text,
               pass: passwordController.text,
             ),
