@@ -58,6 +58,7 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.5
   geocoding: ^4.0.0
+  google_places_flutter: ^2.1.1
 
 
  

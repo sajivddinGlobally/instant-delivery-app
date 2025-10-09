@@ -11,6 +11,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 import 'package:hive_flutter/adapters.dart';
 
 class InstantDeliveryScreen extends ConsumerStatefulWidget {
@@ -337,32 +339,6 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                                 ),
                               ),
                               onPressed: () async {
-                                // List<Location> dropLocations =
-                                //     await locationFromAddress(
-                                //       dropController.text,
-                                //     );
-                                // double dropLat = dropLocations.first.latitude;
-                                // double dropLon = dropLocations.first.longitude;
-
-                                // final body = GetDistanceBodyModel(
-                                //   name: "${box.get("fullName")}",
-                                //   mobNo: "${box.get("phoneNumber")}",
-                                //   origName: _currentAddress.toString(),
-                                //   destName: dropController.text,
-                                //   picUpType: "picUpType",
-                                //   origLat: _currentLatLng!.latitude,
-                                //   origLon: _currentLatLng!.longitude,
-                                //   destLat: dropLat,
-                                //   destLon: dropLon,
-                                // );
-
-                                // Navigator.push(
-                                //   context,
-                                //   CupertinoPageRoute(
-                                //     builder: (context) => SelectTripScreen(),
-                                //   ),
-                                // );
-
                                 if (pickupController.text.isEmpty ||
                                     dropController.text.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -494,6 +470,9 @@ class RideCard extends StatefulWidget {
 class _RideCardState extends State<RideCard> {
   bool oneWay = true;
   bool returnWay = true;
+
+  // Replace 'YOUR_GOOGLE_PLACES_API_KEY' with your actual Google Places API key
+  static const kGoogleApiKey = "AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g";
 
   @override
   Widget build(BuildContext context) {
@@ -631,7 +610,6 @@ class _RideCardState extends State<RideCard> {
                           contentPadding: EdgeInsets.zero,
                           border: InputBorder.none,
                           hintText: "Fetching location...",
-
                           hintStyle: GoogleFonts.inter(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
@@ -646,22 +624,84 @@ class _RideCardState extends State<RideCard> {
                         height: 2,
                       ),
 
-                      TextField(
-                        controller: widget.dropController,
-                        style: GoogleFonts.inter(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                        decoration: InputDecoration(
+                      // TextField(
+                      //   controller: widget.dropController,
+                      //   style: GoogleFonts.inter(
+                      //     fontSize: 15.sp,
+                      //     fontWeight: FontWeight.w500,
+                      //     color: Colors.black,
+                      //   ),
+                      //   decoration: InputDecoration(
+                      //     contentPadding: EdgeInsets.zero,
+                      //     border: InputBorder.none,
+                      //     hintText: "Masjid Al Ma...",
+                      //     hintStyle: GoogleFonts.inter(
+                      //       fontSize: 14.sp,
+                      //       fontWeight: FontWeight.w500,
+                      //       color: Colors.black54,
+                      //     ),
+                      //   ),
+                      // ),
+                      GooglePlaceAutoCompleteTextField(
+                        containerHorizontalPadding: 0,
+                        containerVerticalPadding: 0,
+                        textEditingController: widget.dropController,
+                        googleAPIKey: kGoogleApiKey,
+                        inputDecoration: InputDecoration(
                           contentPadding: EdgeInsets.zero,
                           border: InputBorder.none,
-                          hintText: "Masjid Al Ma...",
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          hintText: "Where to?",
                           hintStyle: GoogleFonts.inter(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.black54,
                           ),
+                        ),
+                        // debounceTime: 400,
+                        // countries: ["in"],
+                        isLatLngRequired: true,
+                        getPlaceDetailWithLatLng: (postalCodeResponse) {
+                          // Optional: Handle place details if needed
+                          log(
+                            "Place selected: ${postalCodeResponse.description}",
+                          );
+                        },
+                        itemClick: (postalCodeResponse) {
+                          widget.dropController.text =
+                              postalCodeResponse.description ?? '';
+                          // Focus back or hide keyboard if needed
+                          FocusScope.of(context).unfocus();
+                        },
+                        itemBuilder: (context, index, Prediction prediction) {
+                          return Container(
+                            // padding: EdgeInsets.all(10),
+                            child: Row(
+                              children: [
+                                Icon(Icons.location_on, color: Colors.grey),
+                                SizedBox(width: 7),
+                                Expanded(
+                                  child: Text(
+                                    prediction.description ?? '',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        seperatedBuilder: null,
+                        //rowMainAxisAlignment: MainAxisAlignment.start,
+                        boxDecoration: BoxDecoration(
+                          border: Border.all(color: Colors.transparent),
+                        ),
+                        textStyle: GoogleFonts.inter(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
                         ),
                       ),
                     ],
