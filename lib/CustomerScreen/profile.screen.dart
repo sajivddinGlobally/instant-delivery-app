@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/deliveryHistory.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
+import 'package:delivery_mvp_app/data/Model/getProfileModel.dart';
 import 'package:delivery_mvp_app/data/controller/getProfileController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,10 +28,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       backgroundColor: Color(0xFFFFFFFF),
       body: provider.when(
         data: (profile) {
+          var box = Hive.box("folder");
+          final fullName =
+              "${profile.data!.firstName} ${profile.data!.lastName}";
+          final mobNo = profile.data.phone;
+          box.put("fullName", fullName);
+          box.put("mobNo", mobNo);
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 70.h),
+              SizedBox(height: 80.h),
               Center(
                 child: Container(
                   width: 72.w,
@@ -53,9 +61,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
               ),
+              SizedBox(height: 5.h),
               Center(
                 child: Text(
-                  profile.data!.firstName + profile.data!.lastName,
+                  "${profile.data!.firstName} ${profile.data!.lastName}",
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w400,
@@ -163,4 +172,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
     );
   }
+}
+
+extension on Data? {
+  get phone => null;
 }

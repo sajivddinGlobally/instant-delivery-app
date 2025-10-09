@@ -24,6 +24,7 @@ mixin LoginVerifyController<T extends LoginVerifyScreen> on State<T> {
       final response = await service.verifyLogin(body);
       var box = Hive.box("folder");
       await box.put("token", response.data);
+
       if (response.error == false) {
         Fluttertoast.showToast(msg: response.message);
         Navigator.pushAndRemoveUntil(

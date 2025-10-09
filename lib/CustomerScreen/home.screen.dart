@@ -240,6 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   CupertinoPageRoute(
                                     builder: (context) =>
                                         InstantDeliveryScreen(),
+                                    fullscreenDialog: true,
                                   ),
                                 );
                               },

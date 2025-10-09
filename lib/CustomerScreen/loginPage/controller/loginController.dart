@@ -5,6 +5,8 @@ import 'package:delivery_mvp_app/config/network/api.state.dart';
 import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
 import 'package:delivery_mvp_app/data/Model/loginBodyModel.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 mixin LoginController<T extends LoginScreen> on State<T> {
@@ -32,6 +34,7 @@ mixin LoginController<T extends LoginScreen> on State<T> {
     try {
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.login(body);
+
       if (response.error == false) {
         Fluttertoast.showToast(msg: response.message);
         Navigator.pushAndRemoveUntil(
@@ -59,6 +62,18 @@ mixin LoginController<T extends LoginScreen> on State<T> {
         loadind = false;
       });
       log("${e.toString()} / ${st.toString()}");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error:${e.toString()}"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(left: 15.w, bottom: 15.h, right: 15.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.r),
+            side: BorderSide.none,
+          ),
+        ),
+      );
     }
   }
 }

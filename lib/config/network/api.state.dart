@@ -1,5 +1,7 @@
 import 'package:delivery_mvp_app/data/Model/forgotSendOTPBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/forgotSentOTPRestModel.dart';
+import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
+import 'package:delivery_mvp_app/data/Model/getDistanceResModel.dart';
 import 'package:delivery_mvp_app/data/Model/getProfileModel.dart';
 import 'package:delivery_mvp_app/data/Model/loginBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/loginResModel.dart';
@@ -16,8 +18,8 @@ import 'package:retrofit/retrofit.dart';
 
 part 'api.state.g.dart';
 
-// @RestApi(baseUrl: "https://weloads.com/api")
-@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
+@RestApi(baseUrl: "https://weloads.com/api")
+//@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
 abstract class APIStateNetwork {
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
 
@@ -47,4 +49,7 @@ abstract class APIStateNetwork {
 
   @GET("/v1/user/getProfile")
   Future<GetProfileModel> fetchProfile();
+
+  @POST("/v1/user/getDistance")
+  Future<GetDistanceResModel> getDistance(@Body() GetDistanceBodyModel body);
 }

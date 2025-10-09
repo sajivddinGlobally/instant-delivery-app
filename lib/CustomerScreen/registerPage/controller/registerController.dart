@@ -33,6 +33,7 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
     try {
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.userRegister(body);
+
       if (response.error == false) {
         Fluttertoast.showToast(msg: response.message);
         Navigator.pushAndRemoveUntil(

@@ -1,21 +1,33 @@
+import 'dart:developer';
+
 import 'package:delivery_mvp_app/CustomerScreen/selectTrip.screen.dart';
+import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
+import 'package:delivery_mvp_app/data/controller/getDistanceController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hive_flutter/adapters.dart';
 
-class InstantDeliveryScreen extends StatefulWidget {
+class InstantDeliveryScreen extends ConsumerStatefulWidget {
   const InstantDeliveryScreen({super.key});
 
   @override
-  State<InstantDeliveryScreen> createState() => _InstantDeliveryScreenState();
+  ConsumerState<InstantDeliveryScreen> createState() =>
+      _InstantDeliveryScreenState();
 }
 
-class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
+class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
+  TextEditingController pickupController = TextEditingController();
+  TextEditingController dropController = TextEditingController();
+
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
+  String? _currentAddress;
 
   @override
   void initState() {
@@ -53,15 +65,52 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
       desiredAccuracy: LocationAccuracy.high,
     );
 
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+    Placemark place = placemarks.first;
+
+    // String address =
+    //     "${place.name}, ${place.street}, ${place.subLocality}, ${place.locality},${place.subAdministrativeArea},${place.administrativeArea},${place.postalCode},${place.country}";
+
+    String address =
+        "${place.name?.isNotEmpty == true ? '${place.name}, ' : ''}"
+        "${place.street?.isNotEmpty == true ? '${place.street}, ' : ''}"
+        "${place.subLocality?.isNotEmpty == true ? '${place.subLocality}, ' : ''}"
+        "${place.locality?.isNotEmpty == true ? '${place.locality}, ' : ''}"
+        "${place.administrativeArea?.isNotEmpty == true ? '${place.administrativeArea}, ' : ''}"
+        "${place.postalCode?.isNotEmpty == true ? '${place.postalCode}, ' : ''}"
+        "${place.country ?? ''}";
+
+    final parts = address
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    final uniqueParts = <String>{};
+    final cleanParts = parts.where((e) => uniqueParts.add(e)).toList();
+
+    address = cleanParts.join(', ');
+
+    pickupController.text = address;
+
     setState(() {
       _currentLatLng = LatLng(position.latitude, position.longitude);
+      _currentAddress = address;
+      pickupController.text = address;
     });
 
     _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng!));
   }
 
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
+    final notifier = ref.watch(getDistanceProvider);
+    var box = Hive.box("folder");
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
       floatingActionButton: FloatingActionButton(
@@ -142,7 +191,10 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                               right: 10.w,
                               top: 12.h,
                             ),
-                            child: RideCard(),
+                            child: RideCard(
+                              pickupController: pickupController,
+                              dropController: dropController,
+                            ),
                           ),
                           SizedBox(height: 15.h),
                           Row(
@@ -284,22 +336,134 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                               ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (context) => SelectTripScreen(),
-                                  ),
-                                );
+                              onPressed: () async {
+                                // List<Location> dropLocations =
+                                //     await locationFromAddress(
+                                //       dropController.text,
+                                //     );
+                                // double dropLat = dropLocations.first.latitude;
+                                // double dropLon = dropLocations.first.longitude;
+
+                                // final body = GetDistanceBodyModel(
+                                //   name: "${box.get("fullName")}",
+                                //   mobNo: "${box.get("phoneNumber")}",
+                                //   origName: _currentAddress.toString(),
+                                //   destName: dropController.text,
+                                //   picUpType: "picUpType",
+                                //   origLat: _currentLatLng!.latitude,
+                                //   origLon: _currentLatLng!.longitude,
+                                //   destLat: dropLat,
+                                //   destLon: dropLon,
+                                // );
+
+                                // Navigator.push(
+                                //   context,
+                                //   CupertinoPageRoute(
+                                //     builder: (context) => SelectTripScreen(),
+                                //   ),
+                                // );
+
+                                if (pickupController.text.isEmpty ||
+                                    dropController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Please enter both pickup and drop locations",
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                setState(() {
+                                  isLoading = true;
+                                });
+
+                                try {
+                                  List<Location> pickupLocations =
+                                      await locationFromAddress(
+                                        pickupController.text,
+                                      );
+                                  double pickupLat =
+                                      pickupLocations.first.latitude;
+                                  double pickupLon =
+                                      pickupLocations.first.longitude;
+
+                                  List<Location> dropLocations =
+                                      await locationFromAddress(
+                                        dropController.text,
+                                      );
+                                  double dropLat = dropLocations.first.latitude;
+                                  double dropLon =
+                                      dropLocations.first.longitude;
+
+                                  final body = GetDistanceBodyModel(
+                                    name: "${box.get("fullName")}",
+                                    mobNo: "${box.get("mobNo")}",
+                                    origName: pickupController.text,
+                                    destName: dropController.text,
+                                    picUpType: "Instant",
+                                    origLat: pickupLat,
+                                    origLon: pickupLon,
+                                    destLat: dropLat,
+                                    destLon: dropLon,
+                                  );
+                                  await ref
+                                      .read(getDistanceProvider.notifier)
+                                      .fetchDistance(body);
+
+                                  await Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (context) => SelectTripScreen(),
+                                    ),
+                                  );
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                } catch (e) {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Error fetching coordinates: $e",
+                                      ),
+                                      behavior: SnackBarBehavior.floating,
+                                      margin: EdgeInsets.only(
+                                        left: 15.w,
+                                        bottom: 15.h,
+                                        right: 15.w,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          15.r,
+                                        ),
+                                        side: BorderSide.none,
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
-                              child: Text(
-                                "Next",
-                                style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFFFFFFFF),
-                                ),
-                              ),
+                              child: isLoading
+                                  ? Center(
+                                      child: SizedBox(
+                                        width: 30.w,
+                                        height: 30.h,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2.w,
+                                        ),
+                                      ),
+                                    )
+                                  : Text(
+                                      "Next",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFFFFFFFF),
+                                      ),
+                                    ),
                             ),
                           ),
                           SizedBox(height: 10.h),
@@ -315,7 +479,13 @@ class _InstantDeliveryScreenState extends State<InstantDeliveryScreen> {
 }
 
 class RideCard extends StatefulWidget {
-  const RideCard({super.key});
+  final TextEditingController pickupController;
+  final TextEditingController dropController;
+  const RideCard({
+    super.key,
+    required this.pickupController,
+    required this.dropController,
+  });
 
   @override
   State<RideCard> createState() => _RideCardState();
@@ -451,6 +621,7 @@ class _RideCardState extends State<RideCard> {
                     // crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       TextField(
+                        controller: widget.pickupController,
                         style: GoogleFonts.inter(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500,
@@ -459,7 +630,8 @@ class _RideCardState extends State<RideCard> {
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.zero,
                           border: InputBorder.none,
-                          hintText: "ARH.VVK.Road",
+                          hintText: "Fetching location...",
+
                           hintStyle: GoogleFonts.inter(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
@@ -475,6 +647,7 @@ class _RideCardState extends State<RideCard> {
                       ),
 
                       TextField(
+                        controller: widget.dropController,
                         style: GoogleFonts.inter(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500,

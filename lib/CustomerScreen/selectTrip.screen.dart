@@ -1,21 +1,26 @@
+import 'dart:developer';
+
 import 'package:delivery_mvp_app/CustomerScreen/MyOrderScreen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/selectPayment.screen.dart';
+import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
+import 'package:delivery_mvp_app/data/controller/getDistanceController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class SelectTripScreen extends StatefulWidget {
+class SelectTripScreen extends ConsumerStatefulWidget {
   const SelectTripScreen({super.key});
 
   @override
-  State<SelectTripScreen> createState() => _SelectTripScreenState();
+  ConsumerState<SelectTripScreen> createState() => _SelectTripScreenState();
 }
 
-class _SelectTripScreenState extends State<SelectTripScreen> {
+class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   List<Map<String, dynamic>> selectTrip = [
     {
       "image": "assets/b.png",
@@ -40,6 +45,7 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
   bool isCheck = false;
   GoogleMapController? _mapController;
   LatLng? _currentLatlng;
+  int selectIndex = 0;
 
   @override
   void initState() {
@@ -86,6 +92,7 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final distanceProviderState = ref.watch(getDistanceProvider);
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
       floatingActionButton: FloatingActionButton(
@@ -99,495 +106,553 @@ class _SelectTripScreenState extends State<SelectTripScreen> {
           child: Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
         ),
       ),
-      body: _currentLatlng == null
-          ? Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
-                GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _currentLatlng!,
-                    zoom: 15,
-                  ),
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                  },
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
-                ),
-
-                DraggableScrollableSheet(
-                  initialChildSize: 0.80, // 🔹 Sheet shuru me 45% height lega
-                  minChildSize: 0.35, // 🔹 Sabse chhoti height
-                  maxChildSize: 0.8, // 🔹 Upar drag karke max kitna khule
-                  builder: (context, scrollController) {
-                    return Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFFFFFFF),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16.r),
-                          topRight: Radius.circular(16.r),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 10,
-                            spreadRadius: 5,
-                          ),
-                        ],
+      body: distanceProviderState.when(
+        data: (snp) {
+          return
+          //  _currentLatlng == null
+          //     ? Center(child: CircularProgressIndicator())
+          //     :
+          Stack(
+            children: [
+              // GoogleMap(
+              //   initialCameraPosition: CameraPosition(
+              //     target: _currentLatlng!,
+              //     zoom: 15,
+              //   ),
+              //   onMapCreated: (controller) {
+              //     _mapController = controller;
+              //   },
+              //   myLocationEnabled: true,
+              //   myLocationButtonEnabled: true,
+              // ),
+              DraggableScrollableSheet(
+                initialChildSize: 0.80, // 🔹 Sheet shuru me 45% height lega
+                minChildSize: 0.35, // 🔹 Sabse chhoti height
+                maxChildSize: 0.8, // 🔹 Upar drag karke max kitna khule
+                builder: (context, scrollController) {
+                  return Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFFFFFFF),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16.r),
+                        topRight: Radius.circular(16.r),
                       ),
-                      child: ListView(
-                        padding: EdgeInsets.zero,
-                        controller: scrollController,
-                        children: [
-                          SizedBox(height: 8.h),
-                          Center(
-                            child: Container(
-                              width: 50.w,
-                              height: 4.h,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          Center(
-                            child: Text(
-                              "Choose a Trip",
-                              style: GoogleFonts.inter(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF000000),
-                                letterSpacing: -1,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 10.h),
-                          Container(
-                            width: double.infinity,
-                            height: 170.h,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      controller: scrollController,
+                      children: [
+                        SizedBox(height: 8.h),
+                        Center(
+                          child: Container(
+                            width: 50.w,
+                            height: 4.h,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.r),
-                              border: Border.all(
-                                color: Color(0xFF000000),
-                                width: 3,
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 10.h),
-                                Center(
-                                  child: Image.asset(
-                                    "assets/car.png",
-                                    width: 106.w,
-                                    height: 60.h,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 18.w),
-                                      child: Text(
-                                        "Delivery Go",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 20.sp,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xfF000000),
-                                          letterSpacing: -0.5,
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(right: 18.w),
-                                      child: Text(
-                                        "₹170.71",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 20.sp,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xfF000000),
-                                          letterSpacing: -0.5,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 18.w),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        "8:46pm",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xFF000000),
-                                          letterSpacing: 1,
-                                        ),
-                                      ),
-                                      SizedBox(width: 6.w),
-                                      CircleAvatar(
-                                        radius: 4.r,
-                                        backgroundColor: Color(0xFFD9D9D9),
-                                      ),
-                                      SizedBox(width: 6.w),
-                                      Text(
-                                        "4 min away",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xFF000000),
-                                          letterSpacing: 1,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(height: 6.h),
-                                Container(
-                                  margin: EdgeInsets.only(left: 18.w),
-                                  width: 65.w,
-                                  height: 22.h,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4.r),
-                                    color: const Color(0xFF3B6CE9),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.bolt,
-                                        color: Colors.white,
-                                        size: 16.sp,
-                                      ),
-                                      SizedBox(width: 3.w),
-                                      Text(
-                                        "Faster",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.white,
-                                          letterSpacing: -0.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(10.r),
                             ),
                           ),
-                          SizedBox(height: 5.h),
-                          ListView.builder(
-                            padding: EdgeInsets.zero,
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: selectTrip.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: EdgeInsets.only(top: 5.h),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Image.asset(
-                                      // "assets/b.png",
-                                      selectTrip[index]["image"].toString(),
-                                      width: 50.w,
-                                      height: 50.h,
-                                      fit: BoxFit.contain,
-                                    ),
-                                    //  SizedBox(width: 20.w),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          //"Delivery Go",
-                                          selectTrip[index]['name'],
-                                          style: GoogleFonts.inter(
-                                            fontSize: 18.sp,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff000000),
-                                            letterSpacing: -1,
-                                          ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              "8:46pm",
-                                              style: GoogleFonts.inter(
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xFF000000),
-                                                letterSpacing: 1,
-                                              ),
-                                            ),
-                                            SizedBox(width: 6.w),
-                                            CircleAvatar(
-                                              radius: 3.r,
-                                              backgroundColor: Color(
-                                                0xFFD9D9D9,
-                                              ),
-                                            ),
-                                            SizedBox(width: 6.w),
-                                            Text(
-                                              "4 min away",
-                                              style: GoogleFonts.inter(
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color(0xFF000000),
-                                                letterSpacing: 1,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          // "₹170.71",
-                                          selectTrip[index]['ammount'],
-                                          style: GoogleFonts.inter(
-                                            fontSize: 18.sp,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xfF000000),
-                                            letterSpacing: -0.5,
-                                          ),
-                                        ),
-                                        if (index == 0 || index == 1)
-                                          Text(
-                                            //"₹188.71",
-                                            selectTrip[index]['discount'],
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.w400,
-                                              color: Color(0xFF6B6B6B),
-                                              letterSpacing: 0,
-                                              decoration:
-                                                  TextDecoration.lineThrough,
-                                              decorationColor: Color(
-                                                0xFF6B6B6B,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                        ),
+                        SizedBox(height: 8.h),
+                        Center(
+                          child: Text(
+                            "Choose a Trip",
+                            style: GoogleFonts.inter(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF000000),
+                              letterSpacing: -1,
+                            ),
                           ),
-                          SizedBox(height: 16.h),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => SelectPaymentScreen(),
+                        ),
+                        SizedBox(height: 10.h),
+                        Container(
+                          width: double.infinity,
+                          height: 170.h,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20.r),
+                            border: Border.all(
+                              color: Color(0xFF000000),
+                              width: 3,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 10.h),
+                              Center(
+                                child: Image.network(
+                                  // "assets/car.png",
+                                  snp.data[selectIndex].image,
+                                  width: 106.w,
+                                  height: 60.h,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset(
+                                      "assets/car.png",
+                                      width: 106.w,
+                                      height: 60.h,
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
                                 ),
-                              );
-                            },
-                            child: Container(
-                              padding: EdgeInsets.only(
-                                left: 15.w,
-                                right: 15.w,
-                                top: 6.h,
-                                bottom: 6.h,
                               ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10.r),
-                                border: Border.all(
-                                  color: Color.fromARGB(127, 0, 0, 0),
-                                  width: 1.w,
-                                ),
-                              ),
-                              child: Row(
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  SvgPicture.asset("assets/SvgImage/v.svg"),
-                                  SizedBox(width: 8.w),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "....8980",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.black,
-                                          letterSpacing: -1,
-                                        ),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 18.w),
+                                    child: Text(
+                                      //Delivery Go
+                                      "${snp.data[selectIndex].vehicleType}",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xfF000000),
+                                        letterSpacing: -0.5,
                                       ),
-                                      Text(
-                                        "Shaikh niyo",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color.fromARGB(127, 0, 0, 0),
-                                          letterSpacing: -1,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Spacer(),
-                                  Container(
-                                    width: 1.w,
-                                    height: 40.h,
-                                    color: Color.fromARGB(127, 0, 0, 0),
-                                  ),
-                                  Spacer(),
-                                  SvgPicture.asset("assets/SvgImage/ed.svg"),
-                                  SizedBox(width: 8.w),
-                                  Text(
-                                    "Note",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFF000000),
-                                      letterSpacing: -1,
                                     ),
                                   ),
-                                  Spacer(),
-                                  Container(
-                                    width: 1.w,
-                                    height: 40.h,
-                                    color: Color.fromARGB(127, 0, 0, 0),
-                                  ),
-                                  Spacer(),
-                                  SvgPicture.asset(
-                                    "assets/SvgImage/addpromo.svg",
-                                  ),
-                                  SizedBox(width: 8.w),
-                                  Text(
-                                    "Add Promo",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFF0690AF),
-                                      letterSpacing: -1,
+                                  Padding(
+                                    padding: EdgeInsets.only(right: 18.w),
+                                    child: Text(
+                                      // "₹170.71",
+                                      "₹${snp.data[selectIndex].price}",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xfF000000),
+                                        letterSpacing: -0.5,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 18.w),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "8:46pm",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF000000),
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    CircleAvatar(
+                                      radius: 4.r,
+                                      backgroundColor: Color(0xFFD9D9D9),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      "4 min away",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF000000),
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 6.h),
+                              Container(
+                                margin: EdgeInsets.only(left: 18.w),
+                                width: 65.w,
+                                height: 22.h,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4.r),
+                                  color: const Color(0xFF3B6CE9),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.bolt,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                    SizedBox(width: 3.w),
+                                    Text(
+                                      "Faster",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 16.h),
-                          Container(
+                        ),
+                        SizedBox(height: 25.h),
+                        ListView.builder(
+                          padding: EdgeInsets.zero,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: snp.data.length,
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  selectIndex = index;
+                                });
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: 20.h,
+                                  left: 5.w,
+                                  right: 5.w,
+                                ),
+                                child: Container(
+                                  padding: EdgeInsets.only(
+                                    left: 13.w,
+                                    right: 16.w,
+                                    top: 10.h,
+                                    bottom: 10.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10.r),
+                                    border: Border.all(
+                                      color: selectIndex == index
+                                          ? Color.fromARGB(127, 0, 0, 0)
+                                          : Colors.transparent,
+                                      width: 1.w,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Image.network(
+                                        // "assets/b.png",
+                                        //selectTrip[index]["image"].toString(),
+                                        snp.data[index].image,
+                                        width: 50.w,
+                                        height: 50.h,
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Image.asset(
+                                            // "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/624px-No-Image-Placeholder.svg.png",
+                                            "assets/b.png",
+                                            width: 50.w,
+                                            height: 50.h,
+                                            fit: BoxFit.contain,
+                                          );
+                                        },
+                                      ),
+                                      SizedBox(width: 10.w),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            //"Delivery Go",
+                                            // selectTrip[index]['name'],
+                                            snp.data[index].vehicleType,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 18.sp,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff000000),
+                                              letterSpacing: -1,
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "8:46pm",
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xFF000000),
+                                                  letterSpacing: -0.5,
+                                                ),
+                                              ),
+                                              SizedBox(width: 6.w),
+                                              CircleAvatar(
+                                                radius: 3.r,
+                                                backgroundColor: Color(
+                                                  0xFFD9D9D9,
+                                                ),
+                                              ),
+                                              SizedBox(width: 6.w),
+                                              Text(
+                                                "4 min away",
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xFF000000),
+                                                  letterSpacing: -0.5,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Spacer(),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            // "₹170.71",
+                                            // selectTrip[index]['ammount'],
+                                            "₹${snp.data[index].price}",
+                                            style: GoogleFonts.inter(
+                                              fontSize: 18.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xfF000000),
+                                              letterSpacing: -0.5,
+                                            ),
+                                          ),
+                                          if (index == 0 || index == 1)
+                                            Text(
+                                              //"₹188.71",
+                                              selectTrip[index]['discount'],
+                                              style: GoogleFonts.inter(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xFF6B6B6B),
+                                                letterSpacing: 0,
+                                                decoration:
+                                                    TextDecoration.lineThrough,
+                                                decorationColor: Color(
+                                                  0xFF6B6B6B,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 16.h),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => SelectPaymentScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
                             padding: EdgeInsets.only(
-                              left: 8.w,
-                              right: 10.w,
+                              left: 15.w,
+                              right: 15.w,
                               top: 6.h,
                               bottom: 6.h,
                             ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10.r),
                               border: Border.all(
-                                color: Color(0xFF000000),
+                                color: Color.fromARGB(127, 0, 0, 0),
                                 width: 1.w,
                               ),
                             ),
                             child: Row(
                               children: [
-                                Transform.scale(
-                                  scale: 1,
-                                  child: Container(
-                                    //color: Colors.amber,
-                                    height: 25.h,
-                                    width: 30.w,
-                                    child: Checkbox(
-                                      shape: CircleBorder(),
-                                      activeColor: Color(0xFF222222),
-                                      value: isCheck,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          isCheck = value!;
-                                        });
-                                      },
+                                SvgPicture.asset("assets/SvgImage/v.svg"),
+                                SizedBox(width: 8.w),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "....8980",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 18.sp,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.black,
+                                        letterSpacing: -1,
+                                      ),
                                     ),
+                                    Text(
+                                      "Shaikh niyo",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color.fromARGB(127, 0, 0, 0),
+                                        letterSpacing: -1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Spacer(),
+                                Container(
+                                  width: 1.w,
+                                  height: 40.h,
+                                  color: Color.fromARGB(127, 0, 0, 0),
+                                ),
+                                Spacer(),
+                                SvgPicture.asset("assets/SvgImage/ed.svg"),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  "Note",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF000000),
+                                    letterSpacing: -1,
                                   ),
                                 ),
+                                Spacer(),
                                 Container(
-                                  margin: EdgeInsets.only(left: 10.w),
-                                  //color: Colors.amber,
-                                  width: 275.w,
-                                  child: Text.rich(
-                                    TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text:
-                                              "I confirm that I have read, consent and agree to the",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black,
-                                            letterSpacing: -1,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: " Terms and Conditions",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w500,
-                                            color: Color(0xFF086E86),
-                                            letterSpacing: -1,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                  width: 1.w,
+                                  height: 40.h,
+                                  color: Color.fromARGB(127, 0, 0, 0),
+                                ),
+                                Spacer(),
+                                SvgPicture.asset(
+                                  "assets/SvgImage/addpromo.svg",
+                                ),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  "Add Promo",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF0690AF),
+                                    letterSpacing: -1,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(height: 20.h),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: Size(double.infinity, 50.h),
-                              backgroundColor: Color(0xFF006970),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                            ),
-                            onPressed: () {
-                              // Navigator.push(
-                              //   context,
-                              //   CupertinoPageRoute(
-                              //     builder: (context) => PickupScreen(),
-                              //   ),
-                              // );
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => MyOrderScreen(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              "Book Now",
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFFFFFFFF),
-                              ),
+                        ),
+                        SizedBox(height: 16.h),
+                        Container(
+                          padding: EdgeInsets.only(
+                            left: 8.w,
+                            right: 10.w,
+                            top: 6.h,
+                            bottom: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(
+                              color: Color(0xFF000000),
+                              width: 1.w,
                             ),
                           ),
-                          SizedBox(height: 10.h),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+                          child: Row(
+                            children: [
+                              Transform.scale(
+                                scale: 1,
+                                child: Container(
+                                  //color: Colors.amber,
+                                  height: 25.h,
+                                  width: 30.w,
+                                  child: Checkbox(
+                                    shape: CircleBorder(),
+                                    activeColor: Color(0xFF222222),
+                                    value: isCheck,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        isCheck = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(left: 10.w),
+                                //color: Colors.amber,
+                                width: 275.w,
+                                child: Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text:
+                                            "I confirm that I have read, consent and agree to the",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black,
+                                          letterSpacing: -1,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: " Terms and Conditions",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xFF086E86),
+                                          letterSpacing: -1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, 50.h),
+                            backgroundColor: Color(0xFF006970),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                          ),
+                          onPressed: () {
+                            // Navigator.push(
+                            //   context,
+                            //   CupertinoPageRoute(
+                            //     builder: (context) => PickupScreen(),
+                            //   ),
+                            // );
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => MyOrderScreen(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Book Now",
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFFFFFFFF),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10.h),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+        error: (error, stackTrace) {
+          log(stackTrace.toString());
+          return Center(child: Text(error.toString()));
+        },
+        loading: () => Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 }
