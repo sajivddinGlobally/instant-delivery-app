@@ -626,13 +626,13 @@ class _RideCardState extends State<RideCard> {
 
                       TextField(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                              builder: (context) => OpenDraggle(),
-                              fullscreenDialog: true,
-                            ),
-                          );
+                          // Navigator.push(
+                          //   context,
+                          //   CupertinoPageRoute(
+                          //     builder: (context) => OpenDraggle(),
+                          //     fullscreenDialog: true,
+                          //   ),
+                          // );
                         },
                         controller: widget.dropController,
                         style: GoogleFonts.inter(

@@ -1,6 +1,7 @@
 import 'package:another_stepper/dto/stepper_data.dart';
 import 'package:another_stepper/widgets/another_stepper.dart';
 import 'package:delivery_mvp_app/CustomerScreen/instantDelivery.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/map.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/orderList.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/payment.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/profile.screen.dart';
@@ -53,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   int activeStep = 2;
+  String? currentAddress;
 
   @override
   Widget build(BuildContext context) {
@@ -94,39 +96,71 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Row(
                           children: [
-                            Container(
-                              width: 40.w,
-                              height: 40.h,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                              ),
-                              child: Icon(
-                                Icons.location_on,
-                                color: Color(0xFF006970),
+                            InkWell(
+                              onTap: () async {
+                                final selectedAddress = await Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => MapPage(),
+                                  ),
+                                );
+
+                                if (selectedAddress != null && mounted) {
+                                  setState(() {
+                                    currentAddress = selectedAddress;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                width: 40.w,
+                                height: 40.h,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                                child: Icon(
+                                  Icons.location_on,
+                                  color: Color(0xFF006970),
+                                ),
                               ),
                             ),
                             SizedBox(width: 10.w),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Noida Sector 75",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF000000),
+                            InkWell(
+                              onTap: () async {
+                                final selectedAddress = await Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => MapPage(),
                                   ),
-                                ),
-                                Text(
-                                  "Golf city, Plot 8, Sector 75",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFF086E86),
+                                );
+
+                                if (selectedAddress != null && mounted) {
+                                  setState(() {
+                                    currentAddress = selectedAddress;
+                                  });
+                                }
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    currentAddress ?? "Fetching location...",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF000000),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    "Tap to change",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xFF086E86),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                             Spacer(),
                             Container(

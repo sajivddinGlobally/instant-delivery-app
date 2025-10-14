@@ -697,59 +697,67 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                               )
                                               .bookInstantDelivery(body);
 
-                                          final bookingState = ref.read(
-                                            bookDeliveryProvider,
+                                          Navigator.push(
+                                            context,
+                                            CupertinoPageRoute(
+                                              builder: (context) =>
+                                                  PickupScreen(),
+                                            ),
                                           );
-                                          bookingState.when(
-                                            data: (response) {
-                                              if (!response.error) {
-                                                Navigator.push(
-                                                  context,
-                                                  CupertinoPageRoute(
-                                                    builder: (context) =>
-                                                        PickupScreen(),
-                                                  ),
-                                                );
-                                                // Navigator.push(
-                                                //   context,
-                                                //   CupertinoPageRoute(
-                                                //     builder: (context) =>
-                                                //         MyOrderScreen(),
-                                                //   ),
-                                                // );
-                                              } else {
-                                                setState(() {
-                                                  isBooking = false;
-                                                });
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      "failed: ${response.message}",
-                                                    ),
-                                                    behavior: SnackBarBehavior
-                                                        .floating,
-                                                    margin: EdgeInsets.only(
-                                                      left: 15.w,
-                                                      bottom: 15.h,
-                                                      right: 15.w,
-                                                    ),
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            15.r,
-                                                          ),
-                                                    ),
-                                                    backgroundColor: Colors.red,
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                            error: (error, stackTrace) =>
-                                                SizedBox(),
-                                            loading: () => SizedBox(),
-                                          );
+
+                                          // final bookingState = ref.read(
+                                          //   bookDeliveryProvider,
+                                          // );
+                                          // bookingState.when(
+                                          //   data: (response) {
+                                          //     if (!response.error) {
+                                          //       Navigator.push(
+                                          //         context,
+                                          //         CupertinoPageRoute(
+                                          //           builder: (context) =>
+                                          //               PickupScreen(),
+                                          //         ),
+                                          //       );
+                                          //       // Navigator.push(
+                                          //       //   context,
+                                          //       //   CupertinoPageRoute(
+                                          //       //     builder: (context) =>
+                                          //       //         MyOrderScreen(),
+                                          //       //   ),
+                                          //       // );
+                                          //     } else {
+                                          //       setState(() {
+                                          //         isBooking = false;
+                                          //       });
+                                          //       ScaffoldMessenger.of(
+                                          //         context,
+                                          //       ).showSnackBar(
+                                          //         SnackBar(
+                                          //           content: Text(
+                                          //             "failed: ${response.message}",
+                                          //           ),
+                                          //           behavior: SnackBarBehavior
+                                          //               .floating,
+                                          //           margin: EdgeInsets.only(
+                                          //             left: 15.w,
+                                          //             bottom: 15.h,
+                                          //             right: 15.w,
+                                          //           ),
+                                          //           shape: RoundedRectangleBorder(
+                                          //             borderRadius:
+                                          //                 BorderRadius.circular(
+                                          //                   15.r,
+                                          //                 ),
+                                          //           ),
+                                          //           backgroundColor: Colors.red,
+                                          //         ),
+                                          //       );
+                                          //     }
+                                          //   },
+                                          //   error: (error, stackTrace) =>
+                                          //       SizedBox(),
+                                          //   loading: () => SizedBox(),
+                                          // );
                                         } catch (e, st) {
                                           setState(() {
                                             isBooking = false;
