@@ -671,7 +671,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                             // ? double.parse(selectedVehicle.price).toInt()
                                             // : int.parse(selectedVehicle.price),
                                             isCopanCode: false,
-                                            copanId: "0",
+                                            copanId: null.toString(),
                                             copanAmount: 0,
                                             coinAmount: 0,
                                             taxAmount: 18,
@@ -679,7 +679,8 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                               selectedVehicle.price,
                                             ).toInt(),
                                             distance: selectedVehicle.distance,
-                                            mobNo: selectedVehicle.mobNo,
+                                            // mobNo: selectedVehicle.mobNo,
+                                            mobNo: "98767655678",
                                             name: selectedVehicle.name,
                                             origName: selectedVehicle.origName,
                                             origLat: selectedVehicle.origLat,
@@ -704,6 +705,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                                   PickupScreen(),
                                             ),
                                           );
+                                          setState(() {
+                                            isBooking = false;
+                                          });
 
                                           // final bookingState = ref.read(
                                           //   bookDeliveryProvider,
