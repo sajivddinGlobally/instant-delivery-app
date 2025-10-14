@@ -96,7 +96,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGU1Z
 ###
 POST {{url}}/api/v1/user/bookInstantDelivery HTTP/1.1
 Content-type: application/json
-Authorization: {{token}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGU1Zjc0NGQxNzc3ZmRkNzcwY2M3OGQiLCJ1c2VyVHlwZSI6ImN1c3RvbWVyIiwiaWF0IjoxNzU5OTE2NDk3LCJleHAiOjE3OTE0NTI0OTd9.jOmTaY2diJF6lkFnjZE53CxM-FKzn8LNhhiSjqOYUfk
 
 {
     "vehicleTypeId": "68ce8594e9401176157710fb",

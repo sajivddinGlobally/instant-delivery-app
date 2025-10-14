@@ -1,3 +1,5 @@
+import 'package:delivery_mvp_app/data/Model/bookInstantDeliveryResModel.dart';
+import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/forgotSendOTPBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/forgotSentOTPRestModel.dart';
 import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
@@ -52,4 +54,9 @@ abstract class APIStateNetwork {
 
   @POST("/v1/user/getDistance")
   Future<GetDistanceResModel> getDistance(@Body() GetDistanceBodyModel body);
+
+  @POST("/v1/user/bookInstantDelivery")
+  Future<BookInstantDeliveryResModel> bookInstantDelivery(
+    @Body() BookInstantDeliveryBodyModel body,
+  );
 }

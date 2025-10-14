@@ -51,7 +51,8 @@ class _StartScreenState extends State<StartScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/scooter.png"),
+            //Image.asset("assets/scooter.png"),
+            Image.asset("assets/playstore.png"),
             CircularProgressIndicator(),
           ],
         ),

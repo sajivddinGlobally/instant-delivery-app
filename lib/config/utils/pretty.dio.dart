@@ -62,6 +62,5 @@ Dio callPrettyDio() {
       },
     ),
   );
-
   return dio;
 }

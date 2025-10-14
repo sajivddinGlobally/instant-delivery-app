@@ -624,86 +624,95 @@ class _RideCardState extends State<RideCard> {
                         height: 2,
                       ),
 
-                      // TextField(
-                      //   controller: widget.dropController,
-                      //   style: GoogleFonts.inter(
-                      //     fontSize: 15.sp,
-                      //     fontWeight: FontWeight.w500,
-                      //     color: Colors.black,
-                      //   ),
-                      //   decoration: InputDecoration(
-                      //     contentPadding: EdgeInsets.zero,
-                      //     border: InputBorder.none,
-                      //     hintText: "Masjid Al Ma...",
-                      //     hintStyle: GoogleFonts.inter(
-                      //       fontSize: 14.sp,
-                      //       fontWeight: FontWeight.w500,
-                      //       color: Colors.black54,
-                      //     ),
-                      //   ),
-                      // ),
-                      GooglePlaceAutoCompleteTextField(
-                        containerHorizontalPadding: 0,
-                        containerVerticalPadding: 0,
-                        textEditingController: widget.dropController,
-                        googleAPIKey: kGoogleApiKey,
-                        inputDecoration: InputDecoration(
+                      TextField(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => OpenDraggle(),
+                              fullscreenDialog: true,
+                            ),
+                          );
+                        },
+                        controller: widget.dropController,
+                        style: GoogleFonts.inter(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                        decoration: InputDecoration(
                           contentPadding: EdgeInsets.zero,
                           border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          errorBorder: InputBorder.none,
-                          disabledBorder: InputBorder.none,
-                          hintText: "Where to?",
+                          hintText: "Masjid Al Ma...",
                           hintStyle: GoogleFonts.inter(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.black54,
                           ),
                         ),
-                        // debounceTime: 400,
-                        // countries: ["in"],
-                        isLatLngRequired: true,
-                        getPlaceDetailWithLatLng: (postalCodeResponse) {
-                          // Optional: Handle place details if needed
-                          log(
-                            "Place selected: ${postalCodeResponse.description}",
-                          );
-                        },
-                        itemClick: (postalCodeResponse) {
-                          widget.dropController.text =
-                              postalCodeResponse.description ?? '';
-                          // Focus back or hide keyboard if needed
-                          FocusScope.of(context).unfocus();
-                        },
-                        itemBuilder: (context, index, Prediction prediction) {
-                          return Container(
-                            // padding: EdgeInsets.all(10),
-                            child: Row(
-                              children: [
-                                Icon(Icons.location_on, color: Colors.grey),
-                                SizedBox(width: 7),
-                                Expanded(
-                                  child: Text(
-                                    prediction.description ?? '',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        seperatedBuilder: null,
-                        //rowMainAxisAlignment: MainAxisAlignment.start,
-                        boxDecoration: BoxDecoration(
-                          border: Border.all(color: Colors.transparent),
-                        ),
-                        textStyle: GoogleFonts.inter(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
                       ),
+                      // GooglePlaceAutoCompleteTextField(
+                      //   containerHorizontalPadding: 0,
+                      //   containerVerticalPadding: 0,
+                      //   textEditingController: widget.dropController,
+                      //   googleAPIKey: kGoogleApiKey,
+                      //   inputDecoration: InputDecoration(
+                      //     contentPadding: EdgeInsets.zero,
+                      //     border: InputBorder.none,
+                      //     enabledBorder: InputBorder.none,
+                      //     focusedBorder: InputBorder.none,
+                      //     errorBorder: InputBorder.none,
+                      //     disabledBorder: InputBorder.none,
+                      //     hintText: "Where to?",
+                      //     hintStyle: GoogleFonts.inter(
+                      //       fontSize: 14.sp,
+                      //       fontWeight: FontWeight.w500,
+                      //       color: Colors.black54,
+                      //     ),
+                      //   ),
+                      //   // debounceTime: 400,
+                      //   // countries: ["in"],
+                      //   isLatLngRequired: true,
+                      //   getPlaceDetailWithLatLng: (postalCodeResponse) {
+                      //     // Optional: Handle place details if needed
+                      //     log(
+                      //       "Place selected: ${postalCodeResponse.description}",
+                      //     );
+                      //   },
+                      //   itemClick: (postalCodeResponse) {
+                      //     widget.dropController.text =
+                      //         postalCodeResponse.description ?? '';
+                      //     // Focus back or hide keyboard if needed
+                      //     FocusScope.of(context).unfocus();
+                      //   },
+                      //   itemBuilder: (context, index, Prediction prediction) {
+                      //     return Container(
+                      //       // padding: EdgeInsets.all(10),
+                      //       child: Row(
+                      //         children: [
+                      //           Icon(Icons.location_on, color: Colors.grey),
+                      //           SizedBox(width: 7),
+                      //           Expanded(
+                      //             child: Text(
+                      //               prediction.description ?? '',
+                      //               style: TextStyle(fontSize: 16),
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     );
+                      //   },
+                      //   seperatedBuilder: null,
+                      //   //rowMainAxisAlignment: MainAxisAlignment.start,
+                      //   boxDecoration: BoxDecoration(
+                      //     border: Border.all(color: Colors.transparent),
+                      //   ),
+                      //   textStyle: GoogleFonts.inter(
+                      //     fontSize: 15.sp,
+                      //     fontWeight: FontWeight.w500,
+                      //     color: Colors.black,
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
@@ -724,6 +733,171 @@ class _RideCardState extends State<RideCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class OpenDraggle extends StatefulWidget {
+  const OpenDraggle({super.key});
+
+  @override
+  State<OpenDraggle> createState() => _OpenDraggleState();
+}
+
+class _OpenDraggleState extends State<OpenDraggle> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      decoration: BoxDecoration(color: Colors.white),
+      child: Padding(
+        padding: EdgeInsets.only(left: 15.w, right: 15.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 40.h),
+            Container(
+              width: 50.w,
+              height: 50.h,
+              color: Colors.white,
+              child: Card(
+                color: Colors.white,
+                shape: CircleBorder(),
+                child: Padding(
+                  padding: EdgeInsets.only(left: 5.w),
+                  child: Icon(Icons.arrow_back_ios),
+                ),
+              ),
+            ),
+            SizedBox(height: 20.h),
+            Card(
+              color: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 15.w,
+                  right: 15.w,
+                  top: 20.h,
+                  bottom: 20.h,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "Md Sajivddin Ansari",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: " . ",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: "9508937828",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              "jhotwara kanta jaipura rajsthan",
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                        Spacer(),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(50.r),
+                          onTap: () {},
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              left: 6.w,
+                              top: 6.h,
+                              bottom: 6.h,
+                            ),
+                            child: Icon(Icons.arrow_forward_ios, size: 18.sp),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            style: GoogleFonts.inter(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.only(
+                                left: 10.w,
+                                right: 10.w,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.r),
+                                borderSide: BorderSide(
+                                  color: Color(0xFF006970),
+                                ),
+                              ),
+                              hintText: "Where is your drop?",
+                              hintStyle: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 15.w),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(50.r),
+                          onTap: () {},
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              left: 6.w,
+                              top: 6.h,
+                              bottom: 6.h,
+                            ),
+                            child: Icon(Icons.add, size: 20.sp),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
