@@ -198,9 +198,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                       child: Image.network(
                                         // "assets/car.png",
                                         snp.data[selectIndex].image,
-                                        width: 106.w,
-                                        height: 60.h,
-                                        fit: BoxFit.cover,
+                                        width: 110.w,
+                                        height: 70.h,
+                                        fit: BoxFit.contain,
                                         errorBuilder:
                                             (context, error, stackTrace) {
                                               return Image.asset(
@@ -222,7 +222,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                             //Delivery Go
                                             "${snp.data[selectIndex].vehicleType}",
                                             style: GoogleFonts.inter(
-                                              fontSize: 20.sp,
+                                              fontSize: 18.sp,
                                               fontWeight: FontWeight.w500,
                                               color: Color(0xfF000000),
                                               letterSpacing: -0.5,
@@ -235,7 +235,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                             // "₹170.71",
                                             "₹${snp.data[selectIndex].price}",
                                             style: GoogleFonts.inter(
-                                              fontSize: 20.sp,
+                                              fontSize: 18.sp,
                                               fontWeight: FontWeight.w500,
                                               color: Color(0xfF000000),
                                               letterSpacing: -0.5,
@@ -251,7 +251,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                           Text(
                                             "8:46pm",
                                             style: GoogleFonts.inter(
-                                              fontSize: 16.sp,
+                                              fontSize: 14.sp,
                                               fontWeight: FontWeight.w400,
                                               color: Color(0xFF000000),
                                               letterSpacing: 1,
@@ -266,7 +266,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                           Text(
                                             "4 min away",
                                             style: GoogleFonts.inter(
-                                              fontSize: 16.sp,
+                                              fontSize: 14.sp,
                                               fontWeight: FontWeight.w400,
                                               color: Color(0xFF000000),
                                               letterSpacing: 1,
@@ -275,7 +275,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                         ],
                                       ),
                                     ),
-                                    SizedBox(height: 6.h),
+                                    SizedBox(height: 5.h),
                                     Container(
                                       margin: EdgeInsets.only(left: 18.w),
                                       width: 65.w,

@@ -31,7 +31,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           var box = Hive.box("folder");
           final fullName =
               "${profile.data!.firstName} ${profile.data!.lastName}";
-          final mobNo = profile.data.phone;
+          final mobNo = profile.data!.phone.toString();
           box.put("fullName", fullName);
           box.put("mobNo", mobNo);
 
@@ -172,8 +172,4 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
     );
   }
-}
-
-extension on Data? {
-  get phone => null;
 }

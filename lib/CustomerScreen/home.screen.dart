@@ -5,20 +5,22 @@ import 'package:delivery_mvp_app/CustomerScreen/map.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/orderList.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/payment.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/profile.screen.dart';
+import 'package:delivery_mvp_app/data/controller/getProfileController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int selectIndex = 0;
   List<Map<String, dynamic>> myList = [
     {
@@ -58,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = ref.watch(getProfileController);
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
       body: selectIndex == 0
