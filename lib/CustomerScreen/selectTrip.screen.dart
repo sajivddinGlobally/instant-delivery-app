@@ -832,3 +832,359 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     );
   }
 }
+
+// import 'dart:developer';
+// import 'package:delivery_mvp_app/CustomerScreen/MyOrderScreen.dart';
+// import 'package:delivery_mvp_app/CustomerScreen/pickup.screen.dart';
+// import 'package:delivery_mvp_app/CustomerScreen/selectPayment.screen.dart';
+// import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
+// import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
+// import 'package:delivery_mvp_app/data/controller/bookInstantDeliveryController.dart';
+// import 'package:delivery_mvp_app/data/controller/getDistanceController.dart';
+// import 'package:flutter/cupertino.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'package:flutter_svg/svg.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:geolocator/geolocator.dart';
+// import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:hive_flutter/adapters.dart';
+
+// class SelectTripScreen extends ConsumerStatefulWidget {
+//   const SelectTripScreen({super.key});
+
+//   @override
+//   ConsumerState<SelectTripScreen> createState() => _SelectTripScreenState();
+// }
+
+// class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
+//   GoogleMapController? _mapController;
+//   LatLng? _currentLatlng;
+//   int selectIndex = 0;
+//   bool isBooking = false;
+//   bool isCheck = false;
+
+//   Set<Marker> _markers = {}; // Map markers
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _getCurrentLocation();
+//   }
+
+//   Future<void> _getCurrentLocation() async {
+//     LocationPermission permission = await Geolocator.checkPermission();
+
+//     if (permission == LocationPermission.denied) {
+//       permission = await Geolocator.requestPermission();
+//       if (permission == LocationPermission.denied) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text("Location permission denied")),
+//         );
+//         return;
+//       }
+//     }
+
+//     if (permission == LocationPermission.deniedForever) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(
+//           content: Text(
+//             "Location permission permanently denied. Please enable it from settings.",
+//           ),
+//         ),
+//       );
+//       return;
+//     }
+
+//     Position position = await Geolocator.getCurrentPosition(
+//       desiredAccuracy: LocationAccuracy.high,
+//     );
+
+//     setState(() {
+//       _currentLatlng = LatLng(position.latitude, position.longitude);
+//     });
+//   }
+
+//   // Update markers on map
+//   void _updateMarkers(List vehicles) {
+//     _markers.clear();
+
+//     if (_currentLatlng != null) {
+//       // Current location marker
+//       _markers.add(
+//         Marker(
+//           markerId: const MarkerId('current_location'),
+//           position: _currentLatlng!,
+//           infoWindow: const InfoWindow(title: 'You are here'),
+//           icon: BitmapDescriptor.defaultMarkerWithHue(
+//             BitmapDescriptor.hueAzure,
+//           ),
+//         ),
+//       );
+
+//       // All vehicle markers
+//       for (int i = 0; i < vehicles.length; i++) {
+//         final vehicle = vehicles[i];
+//         _markers.add(
+//           Marker(
+//             markerId: MarkerId('vehicle_$i'),
+//             position: LatLng(vehicle.origLat, vehicle.origLon),
+//             infoWindow: InfoWindow(title: vehicle.vehicleType),
+//             icon: BitmapDescriptor.defaultMarkerWithHue(
+//               i == selectIndex
+//                   ? BitmapDescriptor.hueRed
+//                   : BitmapDescriptor.hueOrange,
+//             ),
+//           ),
+//         );
+//       }
+//     }
+
+//     setState(() {});
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final distanceProviderState = ref.watch(getDistanceProvider);
+
+//     return Scaffold(
+//       floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
+//       floatingActionButton: FloatingActionButton(
+//         backgroundColor: Colors.white,
+//         shape: const CircleBorder(),
+//         onPressed: () => Navigator.pop(context),
+//         child: const Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
+//       ),
+//       body: distanceProviderState.when(
+//         data: (vehicles) {
+//           if (_currentLatlng != null) {
+//             _updateMarkers(vehicles.data); // update map markers
+//           }
+
+//           return Stack(
+//             children: [
+//               _currentLatlng == null
+//                   ? const Center(child: CircularProgressIndicator())
+//                   : GoogleMap(
+//                       initialCameraPosition: CameraPosition(
+//                         target: _currentLatlng!,
+//                         zoom: 15,
+//                       ),
+//                       onMapCreated: (controller) {
+//                         _mapController = controller;
+//                         _updateMarkers(vehicles.data);
+//                       },
+//                       myLocationEnabled: true,
+//                       myLocationButtonEnabled: true,
+//                       markers: _markers,
+//                     ),
+//               DraggableScrollableSheet(
+//                 initialChildSize: 0.80,
+//                 minChildSize: 0.35,
+//                 maxChildSize: 0.8,
+//                 builder: (context, scrollController) {
+//                   return Container(
+//                     padding: EdgeInsets.symmetric(horizontal: 16.w),
+//                     decoration: BoxDecoration(
+//                       color: Colors.white,
+//                       borderRadius: BorderRadius.only(
+//                         topLeft: Radius.circular(16.r),
+//                         topRight: Radius.circular(16.r),
+//                       ),
+//                       boxShadow: [
+//                         BoxShadow(
+//                           color: Colors.black12,
+//                           blurRadius: 10,
+//                           spreadRadius: 5,
+//                         ),
+//                       ],
+//                     ),
+//                     child: ListView(
+//                       padding: EdgeInsets.zero,
+//                       controller: scrollController,
+//                       children: [
+//                         SizedBox(height: 8.h),
+//                         Center(
+//                           child: Container(
+//                             width: 50.w,
+//                             height: 4.h,
+//                             decoration: BoxDecoration(
+//                               color: Colors.grey[300],
+//                               borderRadius: BorderRadius.circular(10.r),
+//                             ),
+//                           ),
+//                         ),
+//                         SizedBox(height: 8.h),
+//                         Center(
+//                           child: Text(
+//                             "Choose a Trip",
+//                             style: GoogleFonts.inter(
+//                               fontSize: 18.sp,
+//                               fontWeight: FontWeight.w600,
+//                             ),
+//                           ),
+//                         ),
+//                         SizedBox(height: 10.h),
+
+//                         /// List of vehicles
+//                         ListView.builder(
+//                           padding: EdgeInsets.zero,
+//                           physics: const NeverScrollableScrollPhysics(),
+//                           shrinkWrap: true,
+//                           itemCount: vehicles.data.length,
+//                           itemBuilder: (context, index) {
+//                             final vehicle = vehicles.data[index];
+//                             return InkWell(
+//                               onTap: () {
+//                                 setState(() {
+//                                   selectIndex = index;
+//                                 });
+//                                 _updateMarkers(vehicles.data);
+//                                 _mapController?.animateCamera(
+//                                   CameraUpdate.newLatLng(
+//                                     LatLng(vehicle.origLat, vehicle.origLon),
+//                                   ),
+//                                 );
+//                               },
+//                               child: Container(
+//                                 margin: EdgeInsets.symmetric(vertical: 8.h),
+//                                 padding: EdgeInsets.all(10.h),
+//                                 decoration: BoxDecoration(
+//                                   borderRadius: BorderRadius.circular(10.r),
+//                                   border: Border.all(
+//                                     color: selectIndex == index
+//                                         ? Colors.black
+//                                         : Colors.transparent,
+//                                     width: 1,
+//                                   ),
+//                                 ),
+//                                 child: Row(
+//                                   children: [
+//                                     Image.network(
+//                                       vehicle.image,
+//                                       width: 50.w,
+//                                       height: 50.h,
+//                                       fit: BoxFit.cover,
+//                                       errorBuilder: (context, error, st) {
+//                                         return Image.asset(
+//                                           "assets/car.png",
+//                                           width: 50.w,
+//                                           height: 50.h,
+//                                         );
+//                                       },
+//                                     ),
+//                                     SizedBox(width: 10.w),
+//                                     Column(
+//                                       crossAxisAlignment:
+//                                           CrossAxisAlignment.start,
+//                                       children: [
+//                                         Text(
+//                                           vehicle.vehicleType,
+//                                           style: GoogleFonts.inter(
+//                                             fontSize: 16.sp,
+//                                             fontWeight: FontWeight.w500,
+//                                           ),
+//                                         ),
+//                                         Text(
+//                                           "₹${vehicle.price}",
+//                                           style: GoogleFonts.inter(
+//                                             fontSize: 14.sp,
+//                                           ),
+//                                         ),
+//                                       ],
+//                                     ),
+//                                   ],
+//                                 ),
+//                               ),
+//                             );
+//                           },
+//                         ),
+//                         SizedBox(height: 20.h),
+//                         ElevatedButton(
+//                           style: ElevatedButton.styleFrom(
+//                             minimumSize: Size(double.infinity, 50.h),
+//                             backgroundColor: const Color(0xFF006970),
+//                             shape: RoundedRectangleBorder(
+//                               borderRadius: BorderRadius.circular(10.r),
+//                             ),
+//                           ),
+//                           onPressed: isBooking
+//                               ? null
+//                               : () async {
+//                                   setState(() => isBooking = true);
+//                                   try {
+//                                     final selectedVehicle =
+//                                         vehicles.data[selectIndex];
+//                                     final body = BookInstantDeliveryBodyModel(
+//                                       vehicleTypeId:
+//                                           selectedVehicle.vehicleTypeId,
+//                                       price: double.parse(
+//                                         selectedVehicle.price,
+//                                       ).toInt(),
+//                                       isCopanCode: false,
+//                                       copanId: null.toString(),
+//                                       copanAmount: 0,
+//                                       coinAmount: 0,
+//                                       taxAmount: 18,
+//                                       userPayAmount: double.parse(
+//                                         selectedVehicle.price,
+//                                       ).toInt(),
+//                                       distance: selectedVehicle.distance,
+//                                       mobNo: "98767655678",
+//                                       name: selectedVehicle.name,
+//                                       origName: selectedVehicle.origName,
+//                                       origLat: selectedVehicle.origLat,
+//                                       origLon: selectedVehicle.origLon,
+//                                       destName: selectedVehicle.destName,
+//                                       destLat: selectedVehicle.destLat,
+//                                       destLon: selectedVehicle.destLon,
+//                                       picUpType: selectedVehicle.picUpType,
+//                                     );
+
+//                                     await ref
+//                                         .read(bookDeliveryProvider.notifier)
+//                                         .bookInstantDelivery(body);
+
+//                                     Navigator.push(
+//                                       context,
+//                                       CupertinoPageRoute(
+//                                         builder: (context) => PickupScreen(),
+//                                       ),
+//                                     );
+//                                   } catch (e, st) {
+//                                     log("${e.toString()} / ${st.toString()}");
+//                                     ScaffoldMessenger.of(context).showSnackBar(
+//                                       SnackBar(
+//                                         content: Text("Booking failed: $e"),
+//                                         behavior: SnackBarBehavior.floating,
+//                                       ),
+//                                     );
+//                                   } finally {
+//                                     setState(() {
+//                                       isBooking = false;
+//                                     });
+//                                   }
+//                                 },
+//                           child: isBooking
+//                               ? const CircularProgressIndicator(
+//                                   color: Colors.white,
+//                                 )
+//                               : const Text("Book Now"),
+//                         ),
+//                         SizedBox(height: 20.h),
+//                       ],
+//                     ),
+//                   );
+//                 },
+//               ),
+//             ],
+//           );
+//         },
+//         loading: () => const Center(child: CircularProgressIndicator()),
+//         error: (e, st) => Center(child: Text(e.toString())),
+//       ),
+//     );
+//   }
+// }
