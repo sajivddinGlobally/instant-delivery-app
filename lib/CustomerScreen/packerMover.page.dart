@@ -257,6 +257,16 @@ class _PackerMoverPageState extends State<PackerMoverPage> {
             name: "Service lift available at drop",
             work: "A working service lift will reduce the overall quote",
           ),
+          SizedBox(height: 20.h),
+          Container(
+            margin: EdgeInsets.only(left: 15.w, right: 15.w),
+            padding: EdgeInsets.only(left: 20.w, right: 20.w),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: Colors.grey),
+            ),
+            child: Row(children: [Icon(Icons.calendar_month)]),
+          ),
         ],
       ),
     );

@@ -24,6 +24,7 @@ class _PickupScreenState extends State<PickupScreen> {
   final TextEditingController _controller = TextEditingController();
   String receivedMessage = "";
   final List<Map<String, dynamic>> messages = [];
+  Map<String, dynamic>? assignedDriver;
   bool isSocketConnected = false; // Added to track socket connection status
 
   late IO.Socket socket;
@@ -50,7 +51,8 @@ class _PickupScreenState extends State<PickupScreen> {
       });
       log('Socket connected');
       Fluttertoast.showToast(msg: "Socket connected");
-      //socket.on('user:driver_assigned', _handleAssigned);
+      socket.on('user:driver_assigned', _handleAssigned);
+      socket.on('receive_message', _handleReceivedMessage);
     });
 
     socket.on('disconnect', (_) {
@@ -70,15 +72,42 @@ class _PickupScreenState extends State<PickupScreen> {
           : data.toString();
 
       setState(() {
-        messages.add({
-          'text': messageText,
-          'isMine': false, // message from other side
-        });
+        messages.add({'text': messageText, 'isMine': false});
       });
     });
 
     socket.onConnectError((data) {
       log('⚠️ Connection Error: $data');
+    });
+  }
+
+  void _handleAssigned(dynamic data) {
+    log('🚗 Driver Assigned: $data');
+
+    final driverName = data['name'] ?? 'Unknown';
+    final driverPhone = data['phone'] ?? 'N/A';
+
+    Fluttertoast.showToast(
+      msg: "Driver Assigned: $driverName ($driverPhone)",
+      toastLength: Toast.LENGTH_LONG,
+    );
+
+    setState(() {
+      assignedDriver = data;
+    });
+  }
+
+  void _handleReceivedMessage(dynamic data) {
+    if (!mounted) return;
+
+    log('📩 Message received: $data');
+
+    final messageText = data is Map && data.containsKey('message')
+        ? data['message']
+        : data.toString();
+
+    setState(() {
+      messages.add({'text': messageText, 'isMine': false});
     });
   }
 
@@ -92,15 +121,12 @@ class _PickupScreenState extends State<PickupScreen> {
 
     final message = _controller.text.trim();
 
-    // Emit to server
+    // Send to server
     socket.emit('send_message', {'message': message});
     log('📤 Sent message: $message');
 
     setState(() {
-      messages.add({
-        'text': message,
-        'isMine': true, // my message
-      });
+      messages.add({'text': message, 'isMine': true});
     });
 
     _controller.clear();
@@ -108,6 +134,8 @@ class _PickupScreenState extends State<PickupScreen> {
 
   @override
   void dispose() {
+    socket.off('receive_message', _handleReceivedMessage);
+    socket.off('user:driver_assigned', _handleAssigned);
     socket.dispose();
     super.dispose();
   }
