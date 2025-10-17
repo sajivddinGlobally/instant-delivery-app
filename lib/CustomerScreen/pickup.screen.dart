@@ -1,11 +1,10 @@
-import 'package:delivery_mvp_app/CustomerScreen/selectPayment.screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class PickupScreen extends StatefulWidget {
   const PickupScreen({super.key});
@@ -25,10 +24,7 @@ class _PickupScreenState extends State<PickupScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
-    LocationPermission permission;
-
-    permission = await Geolocator.checkPermission();
-
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
@@ -38,7 +34,6 @@ class _PickupScreenState extends State<PickupScreen> {
         return;
       }
     }
-
     if (permission == LocationPermission.deniedForever) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -57,15 +52,13 @@ class _PickupScreenState extends State<PickupScreen> {
     setState(() {
       _currentLatLng = LatLng(position.latitude, position.longitude);
     });
-
-    _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng!));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _currentLatLng == null
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
                 GoogleMap(
@@ -73,15 +66,15 @@ class _PickupScreenState extends State<PickupScreen> {
                     target: _currentLatLng!,
                     zoom: 15,
                   ),
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                  },
+                  onMapCreated: (controller) => _mapController = controller,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: true,
                 ),
-                Padding(
-                  padding: EdgeInsets.only(top: 50.h, left: 20.w),
+                Positioned(
+                  top: 40.h,
+                  left: 20.w,
                   child: FloatingActionButton(
+                    mini: true,
                     backgroundColor: Color(0xFFFFFFFF),
                     shape: CircleBorder(),
                     onPressed: () {
@@ -96,17 +89,19 @@ class _PickupScreenState extends State<PickupScreen> {
                     ),
                   ),
                 ),
+
+                // Bottom Sheet
                 DraggableScrollableSheet(
-                  initialChildSize: 0.40,
-                  minChildSize: 0.2,
-                  maxChildSize: 0.40,
+                  initialChildSize: 0.45,
+                  minChildSize: 0.25,
+                  maxChildSize: 0.75,
                   builder: (context, scrollController) {
                     return Container(
                       decoration: BoxDecoration(
-                        color: Color(0xFFFFFFFF),
+                        color: Colors.white,
                         borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16.r),
-                          topRight: Radius.circular(16.r),
+                          topLeft: Radius.circular(20.r),
+                          topRight: Radius.circular(20.r),
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -117,249 +112,279 @@ class _PickupScreenState extends State<PickupScreen> {
                         ],
                       ),
                       child: ListView(
-                        padding: EdgeInsets.zero,
                         controller: scrollController,
-                        shrinkWrap: true,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20.w,
+                          vertical: 12.h,
+                        ),
                         children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                              left: 14.w,
-                              right: 14.w,
-                              top: 12.h,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Meet at the Pickup Point",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF000000),
-                                  ),
-                                ),
-                                Container(
-                                  width: 54.w,
-                                  height: 45.h,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(6.r),
-                                    color: Color(0xFF000000),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "2",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                          letterSpacing: -1,
-                                          height: 1.1,
-                                        ),
-                                      ),
-                                      Text(
-                                        "Min",
-                                        style: GoogleFonts.inter(
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white,
-                                          letterSpacing: -1,
-                                          height: 1.1,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                          Center(
+                            child: Container(
+                              width: 40.w,
+                              height: 5.h,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
                             ),
                           ),
                           SizedBox(height: 10.h),
-                          Divider(
-                            color: Color.fromARGB(102, 120, 119, 141),
-                            thickness: 2,
-                          ),
-                          SizedBox(height: 10.h),
-                          Padding(
-                            padding: EdgeInsets.only(left: 15.w, right: 15.w),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 50.w,
-                                  height: 50.h,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.grey,
-                                  ),
-                                  child: ClipOval(
-                                    child: Image.asset(
-                                      "assets/driver.png",
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                ),
-                                Image.asset(
-                                  "assets/car.png",
-                                  width: 50.w,
-                                  height: 50.h,
-                                ),
-                                Spacer(),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      "Smith",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xFF000000),
-                                      ),
-                                    ),
-                                    Text(
-                                      "KA15Ak00-0",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF000000),
-                                        letterSpacing: -1,
-                                      ),
-                                    ),
-                                    Text(
-                                      "Black Suzuki S-Presso LXI",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xFF000000),
-                                      ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: Color(0xFFF4F800),
-                                        ),
-                                        Text(
-                                          "4.9",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xFF000000),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                          /// DRIVER DETAILS
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              Text(
+                                "Your driver is arriving",
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
                               Container(
-                                margin: EdgeInsets.only(left: 14.w),
-                                width: 180.w,
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.only(
-                                      left: 16.w,
-                                      right: 16.w,
-                                      top: 6.h,
-                                      bottom: 6.h,
-                                    ),
-                                    filled: true,
-                                    fillColor: Color(0xFFEEEDEF),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(40.r),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(40.r),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    hint: Text(
-                                      "Send a Message...",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xFF000000),
-                                      ),
-                                    ),
-                                    suffixIcon: IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(
-                                        Icons.send,
-                                        color: Color(0xFF000000),
-                                      ),
-                                    ),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 10.w,
+                                  vertical: 4.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                child: Text(
+                                  "2 min",
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
                             ],
                           ),
+                          SizedBox(height: 10.h),
+                          Divider(),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              CircleAvatar(
+                                radius: 25.r,
+                                backgroundImage: AssetImage(
+                                  "assets/driver.png",
+                                ),
+                              ),
+                              SizedBox(width: 12.w),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "John Smith",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Black Suzuki S-Presso LXI",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13.sp,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 16.sp,
+                                      ),
+                                      Text(
+                                        "4.9",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13.sp,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "KA15AK0000",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  Text(
+                                    "MH Registered",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 15.h),
+                          Divider(),
+
+                          /// PICKUP - DROP DETAILS
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.my_location,
+                                color: Colors.green,
+                              ),
+                              SizedBox(width: 10.w),
+                              Expanded(
+                                child: Text(
+                                  "562/11-A, Kaikondrahalli, Bengaluru",
+                                  style: GoogleFonts.inter(fontSize: 13.sp),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.location_on, color: Colors.red),
+                              SizedBox(width: 10.w),
+                              Expanded(
+                                child: Text(
+                                  "MG Road Metro, Bengaluru",
+                                  style: GoogleFonts.inter(fontSize: 13.sp),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 15.h),
+                          Divider(),
+
+                          /// PAYMENT DETAILS
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Payment Method",
+                                style: GoogleFonts.inter(fontSize: 14.sp),
+                              ),
+                              Text(
+                                "Cash",
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 6.h),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Estimated Fare",
+                                style: GoogleFonts.inter(fontSize: 14.sp),
+                              ),
+                              Text(
+                                "₹120",
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 15.h),
+                          Divider(),
+
+                          /// MESSAGE BOX
+                          Container(
+                            margin: EdgeInsets.only(top: 15.h, bottom: 20.h),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEEEDEF),
+                              borderRadius: BorderRadius.circular(40.r),
+                            ),
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: "Send a message to your driver...",
+                                hintStyle: GoogleFonts.inter(fontSize: 12.sp),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20.w,
+                                  vertical: 12.h,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(Icons.send, color: Colors.black),
+                                  onPressed: () {},
+                                ),
+                              ),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              actionButton(
+                                "assets/SvgImage/safety.svg",
+                                "Safety",
+                              ),
+                              actionButton(
+                                "assets/SvgImage/share.svg",
+                                "Share Trip",
+                              ),
+                              actionButton("assets/SvgImage/calld.svg", "Call"),
+                            ],
+                          ),
                           SizedBox(height: 20.h),
-                          Padding(
-                            padding: EdgeInsets.only(left: 20.w, right: 20.w),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                callDriver(
-                                  "assets/SvgImage/safety.svg",
-                                  "Safety",
-                                ),
-                                callDriver(
-                                  "assets/SvgImage/share.svg",
-                                  "Share my Trip",
-                                ),
-                                callDriver(
-                                  "assets/SvgImage/calld.svg",
-                                  "Call Driver",
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          Divider(
-                            color: Color.fromARGB(102, 120, 119, 141),
-                            thickness: 2,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 20.w),
-                            child: Row(
-                              children: [
-                                Icon(Icons.location_on_outlined),
-                                SizedBox(width: 16.w),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "562/11-A",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF000000),
-                                      ),
+
+                          /// BOTTOM BUTTONS
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.redAccent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.r),
                                     ),
-                                    Text(
-                                      "Kaikondrahalli, Bengaluru, Karnataka",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xFF000000),
-                                      ),
+                                  ),
+                                  child: Text(
+                                    "Cancel Ride",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          Divider(
-                            color: Color.fromARGB(102, 120, 119, 141),
-                            thickness: 2,
+                              ),
+                              SizedBox(width: 12.w),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.r),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Help",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -371,32 +396,24 @@ class _PickupScreenState extends State<PickupScreen> {
     );
   }
 
-  Widget callDriver(String image, String name) {
+  Widget actionButton(String icon, String label) {
     return Column(
       children: [
         Container(
-          width: 40.w,
-          height: 40.h,
+          width: 45.w,
+          height: 45.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFFEEEDEF),
+            color: const Color(0xFFEEEDEF),
           ),
           child: Center(
-            child: SvgPicture.asset(
-              image,
-              width: 16.w,
-              height: 19.h,
-              fit: BoxFit.cover,
-            ),
+            child: SvgPicture.asset(icon, width: 18.w, height: 18.h),
           ),
         ),
+        SizedBox(height: 6.h),
         Text(
-          name,
-          style: GoogleFonts.inter(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF000000),
-          ),
+          label,
+          style: GoogleFonts.inter(fontSize: 12.sp, color: Colors.black),
         ),
       ],
     );

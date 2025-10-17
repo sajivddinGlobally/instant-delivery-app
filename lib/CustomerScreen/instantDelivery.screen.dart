@@ -116,6 +116,7 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
       floatingActionButton: FloatingActionButton(
+        mini: true,
         backgroundColor: Color(0xFFFFFFFF),
         shape: CircleBorder(),
         onPressed: () {

@@ -103,6 +103,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
       floatingActionButton: FloatingActionButton(
+        mini: true,
         backgroundColor: Color(0xFFFFFFFF),
         shape: CircleBorder(),
         onPressed: () {
