@@ -381,7 +381,7 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                                     picUpType: "Instant",
                                     // origLat: pickupLat,
                                     // origLon: pickupLon,
-                                    destName: "jaipur",
+                                    destName: dropController.text,
                                     origLat: 26.9124,
                                     origLon: 75.7873,
                                     destLat: dropLat,

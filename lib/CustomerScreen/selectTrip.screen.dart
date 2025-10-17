@@ -607,7 +607,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                     Container(
                                       margin: EdgeInsets.only(left: 10.w),
                                       //color: Colors.amber,
-                                      width: 275.w,
+                                      width: 265.w,
                                       child: Text.rich(
                                         TextSpan(
                                           children: [

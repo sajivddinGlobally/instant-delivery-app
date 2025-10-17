@@ -5,6 +5,7 @@ import 'package:another_stepper/widgets/another_stepper.dart';
 import 'package:delivery_mvp_app/CustomerScreen/instantDelivery.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/map.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/orderList.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/packerMover.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/payment.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/profile.screen.dart';
 import 'package:delivery_mvp_app/data/controller/getProfileController.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -60,52 +62,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ];
   int activeStep = 2;
   String? currentAddress;
-  bool isSocketConnected = false; // Added to track socket connection status
+  // bool isSocketConnected = false; // Added to track socket connection status
 
-  late IO.Socket socket;
+  // late IO.Socket socket;
 
-  @override
-  void initState() {
-    super.initState();
-    _connectSocket();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _connectSocket();
+  // }
 
-  void _connectSocket() {
-    const socketUrl = 'http://192.168.1.43:4567'; // Change to your backend URL
+  // void _connectSocket() {
+  //   const socketUrl = 'http://192.168.1.43:4567'; // Change to your backend URL
 
-    socket = IO.io(socketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
+  //   socket = IO.io(socketUrl, <String, dynamic>{
+  //     'transports': ['websocket'],
+  //     'autoConnect': false,
+  //   });
 
-    socket.connect();
-    socket.on('connect', (_) {
-      setState(() {
-        isSocketConnected = true;
-      });
-      log('Socket connected');
-      Fluttertoast.showToast(msg: "Socket connected");
-    });
+  //   socket.connect();
+  //   socket.on('connect', (_) {
+  //     setState(() {
+  //       isSocketConnected = true;
+  //     });
+  //     log('Socket connected');
+  //     Fluttertoast.showToast(msg: "Socket connected");
+  //     //socket.on('user:driver_assigned', _handleAssigned);
+  //   });
 
-    socket.on('disconnect', (_) {
-      setState(() {
-        isSocketConnected = false;
-      });
-      log('Socket disconnected');
-      Fluttertoast.showToast(msg: "Socket disconnected");
-    });
+  //   socket.on('disconnect', (_) {
+  //     setState(() {
+  //       isSocketConnected = false;
+  //     });
+  //     log('Socket disconnected');
+  //     Fluttertoast.showToast(msg: "Socket disconnected");
+  //   });
 
-    socket.on('receive_message', (data) {
-      setState(() {
-        // receivedMessage = data['message'];
-      });
-      log('📩 Message from driver: $data');
-    });
+  //   socket.on('receive_message', (data) {
+  //     setState(() {
+  //       // receivedMessage = data['message'];
+  //     });
+  //     log('📩 Message from driver: $data');
+  //   });
 
-    socket.onConnectError((data) {
-      log('⚠️ Connection Error: $data');
-    });
-  }
+  //   socket.onConnectError((data) {
+  //     log('⚠️ Connection Error: $data');
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -321,14 +324,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           itemBuilder: (context, index) {
                             return InkWell(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (context) =>
-                                        InstantDeliveryScreen(),
-                                    fullscreenDialog: true,
-                                  ),
-                                );
+                                if (index == 4) {
+                                  Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (context) => PackerMoverPage(),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (context) =>
+                                          InstantDeliveryScreen(),
+                                      fullscreenDialog: true,
+                                    ),
+                                  );
+                                }
                               },
                               child: Container(
                                 width: 158.w,

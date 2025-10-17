@@ -1,10 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class PickupScreen extends StatefulWidget {
   const PickupScreen({super.key});
@@ -19,15 +23,94 @@ class _PickupScreenState extends State<PickupScreen> {
 
   final TextEditingController _controller = TextEditingController();
   String receivedMessage = "";
+  final List<Map<String, dynamic>> messages = [];
+  bool isSocketConnected = false; // Added to track socket connection status
+
+  late IO.Socket socket;
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
+    _connectSocket();
   }
 
+  void _connectSocket() {
+    const socketUrl = 'http://192.168.1.43:4567'; // Change to your backend URL
 
+    socket = IO.io(socketUrl, <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
 
+    socket.connect();
+    socket.on('connect', (_) {
+      setState(() {
+        isSocketConnected = true;
+      });
+      log('Socket connected');
+      Fluttertoast.showToast(msg: "Socket connected");
+      //socket.on('user:driver_assigned', _handleAssigned);
+    });
+
+    socket.on('disconnect', (_) {
+      setState(() {
+        isSocketConnected = false;
+      });
+      log('Socket disconnected');
+      Fluttertoast.showToast(msg: "Socket disconnected");
+    });
+
+    socket.on('receive_message', (data) {
+      if (!mounted) return;
+      log('📩 Message received: $data');
+
+      final messageText = data is Map && data.containsKey('message')
+          ? data['message']
+          : data.toString();
+
+      setState(() {
+        messages.add({
+          'text': messageText,
+          'isMine': false, // message from other side
+        });
+      });
+    });
+
+    socket.onConnectError((data) {
+      log('⚠️ Connection Error: $data');
+    });
+  }
+
+  void _sendMessage() {
+    if (!isSocketConnected) {
+      Fluttertoast.showToast(msg: "Socket not connected!");
+      return;
+    }
+
+    if (_controller.text.trim().isEmpty) return;
+
+    final message = _controller.text.trim();
+
+    // Emit to server
+    socket.emit('send_message', {'message': message});
+    log('📤 Sent message: $message');
+
+    setState(() {
+      messages.add({
+        'text': message,
+        'isMine': true, // my message
+      });
+    });
+
+    _controller.clear();
+  }
+
+  @override
+  void dispose() {
+    socket.dispose();
+    super.dispose();
+  }
 
   Future<void> _getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -62,6 +145,7 @@ class _PickupScreenState extends State<PickupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ScreenUtil.init(context);
     return Scaffold(
       body: _currentLatLng == null
           ? const Center(child: CircularProgressIndicator())
@@ -194,6 +278,7 @@ class _PickupScreenState extends State<PickupScreen> {
                                     style: GoogleFonts.inter(
                                       fontSize: 13.sp,
                                       color: Colors.grey[700],
+                                      letterSpacing: -1,
                                     ),
                                   ),
                                   Row(
@@ -318,16 +403,65 @@ class _PickupScreenState extends State<PickupScreen> {
                             ),
                           ),
                           SizedBox(height: 8.h),
-                          Text(
-                            receivedMessage.isEmpty
-                                ? "No message yet"
-                                : receivedMessage,
-                            style: GoogleFonts.inter(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black,
-                            ),
-                          ),
+                          messages.isEmpty
+                              ? const Center(child: Text("No messages yet"))
+                              : SingleChildScrollView(
+                                  child: ListView.builder(
+                                    padding: EdgeInsets.all(16.w),
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: messages.length,
+                                    itemBuilder: (context, index) {
+                                      final msg = messages[index];
+                                      final isMine = msg['isMine'] as bool;
+                                      return Align(
+                                        alignment: isMine
+                                            ? Alignment.centerRight
+                                            : Alignment.centerLeft,
+                                        child: Container(
+                                          margin: EdgeInsets.symmetric(
+                                            vertical: 6.h,
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 14.w,
+                                            vertical: 10.h,
+                                          ),
+                                          constraints: BoxConstraints(
+                                            maxWidth: 250.w,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: isMine
+                                                ? Colors.blueAccent
+                                                : Colors.grey.shade300,
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: const Radius.circular(
+                                                16,
+                                              ),
+                                              topRight: const Radius.circular(
+                                                16,
+                                              ),
+                                              bottomLeft: Radius.circular(
+                                                isMine ? 16 : 0,
+                                              ),
+                                              bottomRight: Radius.circular(
+                                                isMine ? 0 : 16,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            msg['text'],
+                                            style: GoogleFonts.inter(
+                                              fontSize: 14.sp,
+                                              color: isMine
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
                           Container(
                             margin: EdgeInsets.only(top: 15.h, bottom: 20.h),
                             decoration: BoxDecoration(
@@ -346,9 +480,7 @@ class _PickupScreenState extends State<PickupScreen> {
                                 ),
                                 suffixIcon: IconButton(
                                   icon: Icon(Icons.send, color: Colors.black),
-                                  onPressed: () {
-                                   
-                                  },
+                                  onPressed: _sendMessage,
                                 ),
                               ),
                             ),
