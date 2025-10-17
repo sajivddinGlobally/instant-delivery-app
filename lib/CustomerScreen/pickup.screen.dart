@@ -17,11 +17,17 @@ class _PickupScreenState extends State<PickupScreen> {
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
 
+  final TextEditingController _controller = TextEditingController();
+  String receivedMessage = "";
+
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
   }
+
+
+
 
   Future<void> _getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -302,8 +308,26 @@ class _PickupScreenState extends State<PickupScreen> {
                           ),
                           SizedBox(height: 15.h),
                           Divider(),
-
-                          /// MESSAGE BOX
+                          SizedBox(height: 20.h),
+                          Text(
+                            "Received Message:",
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            receivedMessage.isEmpty
+                                ? "No message yet"
+                                : receivedMessage,
+                            style: GoogleFonts.inter(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black,
+                            ),
+                          ),
                           Container(
                             margin: EdgeInsets.only(top: 15.h, bottom: 20.h),
                             decoration: BoxDecoration(
@@ -311,6 +335,7 @@ class _PickupScreenState extends State<PickupScreen> {
                               borderRadius: BorderRadius.circular(40.r),
                             ),
                             child: TextField(
+                              controller: _controller,
                               decoration: InputDecoration(
                                 hintText: "Send a message to your driver...",
                                 hintStyle: GoogleFonts.inter(fontSize: 12.sp),
@@ -321,7 +346,9 @@ class _PickupScreenState extends State<PickupScreen> {
                                 ),
                                 suffixIcon: IconButton(
                                   icon: Icon(Icons.send, color: Colors.black),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                   
+                                  },
                                 ),
                               ),
                             ),
