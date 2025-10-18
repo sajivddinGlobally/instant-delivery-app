@@ -45,7 +45,8 @@ class _PickupScreenState extends State<PickupScreen> {
     });
 
     socket.connect();
-    socket.on('connect', (_) {
+    socket.onConnect((data) {
+      if (!mounted) return;
       setState(() {
         isSocketConnected = true;
       });
@@ -53,9 +54,11 @@ class _PickupScreenState extends State<PickupScreen> {
       Fluttertoast.showToast(msg: "Socket connected");
       socket.on('user:driver_assigned', _handleAssigned);
       socket.on('receive_message', _handleReceivedMessage);
+      socket.on("user:location_update", _handleLocationUpdate);
     });
 
-    socket.on('disconnect', (_) {
+    socket.onDisconnect((data) {
+      if (!mounted) return;
       setState(() {
         isSocketConnected = false;
       });
@@ -63,26 +66,19 @@ class _PickupScreenState extends State<PickupScreen> {
       Fluttertoast.showToast(msg: "Socket disconnected");
     });
 
-    socket.on('receive_message', (data) {
-      if (!mounted) return;
-      log('📩 Message received: $data');
-
-      final messageText = data is Map && data.containsKey('message')
-          ? data['message']
-          : data.toString();
-
-      setState(() {
-        messages.add({'text': messageText, 'isMine': false});
-      });
-    });
-
     socket.onConnectError((data) {
       log('⚠️ Connection Error: $data');
     });
   }
 
+  void _handleLocationUpdate(dynamic data) {
+    
+
+  }
+
   void _handleAssigned(dynamic data) {
-    log('🚗 Driver Assigned: $data');
+    if (!mounted) return;
+    log(' Driver Assigned: $data');
 
     final driverName = data['name'] ?? 'Unknown';
     final driverPhone = data['phone'] ?? 'N/A';
@@ -134,8 +130,10 @@ class _PickupScreenState extends State<PickupScreen> {
 
   @override
   void dispose() {
-    socket.off('receive_message', _handleReceivedMessage);
-    socket.off('user:driver_assigned', _handleAssigned);
+    socket.off('receive_message');
+    socket.off('user:driver_assigned');
+    socket.off('connect');
+    socket.off('disconnect');
     socket.dispose();
     super.dispose();
   }
@@ -145,6 +143,7 @@ class _PickupScreenState extends State<PickupScreen> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Location permission denied")),
         );
@@ -152,6 +151,7 @@ class _PickupScreenState extends State<PickupScreen> {
       }
     }
     if (permission == LocationPermission.deniedForever) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -166,6 +166,7 @@ class _PickupScreenState extends State<PickupScreen> {
       desiredAccuracy: LocationAccuracy.high,
     );
 
+    if (!mounted) return;
     setState(() {
       _currentLatLng = LatLng(position.latitude, position.longitude);
     });

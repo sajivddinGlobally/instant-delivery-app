@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -99,175 +98,215 @@ class _PackerMoverPageState extends State<PackerMoverPage> {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 25.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    buildStepCircle(
-                      icon: Icons.location_on,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 25.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      buildStepCircle(
+                        icon: Icons.location_on,
+                        color: Color(0xFF006970),
+                      ),
+                      buildLine(),
+                      buildStepCircle(
+                        icon: Icons.add,
+                        color: Color(0xFF006970),
+                      ),
+                      buildLine(),
+                      buildStepCircle(
+                        icon: Icons.calendar_month,
+                        color: Color(0xFF8B8B8B),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 5.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Moving Details",
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
                       color: Color(0xFF006970),
+                      letterSpacing: -1,
                     ),
-                    buildLine(),
-                    buildStepCircle(icon: Icons.add, color: Color(0xFF006970)),
-                    buildLine(),
-                    buildStepCircle(
-                      icon: Icons.calendar_month,
-                      color: Color(0xFF8B8B8B),
+                  ),
+                  Text(
+                    "Payment Method",
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF006970),
+                      letterSpacing: -1,
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 5.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Moving Details",
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF006970),
-                    letterSpacing: -1,
                   ),
-                ),
-                Text(
-                  "Payment Method",
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF006970),
-                    letterSpacing: -1,
-                  ),
-                ),
-                Text(
-                  "Completed",
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 12.h),
-          Divider(color: Color(0xFF086E86)),
-          SizedBox(height: 20.h),
-          Container(
-            margin: EdgeInsets.only(left: 15.w, right: 15.w),
-            padding: EdgeInsets.only(
-              left: 12.w,
-              right: 12.w,
-              top: 10.h,
-              bottom: 10.h,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6.r),
-              color: Color(0xFFF2F2F2),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      select = 0;
-                    });
-                  },
-                  child: Container(
-                    width: 152.w,
-                    height: 35.h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6.r),
-                      color: select == 0
-                          ? Color(0xFF006970)
-                          : Colors.transparent,
+                  Text(
+                    "Completed",
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
                     ),
-                    child: Center(
-                      child: Text(
-                        "Living Room",
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          color: select == 0 ? Color(0xFFFFFFFF) : Colors.black,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Divider(color: Color(0xFF086E86)),
+            SizedBox(height: 20.h),
+            Container(
+              margin: EdgeInsets.only(left: 15.w, right: 15.w),
+              padding: EdgeInsets.only(
+                left: 12.w,
+                right: 12.w,
+                top: 10.h,
+                bottom: 10.h,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6.r),
+                color: Color(0xFFF2F2F2),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        select = 0;
+                      });
+                    },
+                    child: Container(
+                      width: 152.w,
+                      height: 35.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6.r),
+                        color: select == 0
+                            ? Color(0xFF006970)
+                            : Colors.transparent,
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Living Room",
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: select == 0
+                                ? Color(0xFFFFFFFF)
+                                : Colors.black,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      select = 1;
-                    });
-                  },
-                  child: Container(
-                    width: 152.w,
-                    height: 35.h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6.r),
-                      color: select == 1
-                          ? Color(0xFF006970)
-                          : Colors.transparent,
-                    ),
-                    child: Center(
-                      child: Text(
-                        "Living Room",
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          color: select == 1 ? Color(0xFFFFFFFF) : Colors.black,
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        select = 1;
+                      });
+                    },
+                    child: Container(
+                      width: 152.w,
+                      height: 35.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6.r),
+                        color: select == 1
+                            ? Color(0xFF006970)
+                            : Colors.transparent,
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Living Room",
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: select == 1
+                                ? Color(0xFFFFFFFF)
+                                : Colors.black,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          fetchLocation(
-            Color(0xFF006970),
-            Icons.arrow_upward,
-            pickupController,
-            "Pickup location",
-            showPickupClear,
-          ),
-          ServiceBuild(
-            name: "Service lift available at pickup",
-            work: "A working service lift will reduce the overall quote",
-          ),
-          fetchLocation(
-            Color(0xFFDC1818),
-            Icons.arrow_downward,
-            dropController,
-            "Drop location",
-            showDropClear,
-          ),
-          ServiceBuild(
-            name: "Service lift available at drop",
-            work: "A working service lift will reduce the overall quote",
-          ),
-          SizedBox(height: 20.h),
-          Container(
-            margin: EdgeInsets.only(left: 15.w, right: 15.w),
-            padding: EdgeInsets.only(left: 20.w, right: 20.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: Colors.grey),
+            fetchLocation(
+              Color(0xFF006970),
+              Icons.arrow_upward,
+              pickupController,
+              "Pickup location",
+              showPickupClear,
             ),
-            child: Row(children: [Icon(Icons.calendar_month)]),
-          ),
-        ],
+            ServiceBuild(
+              name: "Service lift available at pickup",
+              work: "A working service lift will reduce the overall quote",
+            ),
+            fetchLocation(
+              Color(0xFFDC1818),
+              Icons.arrow_downward,
+              dropController,
+              "Drop location",
+              showDropClear,
+            ),
+            ServiceBuild(
+              name: "Service lift available at drop",
+              work: "A working service lift will reduce the overall quote",
+            ),
+            SizedBox(height: 20.h),
+            Container(
+              margin: EdgeInsets.only(left: 15.w, right: 15.w),
+              padding: EdgeInsets.only(
+                left: 20.w,
+                right: 20.w,
+                top: 10.h,
+                bottom: 10.h,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: Colors.grey),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.calendar_month, color: Color(0xFF000000)),
+                  SizedBox(width: 10.w),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Shifting date",
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF000000),
+                        ),
+                      ),
+                      Text(
+                        "06-10-2025",
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF000000),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

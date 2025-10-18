@@ -335,8 +335,8 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                       ),
                                       child: Container(
                                         padding: EdgeInsets.only(
-                                          left: 13.w,
-                                          right: 16.w,
+                                          left: 10.w,
+                                          right: 12.w,
                                           top: 10.h,
                                           bottom: 10.h,
                                         ),
@@ -438,7 +438,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                                     fontSize: 18.sp,
                                                     fontWeight: FontWeight.w500,
                                                     color: Color(0xfF000000),
-                                                    letterSpacing: -0.5,
+                                                    letterSpacing: -1,
                                                   ),
                                                 ),
                                                 if (index == 0 || index == 1)
