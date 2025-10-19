@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:delivery_mvp_app/CustomerScreen/checkPriceOrAddItem.page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -47,6 +48,54 @@ class _PackerMoverPageState extends State<PackerMoverPage> {
   void _submitText() {
     // Do something with text
     print('Submitted: ${pickupController.text}');
+  }
+
+  String? selectedDateText;
+
+  void _showToday() {
+    DateTime today = DateTime.now();
+    setState(() {
+      selectedDateText = "${today.day}-${today.month}-${today.year}";
+    });
+  }
+
+  void _showTomorrow() {
+    DateTime tomorrow = DateTime.now().add(const Duration(days: 1));
+    setState(() {
+      selectedDateText = "${tomorrow.day}-${tomorrow.month}-${tomorrow.year}";
+    });
+  }
+
+  Future<void> _pickDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF006970), // header color
+              onPrimary: Colors.white, // header text color
+              onSurface: Colors.black, // body text color
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF006970), // button color
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedDateText = "${picked.day}-${picked.month}-${picked.year}";
+      });
+    }
   }
 
   @override
@@ -145,7 +194,7 @@ class _PackerMoverPageState extends State<PackerMoverPage> {
                     ),
                   ),
                   Text(
-                    "Payment Method",
+                    "Add Item",
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w400,
@@ -154,7 +203,7 @@ class _PackerMoverPageState extends State<PackerMoverPage> {
                     ),
                   ),
                   Text(
-                    "Completed",
+                    "Schedule",
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
@@ -265,44 +314,129 @@ class _PackerMoverPageState extends State<PackerMoverPage> {
               work: "A working service lift will reduce the overall quote",
             ),
             SizedBox(height: 20.h),
-            Container(
-              margin: EdgeInsets.only(left: 15.w, right: 15.w),
-              padding: EdgeInsets.only(
-                left: 20.w,
-                right: 20.w,
-                top: 10.h,
-                bottom: 10.h,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: Colors.grey),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_month, color: Color(0xFF000000)),
-                  SizedBox(width: 10.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Shifting date",
-                        style: GoogleFonts.inter(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF000000),
+            InkWell(
+              onTap: () {
+                _pickDate(context);
+              },
+              child: Container(
+                margin: EdgeInsets.only(left: 15.w, right: 15.w),
+                padding: EdgeInsets.only(
+                  left: 20.w,
+                  right: 20.w,
+                  top: 10.h,
+                  bottom: 10.h,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.calendar_month, color: Color(0xFF000000)),
+                    SizedBox(width: 10.w),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Shifting date",
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF000000),
+                          ),
                         ),
-                      ),
-                      Text(
-                        "06-10-2025",
-                        style: GoogleFonts.inter(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF000000),
+                        Text(
+                          selectedDateText == null
+                              ? 'No date selected'
+                              : selectedDateText!,
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF000000),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(150.w, 35.h),
+                    backgroundColor: Color(0xFF006970),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.r),
+                      side: BorderSide.none,
+                    ),
                   ),
-                ],
+                  onPressed: () {
+                    _showToday();
+                  },
+                  child: Text(
+                    "Today",
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 20.w),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(150.w, 35.h),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.r),
+                      side: BorderSide(color: Color(0xFF006970), width: 1.w),
+                    ),
+                  ),
+                  onPressed: () {
+                    _showTomorrow();
+                  },
+                  child: Text(
+                    "Tomorrow",
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF006970),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 25.h),
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(330.w, 55.h),
+                  backgroundColor: Color(0xFF006970),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                    side: BorderSide.none,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => CheckPriceOraddItemPage(),
+                    ),
+                  );
+                },
+                child: Text(
+                  "Check Price",
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],
@@ -444,8 +578,8 @@ class _ServiceBuildState extends State<ServiceBuild> {
 
 class buildStepCircle extends StatelessWidget {
   final IconData icon;
-  final Color color;
-  const buildStepCircle({super.key, required this.icon, required this.color});
+  final Color? color;
+  const buildStepCircle({super.key, required this.icon, this.color});
 
   @override
   Widget build(BuildContext context) {
