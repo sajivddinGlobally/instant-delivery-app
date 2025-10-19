@@ -13,9 +13,30 @@ class CheckPriceOraddItemPage extends StatefulWidget {
 }
 
 class _CheckPriceOraddItemPageState extends State<CheckPriceOraddItemPage> {
+  final List<String> rooms = ["Living Room", "Bedroom", "Kitchen", "Others"];
   int selectedItem = 0;
 
-  final List<String> rooms = ["Living Room", "Bedroom", "Kitchen", "Others"];
+  final ScrollController _scrollController = ScrollController();
+
+  // 🔹 Har item ke liye ek GlobalKey
+  final Map<String, GlobalKey> _keys = {
+    "Living Room": GlobalKey(),
+    "Bedroom": GlobalKey(),
+    "Kitchen": GlobalKey(),
+    "Others": GlobalKey(),
+  };
+
+  // 🔹 Scroll function
+  void scrollToItem(String roomName) {
+    final keyContext = _keys[roomName]?.currentContext;
+    if (keyContext != null) {
+      Scrollable.ensureVisible(
+        keyContext,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +172,7 @@ class _CheckPriceOraddItemPageState extends State<CheckPriceOraddItemPage> {
                     setState(() {
                       selectedItem = index;
                     });
+                    scrollToItem(rooms[index]);
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(
@@ -208,17 +230,71 @@ class _CheckPriceOraddItemPageState extends State<CheckPriceOraddItemPage> {
           SizedBox(height: 20.h),
           Expanded(
             child: SingleChildScrollView(
+              controller: _scrollController,
               child: Padding(
                 padding: EdgeInsets.only(left: 15.w, right: 15.w),
                 child: Column(
                   children: [
-                    ItemSelect(itemName: "Living Room"),
-                    ItemSelect(itemName: "Bedroom"),
-                    ItemSelect(itemName: "Kitchen"),
-                    ItemSelect(itemName: "Others"),
+                    ItemSelect(
+                      key: _keys["Living Room"],
+                      itemName: "Living Room",
+                    ),
+                    ItemSelect(key: _keys["Bedroom"], itemName: "Bedroom"),
+                    ItemSelect(key: _keys["Kitchen"], itemName: "Kitchen"),
+                    ItemSelect(key: _keys["Others"], itemName: "Others"),
                   ],
                 ),
               ),
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.only(
+              bottom: 10.h,
+              top: 10.h,
+              left: 15.w,
+              right: 15.w,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "No item select",
+                  style: GoogleFonts.inter(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(130.w, 40.h),
+                    backgroundColor: Color(0xFF006970),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.r),
+                      side: BorderSide.none,
+                    ),
+                  ),
+                  onPressed: () {},
+                  child: Text(
+                    "Check Price",
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -271,9 +347,9 @@ class _ItemSelectState extends State<ItemSelect> {
                 ),
                 SizedBox(height: 6.h),
                 Divider(),
-                Itembuild(),
+                buildExpansionTile(),
                 Divider(),
-                Itembuild(),
+                buildExpansionTile(),
               ],
             ),
           );
@@ -282,7 +358,7 @@ class _ItemSelectState extends State<ItemSelect> {
     );
   }
 
-  Widget Itembuild() {
+  Widget buildExpansionTile() {
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
