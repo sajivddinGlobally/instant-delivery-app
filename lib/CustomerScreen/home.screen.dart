@@ -299,8 +299,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = ref.watch(getProfileController);
-
     // Don't show homepage until location is enabled
     if (!_locationEnabled) {
       return Scaffold(

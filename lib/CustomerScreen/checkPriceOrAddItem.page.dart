@@ -1,4 +1,5 @@
 import 'package:delivery_mvp_app/CustomerScreen/packerMover.page.dart';
+import 'package:delivery_mvp_app/CustomerScreen/selectPickupSlot.page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -284,7 +285,14 @@ class _CheckPriceOraddItemPageState extends State<CheckPriceOraddItemPage> {
                       side: BorderSide.none,
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => SelectPickupSlotPage(),
+                      ),
+                    );
+                  },
                   child: Text(
                     "Check Price",
                     style: GoogleFonts.inter(

@@ -180,7 +180,7 @@ class _PackerMoverPageState extends State<PackerMoverPage> {
             ),
             SizedBox(height: 5.h),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsets.symmetric(horizontal: 25.w),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -439,6 +439,7 @@ class _PackerMoverPageState extends State<PackerMoverPage> {
                 ),
               ),
             ),
+            SizedBox(height: 20.h),
           ],
         ),
       ),

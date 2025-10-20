@@ -28,13 +28,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       backgroundColor: Color(0xFFFFFFFF),
       body: provider.when(
         data: (profile) {
-          var box = Hive.box("folder");
-          final fullName =
-              "${profile.data!.firstName} ${profile.data!.lastName}";
-          final mobNo = profile.data!.phone.toString();
-          box.put("fullName", fullName);
-          box.put("mobNo", mobNo);
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -50,8 +43,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: Center(
                     child: Text(
                       // "DE",
-                      profile.data!.firstName[0].toUpperCase() +
-                          profile.data!.lastName[0].toUpperCase(),
+                      profile.data!.doc!.firstName![0].toUpperCase() +
+                          profile.data!.doc!.lastName![0].toUpperCase(),
                       style: GoogleFonts.inter(
                         fontSize: 32.sp,
                         fontWeight: FontWeight.w500,
@@ -64,7 +57,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               SizedBox(height: 5.h),
               Center(
                 child: Text(
-                  "${profile.data!.firstName} ${profile.data!.lastName}",
+                  "${profile.data!.doc!.firstName} ${profile.data!.doc!.lastName}",
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w400,
@@ -142,7 +135,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           );
         },
         error: (error, stackTrace) {
-          log(stackTrace.toString());
+          log("${error.toString()} /n ${stackTrace.toString()}");
           return Center(child: Text(error.toString()));
         },
         loading: () => Center(child: CircularProgressIndicator()),
