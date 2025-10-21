@@ -75,6 +75,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Map<String, dynamic>? assignedDriver;
   String receivedMessage = "";
   final List<Map<String, dynamic>> messages = [];
+  bool _isCheckingLocation = true;
 
   late IO.Socket socket;
 
@@ -85,11 +86,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _checkLocationPermission() async {
+    setState(() {
+      _isCheckingLocation = true; // 👈 start loading
+    });
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       _showLocationDialog(
         'Location services are disabled. Please enable them.',
       );
+      setState(() => _isCheckingLocation = false);
       return;
     }
 
@@ -98,6 +103,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         _showLocationDialog('Location permission denied.');
+        setState(() => _isCheckingLocation = false);
         return;
       }
     }
@@ -106,6 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _showLocationDialog(
         'Location permission denied forever. Please enable in app settings.',
       );
+      setState(() => _isCheckingLocation = false);
       return;
     }
 
@@ -117,6 +124,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       await _updateAddress();
       setState(() {
         _locationEnabled = true;
+        _isCheckingLocation = false;
       });
 
       // Connect socket after location is enabled
@@ -124,6 +132,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } catch (e) {
       log('Error getting location: $e');
       _showLocationDialog('Failed to get location. Please try again.');
+      setState(() => _isCheckingLocation = false);
     }
   }
 
@@ -299,6 +308,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 🔄 Show loader while checking
+    if (_isCheckingLocation) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF82ECF3),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.white, strokeWidth: 4),
+              SizedBox(height: 20.h),
+              Text(
+                'Checking location permission...',
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     // Don't show homepage until location is enabled
     if (!_locationEnabled) {
       return Scaffold(

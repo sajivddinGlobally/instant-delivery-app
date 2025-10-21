@@ -139,139 +139,309 @@ class _SelectPickupSlotPageState extends State<SelectPickupSlotPage> {
           ),
           SizedBox(height: 12.h),
           Divider(color: Color(0xFF086E86)),
-          SizedBox(height: 10.h),
-          Padding(
-            padding: EdgeInsets.only(left: 16.w),
-            child: Text(
-              "Select Shifting Date",
-              style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF000000),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 16.w, top: 5.h),
-            child: Text(
-              monthLabel,
-              style: GoogleFonts.inter(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF000000),
-              ),
-            ),
-          ),
-          SizedBox(height: 25),
-          SizedBox(
-            height: 80,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: dates.length,
-              itemBuilder: (context, index) {
-                bool isSelected = index == selectedIndex;
-                DateTime date = dates[index];
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedIndex = index;
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(left: 10.w),
-                    width: 85,
-                    height: 60.h,
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.teal[100] : Colors.white,
-                      border: Border.all(
-                        color: isSelected ? Colors.teal : Colors.grey,
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.w, top: 10.h),
+                    child: Text(
+                      "Select Shifting Date",
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF000000),
                       ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              DateFormat('dd').format(date),
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFF000000),
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            SizedBox(width: 5.w),
-                            Text(
-                              index == 0
-                                  ? "Today"
-                                  : DateFormat('EEE').format(date),
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFF000000),
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          "₹1,702",
-                          style: GoogleFonts.inter(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF000000),
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(left: 15.w, right: 15.w, top: 16.h),
-            child: Text(
-              "Recommended add-ons",
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF000000),
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.w, top: 5.h),
+                    child: Text(
+                      monthLabel,
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF000000),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 25),
+                  SizedBox(
+                    height: 80,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: dates.length,
+                      itemBuilder: (context, index) {
+                        bool isSelected = index == selectedIndex;
+                        DateTime date = dates[index];
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedIndex = index;
+                            });
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(left: 10.w),
+                            width: 85,
+                            height: 60.h,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.teal[100]
+                                  : Colors.white,
+                              border: Border.all(
+                                color: isSelected ? Colors.teal : Colors.grey,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      DateFormat('dd').format(date),
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF000000),
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                    SizedBox(width: 5.w),
+                                    Text(
+                                      index == 0
+                                          ? "Today"
+                                          : DateFormat('EEE').format(date),
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF000000),
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  "₹1,702",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF000000),
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(left: 15.w, right: 15.w, top: 16.h),
+                    child: Text(
+                      "Recommended add-ons",
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF000000),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  packageLayerbuild("Single-layer packing", "₹199"),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: 15.w,
+                      right: 15.w,
+                      top: 10.h,
+                    ),
+                    child: Text(
+                      "Ind. single layer of protective material like foam or corrugated sheets for essential protection",
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF000000),
+                      ),
+                    ),
+                  ),
+                  coverbuild(
+                    "With COVER claim up to 20,000 in case of damage/loss",
+                  ),
+                  SizedBox(height: 16.h),
+                  packageLayerbuild("Multi-layer packing", "₹399"),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: 15.w,
+                      right: 15.w,
+                      top: 10.h,
+                    ),
+                    child: Text(
+                      "Incl. extra layer of bubble wrap + (foam sheets or film rolls) for superior protection",
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF000000),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15.h),
+                  coverbuild(
+                    "With COVER claim up to 50,000 in case of damage/loss",
+                  ),
+                  SizedBox(height: 15.h),
+                ],
               ),
             ),
           ),
-          SizedBox(height: 10.h),
-          packageLayerbuild(),
-          Padding(
-            padding: EdgeInsets.only(left: 15.w, right: 15.w, top: 10.h),
-            child: Text(
-              "Ind. single layer of protective material like foam or corrugated sheets for essential protection",
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF000000),
-              ),
-            ),
-          ),
           Container(
-            margin: EdgeInsets.only(top: 20.h),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.r),
-              color: Color.fromARGB(127, 217, 217, 217),
+            color: Color(0xFFE5F0F1),
+            padding: EdgeInsets.only(
+              left: 15.w,
+              right: 15.w,
+              top: 20.h,
+              bottom: 20.h,
             ),
-            child: Text("data"),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "₹1,702",
+                  style: GoogleFonts.inter(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF000000),
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 8.h,
+                    ),
+                    backgroundColor: Color(0xFF006970),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                      side: BorderSide.none,
+                    ),
+                  ),
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20.r),
+                        ),
+                      ),
+                      builder: (context) => const PickupSlotBottomSheet(),
+                    );
+                  },
+                  child: Text(
+                    "Select Pickup Slot",
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget packageLayerbuild() {
+  Widget coverbuild(String clam) {
+    return Container(
+      margin: EdgeInsets.only(top: 20.h, left: 15.w, right: 15.w),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.r),
+        color: Color.fromARGB(127, 217, 217, 217),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 80.w,
+                height: 30.h,
+                decoration: BoxDecoration(
+                  color: Color(0xFF006970),
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(10.r),
+                    topLeft: Radius.circular(10.r),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.health_and_safety_rounded,
+                      color: Colors.white,
+                      size: 18.sp,
+                    ),
+                    Text(
+                      "Cover",
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                        letterSpacing: -0.55,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Spacer(),
+              Text(
+                "NCLUDED WITH SINGLE LAYER",
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF000000),
+                ),
+              ),
+              SizedBox(width: 10.w),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Padding(
+            padding: EdgeInsets.only(left: 10.w, bottom: 6.h),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    clam,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF000000),
+                      letterSpacing: -0.55,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.health_and_safety_rounded,
+                  color: Color(0xFF006970),
+                  size: 22.sp,
+                ),
+                SizedBox(width: 10.w),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget packageLayerbuild(String name, String price) {
     return Row(
       children: [
         SizedBox(width: 15.w),
@@ -279,7 +449,7 @@ class _SelectPickupSlotPageState extends State<SelectPickupSlotPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Single-layer packing",
+              name,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
@@ -288,7 +458,7 @@ class _SelectPickupSlotPageState extends State<SelectPickupSlotPage> {
             ),
             SizedBox(height: 3.h),
             Text(
-              "₹199",
+              price,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
@@ -320,6 +490,157 @@ class _SelectPickupSlotPageState extends State<SelectPickupSlotPage> {
         ),
         SizedBox(width: 15.w),
       ],
+    );
+  }
+}
+
+class PickupSlotBottomSheet extends StatefulWidget {
+  const PickupSlotBottomSheet({super.key});
+
+  @override
+  State<PickupSlotBottomSheet> createState() => _PickupSlotBottomSheetState();
+}
+
+class _PickupSlotBottomSheetState extends State<PickupSlotBottomSheet> {
+  int selectSlot = 0;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(20.w),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+            ),
+          ),
+          SizedBox(height: 15.h),
+          Center(
+            child: Text(
+              "Select Pickup Slot",
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF000000),
+              ),
+            ),
+          ),
+          SizedBox(height: 3.h),
+          Center(
+            child: Text(
+              "6 Oct 2025",
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF000000),
+              ),
+            ),
+          ),
+          Center(
+            child: Container(
+              margin: EdgeInsets.only(top: 15.h),
+              width: 330.w,
+              height: 70.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.r),
+                color: Color.fromARGB(127, 217, 217, 217),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    textAlign: TextAlign.center,
+                    "Exact slot may vary due to Government's NO ENTRY hours. Our Partners will coordinate with you.",
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 20.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              pickupSlot(
+                0,
+                Icons.wb_sunny_outlined,
+                "Good Morning",
+                "8AM - 12Pm",
+              ),
+              pickupSlot(
+                1,
+                Icons.wb_cloudy_outlined,
+                "Good Afternoon",
+                "12PM - 4Pm",
+              ),
+              pickupSlot(
+                2,
+                Icons.nights_stay_outlined,
+                'Good Evening',
+                "4PM - Pm",
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget pickupSlot(index, IconData icon, String label, String time) {
+    final isSelected = selectSlot == index;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          selectSlot = index;
+        });
+      },
+      child: Container(
+        width: 100.w,
+        height: 80.h,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.teal[100] : Colors.white,
+          border: Border.all(color: isSelected ? Colors.teal : Colors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Color(0xFF006970), size: 20.sp),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF000000),
+                letterSpacing: -1,
+              ),
+            ),
+            Text(
+              time,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF000000),
+                letterSpacing: -0.55,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
