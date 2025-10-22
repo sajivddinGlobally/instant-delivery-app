@@ -26,6 +26,8 @@ class InstantDeliveryScreen extends ConsumerStatefulWidget {
 class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
   TextEditingController pickupController = TextEditingController();
   TextEditingController dropController = TextEditingController();
+  TextEditingController nameContr = TextEditingController();
+  TextEditingController phonContro = TextEditingController();
 
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
@@ -34,6 +36,10 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
   @override
   void initState() {
     super.initState();
+    final box = Hive.box("folder");
+    nameContr.text =
+        "${box.get("firstName") ?? ''} ${box.get("lastName") ?? ''}".trim();
+    phonContro.text = box.get("phone") ?? "";
     _getCurrentLocation();
   }
 
@@ -108,6 +114,12 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
   }
 
   bool isLoading = false;
+  @override
+  void dispose() {
+    nameContr.dispose();
+    phonContro.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +214,8 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                           RideCardMyCode(
                             pickupController: pickupController,
                             dropController: dropController,
+                            nameController: nameContr,
+                            phoneController: phonContro,
                           ),
                           Align(
                             alignment: Alignment.centerLeft,
@@ -228,7 +242,6 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                               ),
                             ),
                           ),
-
                           // Row(
                           //   mainAxisAlignment: MainAxisAlignment.center,
                           //   children: [
@@ -402,8 +415,14 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                                   double dropLon =
                                       dropLocations.first.longitude;
                                   final body = GetDistanceBodyModel(
-                                    name: "${box.get("fullName")}",
-                                    mobNo: "${box.get("mobNo")}",
+                                    // name: "${box.get("firstName")}",
+                                    // mobNo: "${box.get("phone")}",
+                                    name: nameContr.text.isNotEmpty
+                                        ? nameContr.text
+                                        : "${box.get("firstName")}",
+                                    mobNo: phonContro.text.isNotEmpty
+                                        ? phonContro.text
+                                        : "${box.get("phone")}",
                                     origName: pickupController.text,
                                     picUpType: "Instant",
                                     destName: dropController.text,
@@ -772,10 +791,14 @@ class _RideCardState extends State<RideCard> {
 class RideCardMyCode extends StatefulWidget {
   final TextEditingController pickupController;
   final TextEditingController dropController;
+  final TextEditingController nameController;
+  final TextEditingController phoneController;
   const RideCardMyCode({
     super.key,
     required this.pickupController,
     required this.dropController,
+    required this.nameController,
+    required this.phoneController,
   });
 
   @override
@@ -784,200 +807,13 @@ class RideCardMyCode extends StatefulWidget {
 
 class _RideCardMyCodeState extends State<RideCardMyCode> {
   bool showPickupField = false;
+  final nameContr = TextEditingController();
+  final pickCon = TextEditingController();
+  final phonContro = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final box = Hive.box("folder");
-
-    // return Container(
-    //   width: double.infinity,
-    //   decoration: BoxDecoration(
-    //     color: Colors.white,
-    //     borderRadius: BorderRadius.circular(13.r),
-    //     boxShadow: [
-    //       BoxShadow(
-    //         offset: const Offset(0, 2),
-    //         blurRadius: 3,
-    //         spreadRadius: 2,
-    //         color: const Color.fromARGB(28, 0, 0, 0),
-    //       ),
-    //     ],
-    //   ),
-    //   child: Padding(
-    //     padding: EdgeInsets.symmetric(vertical: 15.h),
-    //     child: Row(
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       children: [
-    //         /// Left side pickup/drop indicators
-    //         SizedBox(width: 5.w),
-    //         Column(
-    //           children: [
-    //             Text(
-    //               "Pickup",
-    //               style: GoogleFonts.inter(
-    //                 fontSize: 15.sp,
-    //                 fontWeight: FontWeight.bold,
-    //                 color: Colors.black,
-    //               ),
-    //             ),
-    //             SizedBox(height: 8.h),
-    //             for (int i = 0; i < 5; i++) ...[
-    //               CircleAvatar(
-    //                 backgroundColor: const Color(0xFF086E86),
-    //                 radius: 3.r,
-    //               ),
-    //               SizedBox(height: 4.h),
-    //             ],
-    //             SizedBox(height: 4.h),
-    //             Text(
-    //               "Drop",
-    //               style: GoogleFonts.inter(
-    //                 fontSize: 14.sp,
-    //                 fontWeight: FontWeight.bold,
-    //                 color: Colors.black,
-    //               ),
-    //             ),
-    //           ],
-    //         ),
-    //         SizedBox(width: 12.w),
-    //         /// Middle column (pickup + drop fields)
-    //         Expanded(
-    //           child: Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: [
-    //               /// Pickup area
-    //               if (!showPickupField) ...[
-    //                 Row(
-    //                   children: [
-    //                     Text(
-    //                       "${box.get("firstName")} ${box.get("lastName")}",
-    //                       style: GoogleFonts.inter(
-    //                         fontSize: 16.sp,
-    //                         fontWeight: FontWeight.w600,
-    //                         color: Colors.black,
-    //                       ),
-    //                     ),
-    //                     SizedBox(width: 6.w),
-    //                     CircleAvatar(radius: 3, backgroundColor: Colors.grey),
-    //                     SizedBox(width: 6.w),
-    //                     Text(
-    //                       "${box.get("phone")}",
-    //                       style: GoogleFonts.inter(
-    //                         fontSize: 14.sp,
-    //                         fontWeight: FontWeight.w500,
-    //                         color: Colors.grey[600],
-    //                       ),
-    //                     ),
-    //                   ],
-    //                 ),
-    //                 SizedBox(height: 5.h),
-    //                 Text(
-    //                   widget.pickupController.text.isNotEmpty
-    //                       ? widget.pickupController.text
-    //                       : "Fetching location...",
-    //                   maxLines: 1,
-    //                   overflow: TextOverflow.ellipsis,
-    //                   style: GoogleFonts.inter(
-    //                     fontSize: 13.sp,
-    //                     fontWeight: FontWeight.w500,
-    //                     color: Colors.grey[600],
-    //                   ),
-    //                 ),
-    //               ] else ...[
-    //                 TextField(
-    //                   controller: widget.pickupController,
-    //                   style: GoogleFonts.inter(
-    //                     fontSize: 15.sp,
-    //                     fontWeight: FontWeight.w500,
-    //                     color: Colors.black,
-    //                   ),
-    //                   decoration: InputDecoration(
-    //                     isDense: true,
-    //                     contentPadding: EdgeInsets.symmetric(
-    //                       horizontal: 10.w,
-    //                       vertical: 8.h,
-    //                     ),
-    //                     border: OutlineInputBorder(
-    //                       borderRadius: BorderRadius.circular(10.r),
-    //                       borderSide: const BorderSide(color: Colors.black),
-    //                     ),
-    //                     focusedBorder: OutlineInputBorder(
-    //                       borderRadius: BorderRadius.circular(10.r),
-    //                       borderSide: const BorderSide(
-    //                         color: Color(0xFF006970),
-    //                       ),
-    //                     ),
-    //                     hintText: "Enter pickup location",
-    //                     hintStyle: GoogleFonts.inter(
-    //                       fontSize: 14.sp,
-    //                       fontWeight: FontWeight.w500,
-    //                       color: Colors.black54,
-    //                     ),
-    //                   ),
-    //                 ),
-    //               ],
-    //               SizedBox(height: 20.h),
-    //               /// Drop TextField
-    //               TextField(
-    //                 controller: widget.dropController,
-    //                 style: GoogleFonts.inter(
-    //                   fontSize: 15.sp,
-    //                   fontWeight: FontWeight.w500,
-    //                   color: Colors.black,
-    //                 ),
-    //                 decoration: InputDecoration(
-    //                   isDense: true,
-    //                   contentPadding: EdgeInsets.symmetric(
-    //                     horizontal: 10.w,
-    //                     vertical: 8.h, // ✅ Reduced padding
-    //                   ),
-    //                   enabledBorder: OutlineInputBorder(
-    //                     borderRadius: BorderRadius.circular(10.r),
-    //                     borderSide: BorderSide(color: Colors.black, width: 1.w),
-    //                   ),
-    //                   focusedBorder: OutlineInputBorder(
-    //                     borderRadius: BorderRadius.circular(10.r),
-    //                     borderSide: BorderSide(
-    //                       color: const Color(0xFF006970),
-    //                       width: 1.w,
-    //                     ),
-    //                   ),
-    //                   hintText: "Where is your drop?",
-    //                   hintStyle: GoogleFonts.inter(
-    //                     fontSize: 14.sp,
-    //                     fontWeight: FontWeight.w500,
-    //                     color: Colors.black54,
-    //                   ),
-    //                 ),
-    //               ),
-    //             ],
-    //           ),
-    //         ),
-    //         /// Right side icons
-    //         Column(
-    //           mainAxisAlignment: MainAxisAlignment.start,
-    //           children: [
-    //             IconButton(
-    //               onPressed: () {
-    //                 setState(() => showPickupField = !showPickupField);
-    //               },
-    //               icon: Icon(
-    //                 showPickupField ? Icons.close : Icons.arrow_forward_ios,
-    //                 color: Colors.black,
-    //                 size: 20.sp,
-    //               ),
-    //             ),
-    //             SizedBox(height: 15.h),
-    //             IconButton(
-    //               onPressed: () {},
-    //               icon: Icon(Icons.add, color: Colors.black, size: 20.sp),
-    //             ),
-    //           ],
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1017,14 +853,16 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
                             children: [
                               TextSpan(
                                 text:
-                                    "${box.get("firstName")} ${box.get("lastName")} ·",
+                                    // "${box.get("firstName")} ${box.get("lastName")} ·",
+                                    "${widget.nameController.text} ·",
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15.sp,
                                 ),
                               ),
                               TextSpan(
-                                text: " ${box.get("phone")}",
+                                // text: " ${box.get("phone")}",
+                                text: " ${widget.phoneController.text}",
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w500,
                                   fontSize: 13.sp,
@@ -1039,7 +877,10 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           // "60 Feet Rd, Sanjay Nagar, Jagann...",
-                          widget.pickupController.text,
+                          // widget.pickupController.text,
+                          widget.pickupController.text.isNotEmpty
+                              ? widget.pickupController.text
+                              : "Fetching location...",
                           style: GoogleFonts.poppins(
                             fontSize: 12.sp,
                             color: Colors.grey[700],
@@ -1058,14 +899,24 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
                             top: Radius.circular(20.r),
                           ),
                         ),
-                        //builder: (context) => const PickupSlotBottomSheet(),
-                        builder: (context) {
-                          return FractionallySizedBox(
-                            heightFactor: 0.70, // 👈 85% screen height
-                            child: const PickupScreen(),
-                          );
-                        },
-                      );
+                        builder: (context) => PickupScreen(
+                          pickController: widget.pickupController,
+                          nameController: widget.nameController,
+                          phoneController: widget.phoneController,
+                        ),
+                        // builder: (context) {
+                        //   return FractionallySizedBox(
+                        //     heightFactor: 0.70, // 👈 85% screen height
+                        //     child: PickupScreen(
+                        //       pickController: widget.pickupController,
+                        //       nameController: nameContr,
+                        //       phoneController: phonContro,
+                        //     ),
+                        //   );
+                        // },
+                      ).then((_) {
+                        setState(() {});
+                      });
                     },
                     child: Container(
                       padding: EdgeInsets.all(8),
@@ -1093,7 +944,7 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
                           style: GoogleFonts.poppins(fontSize: 14.sp),
                         ),
                         contentPadding: EdgeInsets.symmetric(
-                          vertical: 10.h,
+                          vertical: 12.h,
                           horizontal: 10.w,
                         ),
                         enabledBorder: OutlineInputBorder(
@@ -1132,112 +983,232 @@ class _RideCardMyCodeState extends State<RideCardMyCode> {
 }
 
 class PickupScreen extends StatefulWidget {
-  const PickupScreen({super.key});
+  final TextEditingController pickController;
+  final TextEditingController nameController;
+  final TextEditingController phoneController;
+
+  PickupScreen({
+    super.key,
+    required this.pickController,
+    required this.nameController,
+    required this.phoneController,
+  });
 
   @override
   State<PickupScreen> createState() => _PickupScreenState();
 }
 
 class _PickupScreenState extends State<PickupScreen> {
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _pickupController;
+
+  @override
+  void initState() {
+    super.initState();
+    // // Initialize with default values
+    // _nameController = TextEditingController(text: widget.nameController.text);
+    // _phoneController = TextEditingController(text: widget.phoneController.text);
+    // _pickupController = TextEditingController(text: widget.pickController.text);
+
+    _nameController = TextEditingController();
+    _phoneController = TextEditingController();
+    _pickupController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _pickupController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15.w),
-      child: Stack(
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 10.h),
-              Center(
-                child: Container(
-                  width: 40.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom, // handles keyboard
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              top: -50,
+              left: 0,
+              right: 0,
+              child: Container(
+                width: 50.w,
+                height: 50.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.amber,
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.close),
                 ),
               ),
-              SizedBox(height: 15.h),
-              TextField(
-                decoration: InputDecoration(
-                  isDense: true,
-                  hint: Text(
-                    "Enter Name",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w300,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 10.h),
+                  Center(
+                    child: Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
                     ),
                   ),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 10.h,
-                    horizontal: 10.w,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                    borderSide: BorderSide(color: Colors.blueAccent, width: 1),
-                  ),
-                ),
-              ),
-              SizedBox(height: 15.h),
-              TextField(
-                decoration: InputDecoration(
-                  isDense: true,
-                  hint: Text(
-                    "Phone Number",
+                  SizedBox(height: 20.h),
+                  Text(
+                    "Pickup Details",
                     style: GoogleFonts.poppins(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w300,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 10.h,
-                    horizontal: 10.w,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                    borderSide: BorderSide(color: Colors.blueAccent, width: 1),
-                  ),
-                ),
-              ),
-              SizedBox(height: 15.h),
-              TextField(
-                decoration: InputDecoration(
-                  isDense: true,
-                  hint: Text(
-                    "Enter Your Pickup",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w300,
+
+                  SizedBox(height: 15.h),
+                  TextField(
+                    controller: _nameController,
+                    keyboardType: TextInputType.name,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      hint: Text(
+                        "Enter Name",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 14.h,
+                        horizontal: 10.w,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(
+                          color: Colors.blueAccent,
+                          width: 1,
+                        ),
+                      ),
                     ),
                   ),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 10.h,
-                    horizontal: 10.w,
+                  SizedBox(height: 15.h),
+                  TextField(
+                    controller: _phoneController,
+                    maxLength: 10,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      counterText: "",
+                      isDense: true,
+                      hint: Text(
+                        "Phone Number",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 14.h,
+                        horizontal: 10.w,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(
+                          color: Colors.blueAccent,
+                          width: 1,
+                        ),
+                      ),
+                    ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  SizedBox(height: 15.h),
+                  TextField(
+                    controller: _pickupController,
+                    
+                    decoration: InputDecoration(
+                      isDense: true,
+                      hint: Text(
+                        "Enter Your Pickup",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 14.h,
+                        horizontal: 10.w,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                        borderSide: BorderSide(
+                          color: Colors.blueAccent,
+                          width: 1,
+                        ),
+                      ),
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                    borderSide: BorderSide(color: Colors.blueAccent, width: 1),
+                  SizedBox(height: 20.h),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF006970),
+                      minimumSize: Size(double.infinity, 48.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                    onPressed: () {
+                      final trimmedName = _nameController.text.trim();
+                      if (trimmedName.isNotEmpty) {
+                        widget.nameController.text = trimmedName;
+                      }
+                      final trimmedPhone = _phoneController.text.trim();
+                      if (trimmedPhone.isNotEmpty) {
+                        widget.phoneController.text = trimmedPhone;
+                      }
+                      final trimmedPickup = _pickupController.text.trim();
+                      if (trimmedPickup.isNotEmpty) {
+                        widget.pickController.text = trimmedPickup;
+                      }
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      "Confirm",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16.sp,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
+                  SizedBox(height: 10.h),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
