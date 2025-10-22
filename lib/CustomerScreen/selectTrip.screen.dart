@@ -152,7 +152,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                margin: EdgeInsets.only(top: 15.h, left: 20.w, right: 20.w),
+                margin: EdgeInsets.only(top: 10.h, left: 20.w, right: 20.w),
                 padding: EdgeInsets.only(
                   left: 12.w,
                   right: 12.w,
