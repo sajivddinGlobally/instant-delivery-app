@@ -89,14 +89,11 @@ class _SelectPickupSlotPageState extends State<SelectPickupSlotPage> {
                   children: [
                     buildStepCircle(icon: Icons.done, color: Color(0xFF006970)),
                     buildLine(),
-                    buildStepCircle(
-                      icon: Icons.shopping_bag,
-                      color: Color(0xFF006970),
-                    ),
+                    buildStepCircle(icon: Icons.done, color: Color(0xFF006970)),
                     buildLine(),
                     buildStepCircle(
                       icon: Icons.calendar_month,
-                      color: Color(0xFF8B8B8B),
+                      color: Color(0xFF006970),
                     ),
                   ],
                 ),
@@ -305,49 +302,62 @@ class _SelectPickupSlotPageState extends State<SelectPickupSlotPage> {
               top: 20.h,
               bottom: 20.h,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "₹1,702",
-                  style: GoogleFonts.inter(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF000000),
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 8.h,
+                Text(selectedIndex.toString()),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "₹1,702",
+                      style: GoogleFonts.inter(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF000000),
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                    backgroundColor: Color(0xFF006970),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.r),
-                      side: BorderSide.none,
-                    ),
-                  ),
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(20.r),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 8.h,
+                        ),
+                        backgroundColor: Color(0xFF006970),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                          side: BorderSide.none,
                         ),
                       ),
-                      builder: (context) => const PickupSlotBottomSheet(),
-                    );
-                  },
-                  child: Text(
-                    "Select Pickup Slot",
-                    style: GoogleFonts.inter(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20.r),
+                            ),
+                          ),
+                          //builder: (context) => const PickupSlotBottomSheet(),
+                          builder: (context) {
+                            return FractionallySizedBox(
+                              heightFactor: 0.70, // 👈 85% screen height
+                              child: const PickupSlotBottomSheet(),
+                            );
+                          },
+                        );
+                      },
+                      child: Text(
+                        "Select Pickup Slot",
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -503,8 +513,31 @@ class PickupSlotBottomSheet extends StatefulWidget {
 
 class _PickupSlotBottomSheetState extends State<PickupSlotBottomSheet> {
   int selectSlot = 0;
+  int? selectedTimeIndex; // 👈 Ye store karega konsa time selected hai
+
+  final Map<int, List<String>> slotTimes = {
+    0: [
+      "8:00 AM - 9:00 AM",
+      "9:00 AM - 10:00 AM",
+      "10:00 AM - 11:00 AM",
+      "11:00 AM - 12:00 PM",
+    ],
+    1: [
+      "12:00 PM - 1:00 PM",
+      "1:00 PM - 2:00 PM",
+      "2:00 PM - 3:00 PM",
+      "3:00 PM - 4:00 PM",
+    ],
+    2: [
+      "4:00 PM - 5:00 PM",
+      "5:00 PM - 6:00 PM",
+      "6:00 PM - 7:00 PM",
+      "7:00 PM - 8:00 PM",
+    ],
+  };
   @override
   Widget build(BuildContext context) {
+    final currentTimes = slotTimes[selectSlot] ?? [];
     return Padding(
       padding: EdgeInsets.all(20.w),
       child: Column(
@@ -543,56 +576,104 @@ class _PickupSlotBottomSheetState extends State<PickupSlotBottomSheet> {
               ),
             ),
           ),
-          Center(
-            child: Container(
-              margin: EdgeInsets.only(top: 15.h),
-              width: 330.w,
-              height: 70.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.r),
-                color: Color.fromARGB(127, 217, 217, 217),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    textAlign: TextAlign.center,
-                    "Exact slot may vary due to Government's NO ENTRY hours. Our Partners will coordinate with you.",
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                      letterSpacing: -1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
           SizedBox(height: 20.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              pickupSlot(
-                0,
-                Icons.wb_sunny_outlined,
-                "Good Morning",
-                "8AM - 12Pm",
-              ),
+              pickupSlot(0, Icons.wb_sunny_outlined, "Morning", "8AM - 12PM"),
               pickupSlot(
                 1,
                 Icons.wb_cloudy_outlined,
-                "Good Afternoon",
-                "12PM - 4Pm",
+                "Afternoon",
+                "12PM - 4PM",
               ),
-              pickupSlot(
-                2,
-                Icons.nights_stay_outlined,
-                'Good Evening',
-                "4PM - Pm",
-              ),
+              pickupSlot(2, Icons.nights_stay_outlined, 'Evening', "4PM - 8PM"),
             ],
+          ),
+          SizedBox(height: 15.h),
+          Flexible(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              itemCount: currentTimes.length,
+              itemBuilder: (context, index) {
+                final time = currentTimes[index];
+                final isSelected = selectedTimeIndex == index;
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      selectedTimeIndex = index; // 👈 select new slot
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(bottom: 15.h),
+                    width: 330.w,
+                    height: 50.h,
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.teal[50] : Colors.white,
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(
+                        color: isSelected
+                            ? const Color(0xFF006970)
+                            : const Color(0xFF000000),
+                        width: isSelected ? 1.5.w : 0.5.w,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(width: 15.w),
+                        Text(
+                          time,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF000000),
+                          ),
+                        ),
+                        Spacer(),
+                        Icon(
+                          isSelected
+                              ? Icons.check_circle
+                              : Icons.circle_outlined, // 👈 icon change
+                          color: isSelected
+                              ? const Color(0xFF006970)
+                              : Colors.black54,
+                        ),
+                        SizedBox(width: 10.w),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          SizedBox(height: 15.h),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: Size(double.infinity, 50.h),
+              backgroundColor: Color(0xFF006970),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+                side: BorderSide.none,
+              ),
+            ),
+            onPressed: () {
+              if (selectedTimeIndex != null) {
+                final selectedTime = currentTimes[selectedTimeIndex!];
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Selected Slot: $selectedTime')),
+                );
+              }
+              Navigator.pop(context);
+            },
+            child: Text(
+              "Confirm Slot",
+              style: GoogleFonts.inter(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              ),
+            ),
           ),
         ],
       ),
@@ -605,6 +686,7 @@ class _PickupSlotBottomSheetState extends State<PickupSlotBottomSheet> {
       onTap: () {
         setState(() {
           selectSlot = index;
+          selectedTimeIndex = null; // 👈 reset time selection on new period
         });
       },
       child: Container(
@@ -626,7 +708,6 @@ class _PickupSlotBottomSheetState extends State<PickupSlotBottomSheet> {
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
                 color: Color(0xFF000000),
-                letterSpacing: -1,
               ),
             ),
             Text(
@@ -635,7 +716,6 @@ class _PickupSlotBottomSheetState extends State<PickupSlotBottomSheet> {
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
                 color: Color(0xFF000000),
-                letterSpacing: -0.55,
               ),
             ),
           ],

@@ -12,27 +12,27 @@ class LoginverifyResModel {
     String message;
     int code;
     bool error;
-    Data data;
+    Data? data;
 
     LoginverifyResModel({
         required this.message,
         required this.code,
         required this.error,
-        required this.data,
+         this.data,
     });
 
     factory LoginverifyResModel.fromJson(Map<String, dynamic> json) => LoginverifyResModel(
         message: json["message"],
         code: json["code"],
         error: json["error"],
-        data: Data.fromJson(json["data"]),
+        data:json["data"] != null ? Data.fromJson(json["data"]) : null,
     );
 
     Map<String, dynamic> toJson() => {
         "message": message,
         "code": code,
         "error": error,
-        "data": data.toJson(),
+        "data": data?.toJson(),
     };
 }
 
@@ -54,12 +54,12 @@ class Data {
     });
 
     factory Data.fromJson(Map<String, dynamic> json) => Data(
-        token: json["token"],
-        firstName: json["firstName"],
-        lastName: json["lastName"],
-        email: json["email"],
-        phone: json["phone"],
-        id: json["id"],
+        token: json["token"]?? "",
+        firstName: json["firstName"] ?? "",
+        lastName: json["lastName"] ?? "",
+        email: json["email"] ?? "",
+        phone: json["phone"] ?? "",
+        id: json["id"] ?? "",
     );
 
     Map<String, dynamic> toJson() => {

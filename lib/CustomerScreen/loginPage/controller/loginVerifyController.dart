@@ -22,15 +22,16 @@ mixin LoginVerifyController<T extends LoginVerifyScreen> on State<T> {
     try {
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.verifyLogin(body);
-      var box = Hive.box("folder");
-      await box.put("token", response.data.token);
-      await box.put("email", response.data.email);
-      await box.put("firstName", response.data.firstName);
-      await box.put("lastName", response.data.lastName);
-      await box.put("phone", response.data.phone);
-      await box.put("id", response.data.id);
 
       if (response.error == false) {
+        var box = Hive.box("folder");
+        await box.put("token", response.data!.token);
+        await box.put("email", response.data!.email);
+        await box.put("firstName", response.data!.firstName);
+        await box.put("lastName", response.data!.lastName);
+        await box.put("phone", response.data!.phone);
+        await box.put("id", response.data!.id);
+
         Fluttertoast.showToast(msg: response.message);
         Navigator.pushAndRemoveUntil(
           context,

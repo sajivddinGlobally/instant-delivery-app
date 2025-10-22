@@ -612,7 +612,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     CupertinoPageRoute(
                                       builder: (context) =>
                                           InstantDeliveryScreen(),
-                                      fullscreenDialog: true,
                                     ),
                                   );
                                 }

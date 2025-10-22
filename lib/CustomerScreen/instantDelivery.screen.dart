@@ -188,146 +188,175 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                               letterSpacing: -1,
                             ),
                           ),
-                          Container(
-                            margin: EdgeInsets.only(
-                              left: 10.w,
-                              right: 10.w,
-                              top: 12.h,
-                            ),
-                            child: RideCard(
-                              pickupController: pickupController,
-                              dropController: dropController,
+                          // Container(
+                          //   margin: EdgeInsets.only(
+                          //     left: 10.w,
+                          //     right: 10.w,
+                          //     top: 12.h,
+                          //   ),
+                          //   child: RideCard(
+                          //     pickupController: pickupController,
+                          //     dropController: dropController,
+                          //   ),
+                          // ),
+                          RideCardMyCode(
+                            pickupController: pickupController,
+                            dropController: dropController,
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFE5F0F1),
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.favorite_border, size: 16.sp),
+                                  SizedBox(width: 7.w),
+                                  Text(
+                                    "Saved Address",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF006970),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          SizedBox(height: 15.h),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.only(
-                                  left: 10.w,
-                                  right: 10.w,
-                                  top: 5.h,
-                                  bottom: 5.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4.r),
-                                  color: Color(0xFFFFFFFF),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      offset: Offset(0, 0),
-                                      spreadRadius: 0,
-                                      blurRadius: 1,
-                                      color: Color.fromARGB(63, 0, 0, 0),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 30.w,
-                                      height: 30.h,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Color(0xFF086E86),
-                                      ),
-                                      child: Icon(
-                                        Icons.location_on,
-                                        color: Color(0xFFDE4B65),
-                                      ),
-                                    ),
-                                    SizedBox(width: 8.w),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "ARH Hardware",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xFF000000),
-                                            letterSpacing: -1,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Sri Saranakara Road",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color.fromARGB(127, 0, 0, 0),
-                                            letterSpacing: -1,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 10.w),
-                              Container(
-                                padding: EdgeInsets.only(
-                                  left: 10.w,
-                                  right: 10.w,
-                                  top: 5.h,
-                                  bottom: 5.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4.r),
-                                  color: Color(0xFFFFFFFF),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      offset: Offset(0, 0),
-                                      spreadRadius: 0,
-                                      blurRadius: 1,
-                                      color: Color.fromARGB(63, 0, 0, 0),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 30.w,
-                                      height: 30.h,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Color(0xFF086E86),
-                                      ),
-                                      child: Icon(
-                                        Icons.location_on,
-                                        color: Color(0xFFDE4B65),
-                                      ),
-                                    ),
-                                    SizedBox(width: 8.w),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "ARH Hardware",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xFF000000),
-                                            letterSpacing: -1,
-                                          ),
-                                        ),
-                                        Text(
-                                          "Sri Saranakara Road",
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color.fromARGB(127, 0, 0, 0),
-                                            letterSpacing: -1,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.center,
+                          //   children: [
+                          //     Container(
+                          //       padding: EdgeInsets.only(
+                          //         left: 10.w,
+                          //         right: 10.w,
+                          //         top: 5.h,
+                          //         bottom: 5.h,
+                          //       ),
+                          //       decoration: BoxDecoration(
+                          //         borderRadius: BorderRadius.circular(4.r),
+                          //         color: Color(0xFFFFFFFF),
+                          //         boxShadow: [
+                          //           BoxShadow(
+                          //             offset: Offset(0, 0),
+                          //             spreadRadius: 0,
+                          //             blurRadius: 1,
+                          //             color: Color.fromARGB(63, 0, 0, 0),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //       child: Row(
+                          //         children: [
+                          //           Container(
+                          //             width: 30.w,
+                          //             height: 30.h,
+                          //             decoration: BoxDecoration(
+                          //               shape: BoxShape.circle,
+                          //               color: Color(0xFF086E86),
+                          //             ),
+                          //             child: Icon(
+                          //               Icons.location_on,
+                          //               color: Color(0xFFDE4B65),
+                          //             ),
+                          //           ),
+                          //           SizedBox(width: 8.w),
+                          //           Column(
+                          //             crossAxisAlignment:
+                          //                 CrossAxisAlignment.start,
+                          //             children: [
+                          //               Text(
+                          //                 "ARH Hardware",
+                          //                 style: GoogleFonts.inter(
+                          //                   fontSize: 16.sp,
+                          //                   fontWeight: FontWeight.w400,
+                          //                   color: Color(0xFF000000),
+                          //                   letterSpacing: -1,
+                          //                 ),
+                          //               ),
+                          //               Text(
+                          //                 "Sri Saranakara Road",
+                          //                 style: GoogleFonts.inter(
+                          //                   fontSize: 12.sp,
+                          //                   fontWeight: FontWeight.w400,
+                          //                   color: Color.fromARGB(127, 0, 0, 0),
+                          //                   letterSpacing: -1,
+                          //                 ),
+                          //               ),
+                          //             ],
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     ),
+                          //     SizedBox(width: 10.w),
+                          //     Container(
+                          //       padding: EdgeInsets.only(
+                          //         left: 10.w,
+                          //         right: 10.w,
+                          //         top: 5.h,
+                          //         bottom: 5.h,
+                          //       ),
+                          //       decoration: BoxDecoration(
+                          //         borderRadius: BorderRadius.circular(4.r),
+                          //         color: Color(0xFFFFFFFF),
+                          //         boxShadow: [
+                          //           BoxShadow(
+                          //             offset: Offset(0, 0),
+                          //             spreadRadius: 0,
+                          //             blurRadius: 1,
+                          //             color: Color.fromARGB(63, 0, 0, 0),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //       child: Row(
+                          //         children: [
+                          //           Container(
+                          //             width: 30.w,
+                          //             height: 30.h,
+                          //             decoration: BoxDecoration(
+                          //               shape: BoxShape.circle,
+                          //               color: Color(0xFF086E86),
+                          //             ),
+                          //             child: Icon(
+                          //               Icons.location_on,
+                          //               color: Color(0xFFDE4B65),
+                          //             ),
+                          //           ),
+                          //           SizedBox(width: 8.w),
+                          //           Column(
+                          //             crossAxisAlignment:
+                          //                 CrossAxisAlignment.start,
+                          //             children: [
+                          //               Text(
+                          //                 "ARH Hardware",
+                          //                 style: GoogleFonts.inter(
+                          //                   fontSize: 16.sp,
+                          //                   fontWeight: FontWeight.w400,
+                          //                   color: Color(0xFF000000),
+                          //                   letterSpacing: -1,
+                          //                 ),
+                          //               ),
+                          //               Text(
+                          //                 "Sri Saranakara Road",
+                          //                 style: GoogleFonts.inter(
+                          //                   fontSize: 12.sp,
+                          //                   fontWeight: FontWeight.w400,
+                          //                   color: Color.fromARGB(127, 0, 0, 0),
+                          //                   letterSpacing: -1,
+                          //                 ),
+                          //               ),
+                          //             ],
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
                           SizedBox(height: 15.h),
                           Container(
                             margin: EdgeInsets.only(left: 15.w, right: 15.w),
@@ -372,7 +401,6 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                                   double dropLat = dropLocations.first.latitude;
                                   double dropLon =
                                       dropLocations.first.longitude;
-
                                   final body = GetDistanceBodyModel(
                                     name: "${box.get("fullName")}",
                                     mobNo: "${box.get("mobNo")}",
@@ -381,9 +409,6 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                                     destName: dropController.text,
                                     origLat: pickupLat,
                                     origLon: pickupLon,
-                                    // destName: dropController.text,
-                                    // origLat: 26.9124,
-                                    // origLon: 75.7873,
                                     destLat: dropLat,
                                     destLon: dropLon,
                                   );
@@ -742,166 +767,477 @@ class _RideCardState extends State<RideCard> {
   }
 }
 
-class OpenDraggle extends StatefulWidget {
-  const OpenDraggle({super.key});
+///////////////////////////////// My Design =======================
+
+class RideCardMyCode extends StatefulWidget {
+  final TextEditingController pickupController;
+  final TextEditingController dropController;
+  const RideCardMyCode({
+    super.key,
+    required this.pickupController,
+    required this.dropController,
+  });
 
   @override
-  State<OpenDraggle> createState() => _OpenDraggleState();
+  State<RideCardMyCode> createState() => _RideCardMyCodeState();
 }
 
-class _OpenDraggleState extends State<OpenDraggle> {
+class _RideCardMyCodeState extends State<RideCardMyCode> {
+  bool showPickupField = false;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      decoration: BoxDecoration(color: Colors.white),
-      child: Padding(
-        padding: EdgeInsets.only(left: 15.w, right: 15.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 40.h),
-            Container(
-              width: 50.w,
-              height: 50.h,
-              color: Colors.white,
-              child: Card(
-                color: Colors.white,
-                shape: CircleBorder(),
-                child: Padding(
-                  padding: EdgeInsets.only(left: 5.w),
-                  child: Icon(Icons.arrow_back_ios),
-                ),
+    final box = Hive.box("folder");
+
+    // return Container(
+    //   width: double.infinity,
+    //   decoration: BoxDecoration(
+    //     color: Colors.white,
+    //     borderRadius: BorderRadius.circular(13.r),
+    //     boxShadow: [
+    //       BoxShadow(
+    //         offset: const Offset(0, 2),
+    //         blurRadius: 3,
+    //         spreadRadius: 2,
+    //         color: const Color.fromARGB(28, 0, 0, 0),
+    //       ),
+    //     ],
+    //   ),
+    //   child: Padding(
+    //     padding: EdgeInsets.symmetric(vertical: 15.h),
+    //     child: Row(
+    //       crossAxisAlignment: CrossAxisAlignment.start,
+    //       children: [
+    //         /// Left side pickup/drop indicators
+    //         SizedBox(width: 5.w),
+    //         Column(
+    //           children: [
+    //             Text(
+    //               "Pickup",
+    //               style: GoogleFonts.inter(
+    //                 fontSize: 15.sp,
+    //                 fontWeight: FontWeight.bold,
+    //                 color: Colors.black,
+    //               ),
+    //             ),
+    //             SizedBox(height: 8.h),
+    //             for (int i = 0; i < 5; i++) ...[
+    //               CircleAvatar(
+    //                 backgroundColor: const Color(0xFF086E86),
+    //                 radius: 3.r,
+    //               ),
+    //               SizedBox(height: 4.h),
+    //             ],
+    //             SizedBox(height: 4.h),
+    //             Text(
+    //               "Drop",
+    //               style: GoogleFonts.inter(
+    //                 fontSize: 14.sp,
+    //                 fontWeight: FontWeight.bold,
+    //                 color: Colors.black,
+    //               ),
+    //             ),
+    //           ],
+    //         ),
+    //         SizedBox(width: 12.w),
+    //         /// Middle column (pickup + drop fields)
+    //         Expanded(
+    //           child: Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: [
+    //               /// Pickup area
+    //               if (!showPickupField) ...[
+    //                 Row(
+    //                   children: [
+    //                     Text(
+    //                       "${box.get("firstName")} ${box.get("lastName")}",
+    //                       style: GoogleFonts.inter(
+    //                         fontSize: 16.sp,
+    //                         fontWeight: FontWeight.w600,
+    //                         color: Colors.black,
+    //                       ),
+    //                     ),
+    //                     SizedBox(width: 6.w),
+    //                     CircleAvatar(radius: 3, backgroundColor: Colors.grey),
+    //                     SizedBox(width: 6.w),
+    //                     Text(
+    //                       "${box.get("phone")}",
+    //                       style: GoogleFonts.inter(
+    //                         fontSize: 14.sp,
+    //                         fontWeight: FontWeight.w500,
+    //                         color: Colors.grey[600],
+    //                       ),
+    //                     ),
+    //                   ],
+    //                 ),
+    //                 SizedBox(height: 5.h),
+    //                 Text(
+    //                   widget.pickupController.text.isNotEmpty
+    //                       ? widget.pickupController.text
+    //                       : "Fetching location...",
+    //                   maxLines: 1,
+    //                   overflow: TextOverflow.ellipsis,
+    //                   style: GoogleFonts.inter(
+    //                     fontSize: 13.sp,
+    //                     fontWeight: FontWeight.w500,
+    //                     color: Colors.grey[600],
+    //                   ),
+    //                 ),
+    //               ] else ...[
+    //                 TextField(
+    //                   controller: widget.pickupController,
+    //                   style: GoogleFonts.inter(
+    //                     fontSize: 15.sp,
+    //                     fontWeight: FontWeight.w500,
+    //                     color: Colors.black,
+    //                   ),
+    //                   decoration: InputDecoration(
+    //                     isDense: true,
+    //                     contentPadding: EdgeInsets.symmetric(
+    //                       horizontal: 10.w,
+    //                       vertical: 8.h,
+    //                     ),
+    //                     border: OutlineInputBorder(
+    //                       borderRadius: BorderRadius.circular(10.r),
+    //                       borderSide: const BorderSide(color: Colors.black),
+    //                     ),
+    //                     focusedBorder: OutlineInputBorder(
+    //                       borderRadius: BorderRadius.circular(10.r),
+    //                       borderSide: const BorderSide(
+    //                         color: Color(0xFF006970),
+    //                       ),
+    //                     ),
+    //                     hintText: "Enter pickup location",
+    //                     hintStyle: GoogleFonts.inter(
+    //                       fontSize: 14.sp,
+    //                       fontWeight: FontWeight.w500,
+    //                       color: Colors.black54,
+    //                     ),
+    //                   ),
+    //                 ),
+    //               ],
+    //               SizedBox(height: 20.h),
+    //               /// Drop TextField
+    //               TextField(
+    //                 controller: widget.dropController,
+    //                 style: GoogleFonts.inter(
+    //                   fontSize: 15.sp,
+    //                   fontWeight: FontWeight.w500,
+    //                   color: Colors.black,
+    //                 ),
+    //                 decoration: InputDecoration(
+    //                   isDense: true,
+    //                   contentPadding: EdgeInsets.symmetric(
+    //                     horizontal: 10.w,
+    //                     vertical: 8.h, // ✅ Reduced padding
+    //                   ),
+    //                   enabledBorder: OutlineInputBorder(
+    //                     borderRadius: BorderRadius.circular(10.r),
+    //                     borderSide: BorderSide(color: Colors.black, width: 1.w),
+    //                   ),
+    //                   focusedBorder: OutlineInputBorder(
+    //                     borderRadius: BorderRadius.circular(10.r),
+    //                     borderSide: BorderSide(
+    //                       color: const Color(0xFF006970),
+    //                       width: 1.w,
+    //                     ),
+    //                   ),
+    //                   hintText: "Where is your drop?",
+    //                   hintStyle: GoogleFonts.inter(
+    //                     fontSize: 14.sp,
+    //                     fontWeight: FontWeight.w500,
+    //                     color: Colors.black54,
+    //                   ),
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //         /// Right side icons
+    //         Column(
+    //           mainAxisAlignment: MainAxisAlignment.start,
+    //           children: [
+    //             IconButton(
+    //               onPressed: () {
+    //                 setState(() => showPickupField = !showPickupField);
+    //               },
+    //               icon: Icon(
+    //                 showPickupField ? Icons.close : Icons.arrow_forward_ios,
+    //                 color: Colors.black,
+    //                 size: 20.sp,
+    //               ),
+    //             ),
+    //             SizedBox(height: 15.h),
+    //             IconButton(
+    //               onPressed: () {},
+    //               icon: Icon(Icons.add, color: Colors.black, size: 20.sp),
+    //             ),
+    //           ],
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    // );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Address Card
+        Container(
+          margin: EdgeInsets.only(top: 15.h),
+          padding: EdgeInsets.only(
+            left: 12.w,
+            right: 12.w,
+            top: 18.h,
+            bottom: 18.h,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15.r),
+            boxShadow: [
+              BoxShadow(
+                offset: Offset(0, 2),
+                blurRadius: 3,
+                spreadRadius: 2,
+                color: Color.fromARGB(28, 0, 0, 0),
               ),
-            ),
-            SizedBox(height: 20.h),
-            Card(
-              color: Colors.white,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: 15.w,
-                  right: 15.w,
-                  top: 20.h,
-                  bottom: 20.h,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.circle, size: 12.sp, color: Colors.green),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text.rich(
+                        Text.rich(
+                          TextSpan(
+                            children: [
                               TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Md Sajivddin Ansari",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: " . ",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: "9508937828",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              "jhotwara kanta jaipura rajsthan",
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.black,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                        Spacer(),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(50.r),
-                          onTap: () {},
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              left: 6.w,
-                              top: 6.h,
-                              bottom: 6.h,
-                            ),
-                            child: Icon(Icons.arrow_forward_ios, size: 18.sp),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            style: GoogleFonts.inter(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.only(
-                                left: 10.w,
-                                right: 10.w,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.r),
-                                borderSide: BorderSide(
-                                  color: Color(0xFF006970),
+                                text:
+                                    "${box.get("firstName")} ${box.get("lastName")} ·",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15.sp,
                                 ),
                               ),
-                              hintText: "Where is your drop?",
-                              hintStyle: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black54,
+                              TextSpan(
+                                text: " ${box.get("phone")}",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13.sp,
+                                  color: Colors.grey[700],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                        SizedBox(width: 15.w),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(50.r),
-                          onTap: () {},
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              left: 6.w,
-                              top: 6.h,
-                              bottom: 6.h,
-                            ),
-                            child: Icon(Icons.add, size: 20.sp),
+                        SizedBox(height: 2.h),
+                        Text(
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          // "60 Feet Rd, Sanjay Nagar, Jagann...",
+                          widget.pickupController.text,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12.sp,
+                            color: Colors.grey[700],
                           ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
+                  InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20.r),
+                          ),
+                        ),
+                        //builder: (context) => const PickupSlotBottomSheet(),
+                        builder: (context) {
+                          return FractionallySizedBox(
+                            heightFactor: 0.70, // 👈 85% screen height
+                            child: const PickupScreen(),
+                          );
+                        },
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFE5F0F1),
+                      ),
+                      child: Icon(Icons.arrow_forward_ios, size: 20.w),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 15.h),
+              Row(
+                children: [
+                  Icon(Icons.location_on, size: 14.sp, color: Colors.red),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: TextField(
+                      controller: widget.dropController,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hint: Text(
+                          "Where is your Drop ?",
+                          style: GoogleFonts.poppins(fontSize: 14.sp),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 10.h,
+                          horizontal: 10.w,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                          borderSide: BorderSide(
+                            color: Colors.blueAccent,
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFE5F0F1),
+                    ),
+                    child: Icon(Icons.add, size: 20.sp),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: 20.h),
+      ],
+    );
+  }
+}
+
+class PickupScreen extends StatefulWidget {
+  const PickupScreen({super.key});
+
+  @override
+  State<PickupScreen> createState() => _PickupScreenState();
+}
+
+class _PickupScreenState extends State<PickupScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 15.w),
+      child: Stack(
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 10.h),
+              Center(
+                child: Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+              SizedBox(height: 15.h),
+              TextField(
+                decoration: InputDecoration(
+                  isDense: true,
+                  hint: Text(
+                    "Enter Name",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 10.h,
+                    horizontal: 10.w,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: Colors.blueAccent, width: 1),
+                  ),
+                ),
+              ),
+              SizedBox(height: 15.h),
+              TextField(
+                decoration: InputDecoration(
+                  isDense: true,
+                  hint: Text(
+                    "Phone Number",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 10.h,
+                    horizontal: 10.w,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: Colors.blueAccent, width: 1),
+                  ),
+                ),
+              ),
+              SizedBox(height: 15.h),
+              TextField(
+                decoration: InputDecoration(
+                  isDense: true,
+                  hint: Text(
+                    "Enter Your Pickup",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 10.h,
+                    horizontal: 10.w,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide(color: Colors.blueAccent, width: 1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
