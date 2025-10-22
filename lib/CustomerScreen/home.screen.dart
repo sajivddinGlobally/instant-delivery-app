@@ -269,6 +269,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final driverName = data['name'] ?? 'Unknown';
     final driverPhone = data['phone'] ?? 'N/A';
+    log(driverName);
+    log(driverPhone);
 
     Fluttertoast.showToast(
       msg: "Driver Assigned: $driverName ($driverPhone)",
