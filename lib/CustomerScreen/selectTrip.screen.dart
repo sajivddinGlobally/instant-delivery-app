@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/MyOrderScreen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/pickup.screen.dart';
@@ -12,10 +13,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SelectTripScreen extends ConsumerStatefulWidget {
   // final GetDistanceBodyModel originalBody;
@@ -24,6 +27,9 @@ class SelectTripScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<SelectTripScreen> createState() => _SelectTripScreenState();
 }
+
+var box = Hive.box("folder");
+var id = box.get("id");
 
 class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   List<Map<String, dynamic>> selectTrip = [
@@ -46,54 +52,236 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       "discount": "₹188.71",
     },
   ];
-
-  // bool isCheck = false;
   GoogleMapController? _mapController;
   LatLng? _currentLatlng;
   int selectIndex = 0;
   bool isBooking = false;
+  Map<String, dynamic>? assignedDriver;
+  bool isSocketConnected = false;
+  final List<Map<String, dynamic>> messages = [];
+  IO.Socket? socket;
+  bool _isCheckingLocation = true;
+  Position? _currentPosition;
+  String? currentAddress;
+  StreamSubscription<Position>? _locationSubscription;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _getCurrentLoacation();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _checkLocationPermission();
+      if (mounted) _connectSocket();
+    });
   }
 
-  Future<void> _getCurrentLoacation() async {
-    LocationPermission permission;
-    permission = await Geolocator.checkPermission();
+  // ---------------- SAFE SETSTATE ----------------
+  void safeSetState(VoidCallback fn) {
+    if (mounted) setState(fn);
+  }
 
+  // ---------------- LOCATION PERMISSION ----------------
+  Future<void> _checkLocationPermission() async {
+    if (!mounted) return;
+    safeSetState(() => _isCheckingLocation = true);
+
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      safeSetState(() => _isCheckingLocation = false);
+      Fluttertoast.showToast(msg: "Please enable location services.");
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Location permission denied")),
-        );
+        safeSetState(() => _isCheckingLocation = false);
+        Fluttertoast.showToast(msg: "Location permission denied.");
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Location permission permanently denied. Please enable it from settings.",
-          ),
-        ),
-      );
+      safeSetState(() => _isCheckingLocation = false);
+      Fluttertoast.showToast(msg: "Location permission denied forever.");
       return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    // ✅ Get initial position
+    try {
+      _currentPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      await _updateAddress();
 
-    setState(() {
-      _currentLatlng = LatLng(position.latitude, position.longitude);
+      safeSetState(() => _isCheckingLocation = false);
+    } catch (e) {
+      log('Error getting location: $e');
+      safeSetState(() => _isCheckingLocation = false);
+    }
+  }
+
+  // ---------------- UPDATE ADDRESS ----------------
+  Future<void> _updateAddress() async {
+    if (_currentPosition == null) return;
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        safeSetState(() {
+          currentAddress =
+              "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
+        });
+      } else {
+        safeSetState(() {
+          currentAddress =
+              "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
+        });
+      }
+    } catch (e) {
+      log('Error updating address: $e');
+      safeSetState(() {
+        currentAddress =
+            "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
+      });
+    }
+  }
+
+  // ---------------- UPDATE USER LOCATION TO SOCKET ----------------
+  void updateUserLocation(double lat, double lon) {
+    if (socket != null && socket!.connected) {
+      socket!.emit('user:location_update', {
+        'userId': id, // Replace with actual user id
+        'lat': lat,
+        'lon': lon,
+      });
+      log('📤 Location sent → lat: $lat, lon: $lon');
+    } else {
+      log('⚠️ Socket not connected!');
+    }
+  }
+
+  // ---------------- SOCKET LIVE UPDATES ----------------
+  void listenForLiveUpdates() {
+    socket?.on('user:location_update', (data) {
+      if (!mounted) return;
+      log('📥 Live location from server: $data');
+    });
+  }
+
+  // ---------------- LOCATION STREAM ----------------
+  void startLocationStream() {
+    _locationSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 10, // every 10 meters
+          ),
+        ).listen((Position position) async {
+          updateUserLocation(position.latitude, position.longitude);
+          _currentPosition = position;
+          await _updateAddress();
+          safeSetState(() {});
+        });
+  }
+
+  // ---------------- SOCKET CONNECTION ----------------
+  void _connectSocket() {
+    const socketUrl = 'https://weloads.com';
+    socket = IO.io(socketUrl, {
+      'transports': ['websocket'],
+      'autoConnect': false,
     });
 
-    _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatlng!));
+    // ✅ Log all events for debugging
+    socket!.onAny((event, data) {
+      log("📡 SOCKET EVENT: $event → $data");
+    });
+
+    socket!.connect();
+
+    socket!.onConnect((_) {
+      log('✅ Socket connected');
+      Fluttertoast.showToast(msg: "Socket connected");
+      isSocketConnected = true;
+      listenForLiveUpdates();
+      startLocationStream();
+      safeSetState(() {});
+    });
+
+    socket!.onDisconnect((_) {
+      log('❌ Socket disconnected');
+      Fluttertoast.showToast(msg: "Socket disconnected");
+      isSocketConnected = false;
+      safeSetState(() {});
+    });
+
+    // ✅ DRIVER ASSIGNED EVENT
+    socket!.on('user:driver_assigned', (data) {
+      if (!mounted) return;
+      log('👨‍✈️ Driver Assigned: $data');
+
+      try {
+        final driver = data['driver'] ?? data;
+        final driverName = driver?['name'] ?? 'Unknown';
+        final driverPhone = driver?['phone'] ?? 'N/A';
+
+        Fluttertoast.showToast(
+          msg: "Driver Assigned: $driverName ($driverPhone)",
+          toastLength: Toast.LENGTH_LONG,
+        );
+
+        safeSetState(() {
+          assignedDriver = driver;
+        });
+      } catch (e) {
+        log('⚠️ Error parsing driver data: $e');
+      }
+    });
+
+    // ✅ MESSAGE EVENT
+    socket!.on('receive_message', (data) {
+      if (!mounted) return;
+      log('📩 Message received: $data');
+      final messageText = data is Map && data.containsKey('message')
+          ? data['message']
+          : data.toString();
+      safeSetState(() {
+        messages.add({'text': messageText, 'isMine': false});
+      });
+    });
+  }
+
+  // ---------------- DISPOSE ----------------
+  @override
+  void dispose() {
+    // Stop location updates
+    _locationSubscription?.cancel();
+    _locationSubscription = null;
+
+    // Dispose Google Map safely
+    if (_mapController != null) {
+      try {
+        _mapController?.dispose();
+      } catch (e) {
+        log("Map dispose error: $e");
+      }
+      _mapController = null;
+    }
+
+    // Disconnect socket safely
+    if (socket != null) {
+      socket!.clearListeners(); // ✅ removes all listeners
+      socket!.disconnect();
+      socket!.close();
+      socket = null;
+    }
+
+    super.dispose();
   }
 
   @override
@@ -102,19 +290,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     final distanceProviderState = ref.watch(getDistanceProvider);
     return Scaffold(
       backgroundColor: Colors.white,
-      // floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
-      // floatingActionButton: FloatingActionButton(
-      //   mini: true,
-      //   backgroundColor: Color(0xFFFFFFFF),
-      //   shape: CircleBorder(),
-      //   onPressed: () {
-      //     Navigator.pop(context);
-      //   },
-      //   child: Padding(
-      //     padding: EdgeInsets.only(left: 8.w),
-      //     child: Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
-      //   ),
-      // ),
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: Padding(
@@ -635,12 +810,12 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                   await ref
                                       .read(bookDeliveryProvider.notifier)
                                       .bookInstantDelivery(body);
-                                  Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                      builder: (context) => PickupScreen(),
-                                    ),
-                                  );
+                                  // Navigator.push(
+                                  //   context,
+                                  //   CupertinoPageRoute(
+                                  //     builder: (context) => PickupScreen(),
+                                  //   ),
+                                  // );
                                   setState(() {
                                     isBooking = false;
                                   });

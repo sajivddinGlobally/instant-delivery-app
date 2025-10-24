@@ -1035,7 +1035,7 @@ class _PickupScreenState extends State<PickupScreen> {
           clipBehavior: Clip.none,
           children: [
             Positioned(
-              top: -50,
+              top: -55,
               left: 0,
               right: 0,
               child: Container(
@@ -1043,7 +1043,7 @@ class _PickupScreenState extends State<PickupScreen> {
                 height: 50.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.amber,
+                  color: Colors.white,
                 ),
                 child: IconButton(
                   onPressed: () {
@@ -1144,7 +1144,7 @@ class _PickupScreenState extends State<PickupScreen> {
                   SizedBox(height: 15.h),
                   TextField(
                     controller: _pickupController,
-                    
+
                     decoration: InputDecoration(
                       isDense: true,
                       hint: Text(
