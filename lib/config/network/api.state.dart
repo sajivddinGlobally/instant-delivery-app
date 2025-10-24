@@ -20,8 +20,8 @@ import 'package:retrofit/retrofit.dart';
 
 part 'api.state.g.dart';
 
-@RestApi(baseUrl: "https://weloads.com/api")
-//@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
+// @RestApi(baseUrl: "https://weloads.com/api")
+@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
 abstract class APIStateNetwork {
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
 
@@ -30,8 +30,7 @@ abstract class APIStateNetwork {
 
   @POST("/v1/user/registerVerify")
   Future<VerifyRegisterResModel> verifyRegister(
-    @Body() VerifyRegisterBodyModel body,
-  );
+    @Body() VerifyRegisterBodyModel body,);
 
   @POST("/v1/user/login")
   Future<LoginResModel> login(@Body() LoginBodyModel body);
