@@ -178,7 +178,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       _setupEventListeners();
       safeSetState(() {});
 
-    });*//*
+    });*/ /*
 
     socket!.onConnect((_) {
       log('✅ Socket connected');
@@ -918,8 +918,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   }
 }*/
 
-
-
 import 'dart:async';
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/MyOrderScreen.dart';
@@ -988,12 +986,12 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   StreamSubscription<Position>? _locationSubscription;
   // Add these vars for improved socket handling
   // bool _listenersSetup = false;
-  String? userId;  // Cache it
+  String? userId; // Cache it
 
   @override
   void initState() {
     super.initState();
-    userId = box.get("id")?.toString();  // Safe cast
+    userId = box.get("id")?.toString(); // Safe cast
     if (userId == null) {
       log('❌ User ID missing from Hive!');
       // Handle: Navigate back or fetch ID
@@ -1021,19 +1019,19 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
         final place = placemarks.first;
         safeSetState(() {
           currentAddress =
-          "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
+              "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
         });
       } else {
         safeSetState(() {
           currentAddress =
-          "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
+              "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
         });
       }
     } catch (e) {
       log('Error updating address: $e');
       safeSetState(() {
         currentAddress =
-        "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
+            "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
       });
     }
   }
@@ -1041,13 +1039,13 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   // ---------------- UPDATE USER LOCATION TO SOCKET ---------------- (with ack)
   void updateUserLocation(double lat, double lon) {
     if (socket != null && socket!.connected && userId != null) {
-      socket!.emitWithAck('user:location_update', {
-        'userId': userId,
-        'lat': lat,
-        'lon': lon,
-      }, ack: (data) {
-        log('📤 Location ACK: $data');  // Server confirms receipt
-      });
+      socket!.emitWithAck(
+        'user:location_update',
+        {'userId': userId, 'lat': lat, 'lon': lon},
+        ack: (data) {
+          log('📤 Location ACK: $data'); // Server confirms receipt
+        },
+      );
       log('📤 Location sent → lat: $lat, lon: $lon, userId: $userId');
     } else {
       log('⚠️ Socket not connected or userId null!');
@@ -1072,9 +1070,10 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
 
   // ---------------- SOCKET CONNECTION ----------------
   void _connectSocket() {
-    const socketUrl = 'http://192.168.1.43:4567';
+    // const socketUrl = 'http://192.168.1.43:4567';
+    const socketUrl = 'https://weloads.com';
     socket = IO.io(socketUrl, <String, dynamic>{
-      'transports': ['websocket', 'polling'],  // Fallback
+      'transports': ['websocket', 'polling'], // Fallback
       'autoConnect': false,
       // 'auth': {'token': userToken},  // If needed
     });
@@ -1106,11 +1105,17 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       if (userId != null) {
         final data = {
           'userId': userId,
-          'role': 'customer'  // Backend handler के अनुसार
+          'role': 'customer', // Backend handler के अनुसार
         };
-        socket!.emitWithAck('registerCustomer', data, ack: (ackData) {
-          log('🔐 Registration ACK: $ackData');  // Backend से response आएगा (e.g., success/error)
-        });
+        socket!.emitWithAck(
+          'registerCustomer',
+          data,
+          ack: (ackData) {
+            log(
+              '🔐 Registration ACK: $ackData',
+            ); // Backend से response आएगा (e.g., success/error)
+          },
+        );
         log('📤 RegisterCustomer emitted: userId=$userId, role=customer');
       } else {
         log('❌ No userId for registration!');
@@ -1134,7 +1139,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       log('🔄 Reconnected: Attempt ${data['data']['attempts']}');
       isSocketConnected = true;
       safeSetState(() {});
-      socket!.emit('join:user', {'userId': userId});  // Re-join
+      socket!.emit('join:user', {'userId': userId}); // Re-join
       _setupEventListeners(); // Re-setup listeners on reconnect
     });
 
@@ -1145,7 +1150,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
 
   // ✅ Centralized method to set up event listeners (avoids duplicates)
   void _setupEventListeners() {
-
     // _listenersSetup = true;
 
     // ✅ DRIVER ASSIGNED EVENT (merged logic into handler)
@@ -1167,7 +1171,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   // ✅ Enhanced handler with full logic from previous duplicate
   Future<void> _handleAssigned(dynamic payload) async {
     if (!mounted) return;
-    log('👨‍✈️ Driver Assigned RAW: $payload');  // Full payload
+    log('👨‍✈️ Driver Assigned RAW: $payload'); // Full payload
 
     try {
       final deliveryId = payload['deliveryId'] as String?;
@@ -1175,12 +1179,13 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
         log('⚠️ Missing deliveryId in payload');
         return;
       }
-      print("✅ Delivery Assigned: $deliveryId");
+      log("✅ Delivery Assigned: $deliveryId");
 
-      final driver = payload['driver'] ?? payload;  // Fallback to whole payload
+      final driver = payload['driver'] ?? payload; // Fallback to whole payload
       final driverName = driver?['name'] ?? 'Unknown';
       final driverPhone = driver?['phone'] ?? 'N/A';
-
+      log(driverName);
+      log(driverPhone);
       Fluttertoast.showToast(
         msg: "Driver Assigned: $driverName ($driverPhone)",
         toastLength: Toast.LENGTH_LONG,
@@ -1213,7 +1218,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           ),
         );
       }
-
     } catch (e) {
       log('⚠️ Error parsing driver data: $e');
       log('Payload type: ${payload.runtimeType}');
@@ -1244,7 +1248,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       socket!.off('receive_message');
       socket!.clearListeners(); // ✅ removes all listeners
       socket!.disconnect();
-      socket!.dispose();  // Better than close()
+      socket!.dispose(); // Better than close()
       socket = null;
     }
 
@@ -1639,7 +1643,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                     SizedBox(width: 10.w),
                                     Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           //"Delivery Go",
@@ -1687,7 +1691,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                     Spacer(),
                                     Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           // "₹170.71",
@@ -1710,7 +1714,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                               color: Color(0xFF6B6B6B),
                                               letterSpacing: 0,
                                               decoration:
-                                              TextDecoration.lineThrough,
+                                                  TextDecoration.lineThrough,
                                               decorationColor: Color(
                                                 0xFF6B6B6B,
                                               ),
@@ -1738,99 +1742,99 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                         onPressed: isBooking
                             ? null
                             : () async {
-                          setState(() => isBooking = true);
-                          try {
-                            final selectedVehicle = snp.data[selectIndex];
-                            final body = BookInstantDeliveryBodyModel(
-                              vehicleTypeId:
-                              selectedVehicle.vehicleTypeId,
-                              //selectedVehicle.vehicleType,
-                              price: double.parse(
-                                selectedVehicle.price,
-                              ).toInt(),
-                              //                                             price: (selectedVehicle.price.contains('.'))
-                              // ? double.parse(selectedVehicle.price).toInt()
-                              // : int.parse(selectedVehicle.price),
-                              isCopanCode: false,
-                              copanId: null.toString(),
-                              copanAmount: 0,
-                              coinAmount: 0,
-                              taxAmount: 18,
-                              userPayAmount: double.parse(
-                                selectedVehicle.price,
-                              ).toInt(),
-                              distance: selectedVehicle.distance,
-                              // mobNo: selectedVehicle.mobNo,
-                              mobNo: "98767655678",
-                              name: selectedVehicle.name,
-                              // origName: selectedVehicle.origName,
-                              // origLat: selectedVehicle.origLat,
-                              // origLon: selectedVehicle.origLon,
-                              origName: "jaipur",
-                              origLat: 26.9124,
-                              origLon: 75.7873,
-                              destName: selectedVehicle.destName,
-                              destLat: selectedVehicle.destLat,
-                              destLon: selectedVehicle.destLon,
-                              picUpType: selectedVehicle.picUpType,
-                            );
-                            final result = await ref
-                                .read(bookDeliveryProvider.notifier)
-                                .bookInstantDelivery(body);
-                            // log('Booking Response: $result');  // Added logging
-                            // Navigator.push(
-                            //   context,
-                            //   CupertinoPageRoute(
-                            //     builder: (context) => PickupScreen(),
-                            //   ),
-                            // );
-                            setState(() {
-                              isBooking = false;
-                            });
-                          } catch (e, st) {
-                            setState(() {
-                              isBooking = false;
-                            });
-                            log("${e.toString()} / ${st.toString()}");
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Booking failed: $e"),
-                                behavior: SnackBarBehavior.floating,
-                                margin: EdgeInsets.only(
-                                  left: 15.w,
-                                  bottom: 15.h,
-                                  right: 15.w,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    15.r,
-                                  ),
-                                  side: BorderSide.none,
-                                ),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        },
+                                setState(() => isBooking = true);
+                                try {
+                                  final selectedVehicle = snp.data[selectIndex];
+                                  final body = BookInstantDeliveryBodyModel(
+                                    vehicleTypeId:
+                                        selectedVehicle.vehicleTypeId,
+                                    //selectedVehicle.vehicleType,
+                                    price: double.parse(
+                                      selectedVehicle.price,
+                                    ).toInt(),
+                                    //                                             price: (selectedVehicle.price.contains('.'))
+                                    // ? double.parse(selectedVehicle.price).toInt()
+                                    // : int.parse(selectedVehicle.price),
+                                    isCopanCode: false,
+                                    copanId: null.toString(),
+                                    copanAmount: 0,
+                                    coinAmount: 0,
+                                    taxAmount: 18,
+                                    userPayAmount: double.parse(
+                                      selectedVehicle.price,
+                                    ).toInt(),
+                                    distance: selectedVehicle.distance,
+                                    // mobNo: selectedVehicle.mobNo,
+                                    mobNo: "98767655678",
+                                    name: selectedVehicle.name,
+                                    // origName: selectedVehicle.origName,
+                                    // origLat: selectedVehicle.origLat,
+                                    // origLon: selectedVehicle.origLon,
+                                    origName: "jaipur",
+                                    origLat: 26.9124,
+                                    origLon: 75.7873,
+                                    destName: selectedVehicle.destName,
+                                    destLat: selectedVehicle.destLat,
+                                    destLon: selectedVehicle.destLon,
+                                    picUpType: selectedVehicle.picUpType,
+                                  );
+                                  final result = await ref
+                                      .read(bookDeliveryProvider.notifier)
+                                      .bookInstantDelivery(body);
+                                  // log('Booking Response: $result');  // Added logging
+                                  // Navigator.push(
+                                  //   context,
+                                  //   CupertinoPageRoute(
+                                  //     builder: (context) => PickupScreen(),
+                                  //   ),
+                                  // );
+                                  setState(() {
+                                    isBooking = false;
+                                  });
+                                } catch (e, st) {
+                                  setState(() {
+                                    isBooking = false;
+                                  });
+                                  log("${e.toString()} / ${st.toString()}");
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Booking failed: $e"),
+                                      behavior: SnackBarBehavior.floating,
+                                      margin: EdgeInsets.only(
+                                        left: 15.w,
+                                        bottom: 15.h,
+                                        right: 15.w,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          15.r,
+                                        ),
+                                        side: BorderSide.none,
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
                         child: isBooking
                             ? Center(
-                          child: SizedBox(
-                            width: 30.w,
-                            height: 30.h,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.w,
-                            ),
-                          ),
-                        )
+                                child: SizedBox(
+                                  width: 30.w,
+                                  height: 30.h,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.w,
+                                  ),
+                                ),
+                              )
                             : Text(
-                          "Book Now",
-                          style: GoogleFonts.inter(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFFFFFFFF),
-                          ),
-                        ),
+                                "Book Now",
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFFFFFFFF),
+                                ),
+                              ),
                       ),
                       SizedBox(height: 10.h),
                     ],
@@ -1839,7 +1843,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
               ),
             ],
           );
-
         },
         error: (error, stackTrace) {
           log(stackTrace.toString());
@@ -1927,8 +1930,13 @@ class DeliveryDetailsScreen extends StatelessWidget {
                           radius: 20.r,
                           backgroundColor: Colors.grey[300],
                           child: Text(
-                            driverName.isNotEmpty ? driverName[0].toUpperCase() : '?',
-                            style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                            driverName.isNotEmpty
+                                ? driverName[0].toUpperCase()
+                                : '?',
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         SizedBox(width: 12.w),
@@ -1970,7 +1978,11 @@ class DeliveryDetailsScreen extends StatelessWidget {
                   padding: EdgeInsets.all(16.w),
                   child: Row(
                     children: [
-                      Icon(Icons.lock_outline, color: Colors.blue[700], size: 24.sp),
+                      Icon(
+                        Icons.lock_outline,
+                        color: Colors.blue[700],
+                        size: 24.sp,
+                      ),
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Column(

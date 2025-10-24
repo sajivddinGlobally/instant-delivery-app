@@ -92,6 +92,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               InkWell(
                 onTap: () {
                   box.clear();
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text("Sign out successfully"),
