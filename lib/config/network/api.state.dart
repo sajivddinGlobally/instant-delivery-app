@@ -22,8 +22,8 @@ import '../../data/Model/CancelOrderModel.dart';
 
 part 'api.state.g.dart';
 
-// @RestApi(baseUrl: "https://weloads.com/api")
-@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
+@RestApi(baseUrl: "https://weloads.com/api")
+//@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
 abstract class APIStateNetwork {
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
 
@@ -32,7 +32,8 @@ abstract class APIStateNetwork {
 
   @POST("/v1/user/registerVerify")
   Future<VerifyRegisterResModel> verifyRegister(
-    @Body() VerifyRegisterBodyModel body,);
+    @Body() VerifyRegisterBodyModel body,
+  );
 
   @POST("/v1/user/login")
   Future<LoginResModel> login(@Body() LoginBodyModel body);
@@ -60,6 +61,7 @@ abstract class APIStateNetwork {
   Future<BookInstantDeliveryResModel> bookInstantDelivery(
     @Body() BookInstantDeliveryBodyModel body,
   );
+<<<<<<< HEAD
 
 
   @POST("/v1/user/deliveryCancelledByUser")
@@ -69,4 +71,6 @@ abstract class APIStateNetwork {
 
 
 
+=======
+>>>>>>> 4b92b179405ef1e69babd34810510f910e285240
 }
