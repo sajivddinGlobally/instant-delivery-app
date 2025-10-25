@@ -53,7 +53,9 @@ class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
               padding: EdgeInsets.zero,
               itemCount: 4,
               itemBuilder: (context, index) {
-                return Padding(
+                return
+
+                  Padding(
                   padding: EdgeInsets.only(
                     bottom: 15.h,
                     left: 25.w,

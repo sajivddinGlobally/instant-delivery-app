@@ -18,6 +18,8 @@ import 'package:delivery_mvp_app/data/Model/verifyRegisterResModel.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../../data/Model/CancelOrderModel.dart';
+
 part 'api.state.g.dart';
 
 // @RestApi(baseUrl: "https://weloads.com/api")
@@ -59,5 +61,12 @@ abstract class APIStateNetwork {
     @Body() BookInstantDeliveryBodyModel body,
   );
 
-  
+
+  @POST("/v1/user/deliveryCancelledByUser")
+  Future<HttpResponse<dynamic>> deliveryCancelledByUser(
+      @Body() CancelOrderModel body,
+      );
+
+
+
 }
