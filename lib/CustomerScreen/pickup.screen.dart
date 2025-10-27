@@ -954,6 +954,7 @@ class _CancelBottomSheetContentState extends State<CancelBottomSheetContent> {
                                 );
                                 return;
                               }
+
                               String reason;
                               if (selectedIndex == reasons.length - 1) {
                                 reason = _otherController.text.trim();
@@ -968,23 +969,25 @@ class _CancelBottomSheetContentState extends State<CancelBottomSheetContent> {
                               } else {
                                 reason = reasons[selectedIndex];
                               }
+
                               setState(() {
                                 _isLoading = true;
                               });
-                              widget.onCancel();
-                              await cancelOrderApiStatic(
-                                widget.deliveryId,
-                                reason,
-                              );
-                              if (mounted) {
-                                Navigator.push(
-                                  context,
-                                  CupertinoPageRoute(
-                                    builder: (context) => SelectTripScreen(),
-                                  ),
+
+                              try {
+                                await cancelOrderApiStatic(
+                                  widget.deliveryId,
+                                  reason,
                                 );
+                              } finally {
+                                if (mounted) {
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                }
                               }
                             },
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
                         shape: RoundedRectangleBorder(
@@ -1028,12 +1031,27 @@ class _CancelBottomSheetContentState extends State<CancelBottomSheetContent> {
       final body = CancelOrderModel(txId: txtId, cancellationReason: reason);
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.deliveryCancelledByUser(body);
+
       if (response.code == 0) {
         Fluttertoast.showToast(
           msg: response.message,
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.green,
+          textColor: Colors.white,
+        );
+
+        if (mounted) {
+          // Pop the bottom sheet first
+          Navigator.pop(context);
+          Navigator.pop(context);
+        }
+      } else {
+        Fluttertoast.showToast(
+          msg: response.message,
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
           textColor: Colors.white,
         );
       }
