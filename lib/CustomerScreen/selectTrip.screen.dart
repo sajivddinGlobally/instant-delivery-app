@@ -1,4 +1,3 @@
-
 //
 //
 // import 'dart:async';
@@ -899,10 +898,13 @@
 // }*/
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/MyOrderScreen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/pickup.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/selectPayment.screen.dart';
+import 'package:delivery_mvp_app/config/network/api.state.dart';
+import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
 import 'package:delivery_mvp_app/data/controller/bookInstantDeliveryController.dart';
@@ -967,6 +969,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   // Add these vars for improved socket handling
   // bool _listenersSetup = false;
   String? userId; // Cache it
+  String? bookedTxtId;
 
   @override
   void initState() {
@@ -1050,8 +1053,8 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
 
   // ---------------- SOCKET CONNECTION ----------------
   void _connectSocket() {
-    // const socketUrl = 'http://192.168.1.43:4567';
-    const socketUrl = 'https://weloads.com';
+    const socketUrl = 'http://192.168.1.43:4567';
+    //const socketUrl = 'https://weloads.com';
     socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket', 'polling'], // Fallback
       'autoConnect': false,
@@ -1115,12 +1118,30 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     });
 
     // ✅ Reconnect handler for robustness
+    // socket!.onReconnect((data) {
+    //   log('🔄 Reconnected: Attempt ${data['data']['attempts']}');
+    //   isSocketConnected = true;
+    //   safeSetState(() {});
+    //   socket!.emit('join:user', {'userId': userId}); // Re-join
+    //   _setupEventListeners(); // Re-setup listeners on reconnect
+    // });
     socket!.onReconnect((data) {
-      log('🔄 Reconnected: Attempt ${data['data']['attempts']}');
+      log(
+        '🔄 Reconnected Event Triggered | Raw data: $data (${data.runtimeType})',
+      );
+      // Socket.IO usually sends attempt count as int
+      int? attempt;
+      if (data is Map && data.containsKey('data')) {
+        attempt = data['data']['attempts'];
+      } else if (data is int) {
+        attempt = data;
+      }
+      log('🔄 Reconnected${attempt != null ? ' (Attempt $attempt)' : ''}');
       isSocketConnected = true;
       safeSetState(() {});
-      socket!.emit('join:user', {'userId': userId}); // Re-join
-      _setupEventListeners(); // Re-setup listeners on reconnect
+      // Re-join logic
+      socket!.emit('join:user', {'userId': userId});
+      _setupEventListeners();
     });
 
     socket!.onReconnectError((error) {
@@ -1148,11 +1169,72 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     });
   }
 
+  // Future<void> _handleAssigned(dynamic payload) async {
+  //   if (!mounted) return;
+  //   log(
+  //     '👨‍✈️ DRIVER ASSIGNED FULL PAYLOAD:\n${const JsonEncoder.withIndent('  ').convert(payload)}',
+  //   );
+  //   try {
+  //     final deliveryId = payload['deliveryId'] as String?;
+  //     if (deliveryId == null) {
+  //       log('⚠️ Missing deliveryId in payload');
+  //       return;
+  //     }
+  //     log("✅ Delivery Assigned: $deliveryId");
+  //     final driver = payload['driver'] ?? payload; // Fallback to whole payload
+  //     final driverName = driver?['name'] ?? 'Unknown';
+  //     final driverPhone = driver?['phone'] ?? 'N/A';
+  //     log(driverName);
+  //     log(driverPhone);
+  //     log(payload["amount"]);
+  //     Fluttertoast.showToast(
+  //       msg: "Driver Assigned: $driverName ($driverPhone)",
+  //       toastLength: Toast.LENGTH_LONG,
+  //     );
+  //     safeSetState(() {
+  //       assignedDriver = driver as Map<String, dynamic>?;
+  //     });
+  //     // Optional: Handle OTP or other data from payload
+  //     if (payload.containsKey('otp')) {
+  //       final otp = payload['otp'] as String;
+  //       log('🔑 OTP Received: $otp');
+  //       // Store or display OTP
+  //     }
+  //     if (mounted) {
+  //       Navigator.push(
+  //         context,
+  //         CupertinoPageRoute(
+  //           builder: (context) => PickupScreen(
+  //             deliveryId: deliveryId,
+  //             driver: driver as Map<String, dynamic>,
+  //             otp: payload['otp'] as String?,
+  //             pickup: payload['pickup'] as Map<String, dynamic>?,
+  //             dropoff: payload['dropoff'] as Map<String, dynamic>?,
+  //           ),
+  //         ),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     log('⚠️ Error parsing driver data: $e');
+  //     log('Payload type: ${payload.runtimeType}');
+  //   }
+  // }
+
   Future<void> _handleAssigned(dynamic payload) async {
     if (!mounted) return;
-    log('👨‍✈️ Driver Assigned RAW: $payload'); // Full payload
+
+    log(
+      '👨‍✈️ DRIVER ASSIGNED FULL PAYLOAD:\n${const JsonEncoder.withIndent('  ').convert(payload)}',
+    );
 
     try {
+      if (payload is! Map) {
+        log('⚠️ Invalid payload type: ${payload.runtimeType}');
+        return;
+      }
+
+      log('🧾 Payload keys: ${payload.keys.join(', ')}');
+
       final deliveryId = payload['deliveryId'] as String?;
       if (deliveryId == null) {
         log('⚠️ Missing deliveryId in payload');
@@ -1160,48 +1242,60 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       }
       log("✅ Delivery Assigned: $deliveryId");
 
-      final driver = payload['driver'] ?? payload; // Fallback to whole payload
-      final driverName = driver?['name'] ?? 'Unknown';
-      final driverPhone = driver?['phone'] ?? 'N/A';
-      log(driverName);
-      log(driverPhone);
+      // ✅ Define all fields before using
+      final driver = payload['driver'] ?? {};
+      final driverFirstName = driver['firstName'] ?? '';
+      final driverLastName = driver['lastName'] ?? '';
+      final driverName = '$driverFirstName $driverLastName'.trim();
+      final driverPhone = driver['phone'] ?? 'N/A';
+      final driverRating = driver['averageRating'] ?? 'N/A';
+
+      final otp = payload['otp']?.toString() ?? 'N/A';
+      final amount = payload['amount'] ?? 'N/A';
+      final vehicleType = payload['vehicleType'] ?? {};
+      final pickup = payload['pickup'] ?? {};
+      final dropoff = payload['dropoff'] ?? {};
+      final status = payload['status'] ?? 'N/A';
+
       Fluttertoast.showToast(
-        msg: "Driver Assigned: $driverName ($driverPhone)",
+        msg: "Driver Assigned : $driverName",
         toastLength: Toast.LENGTH_LONG,
       );
 
       safeSetState(() {
         assignedDriver = driver as Map<String, dynamic>?;
-        // Add more state updates here if needed, e.g., currentDeliveryId = deliveryId;
       });
 
-      // Optional: Handle OTP or other data from payload
+      // Handle OTP
       if (payload.containsKey('otp')) {
-        final otp = payload['otp'] as String;
+        final otp = payload['otp'].toString();
         log('🔑 OTP Received: $otp');
-        // Store or display OTP
       }
 
-      // ✅ Navigate to new screen with received data
+      // Navigate
       if (mounted) {
-
-         Navigator.push(
+        Navigator.push(
           context,
           CupertinoPageRoute(
             builder: (context) => PickupScreen(
               deliveryId: deliveryId,
               driver: driver as Map<String, dynamic>,
-              otp: payload['otp'] as String?,
-              pickup: payload['pickup'] as Map<String, dynamic>?,
-              dropoff: payload['dropoff'] as Map<String, dynamic>?,
+              otp: otp,
+              pickup: pickup as Map<String, dynamic>,
+              dropoff: dropoff as Map<String, dynamic>,
+              amount: amount,
+              vehicleType: vehicleType as Map<String, dynamic>,
+              status: status.toString(),
+              txId: bookedTxtId,
             ),
           ),
         );
-
       }
-    } catch (e) {
+    } catch (e, st) {
       log('⚠️ Error parsing driver data: $e');
+      log('Stack trace: $st');
       log('Payload type: ${payload.runtimeType}');
+      Fluttertoast.showToast(msg: e.toString());
     }
   }
 
@@ -1367,7 +1461,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                     ),
                                     TextSpan(
                                       text: " ${phon}",
-
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.w400,
                                         fontSize: 13.sp,
@@ -1759,19 +1852,35 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                                     destLon: selectedVehicle.destLon,
                                     picUpType: selectedVehicle.picUpType,
                                   );
-                                  final result = await ref
-                                      .read(bookDeliveryProvider.notifier)
+
+                                  final service = APIStateNetwork(
+                                    callPrettyDio(),
+                                  );
+                                  final response = await service
                                       .bookInstantDelivery(body);
-                                  // log('Booking Response: $result');  // Added logging
-                                  // Navigator.push(
-                                  //   context,
-                                  //   CupertinoPageRoute(
-                                  //     builder: (context) => PickupScreen(),
-                                  //   ),
-                                  // );
-                                  setState(() {
-                                    isBooking = false;
-                                  });
+                                  if (response.code == 0) {
+                                    bookedTxtId = response
+                                        .data!
+                                        .txId; // 👈 sirf store karlo
+                                    log(
+                                      '✅ Booking created — txtId: $bookedTxtId',
+                                    );
+
+                                    Fluttertoast.showToast(
+                                      msg:
+                                          "Delivery booked, waiting for driver...",
+                                    );
+                                    setState(() {
+                                      isBooking = false;
+                                    });
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: response.message,
+                                    );
+                                    setState(() {
+                                      isBooking = false;
+                                    });
+                                  }
                                 } catch (e, st) {
                                   setState(() {
                                     isBooking = false;
@@ -2054,7 +2163,6 @@ class DeliveryDetailsScreen extends StatelessWidget {
                 onPressed: () {
                   // Navigate to tracking screen or handle next step
                   Fluttertoast.showToast(msg: 'Tracking Delivery...');
-
                 },
                 child: Text(
                   'Track Delivery',

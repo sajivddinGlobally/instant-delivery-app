@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 
@@ -92,23 +93,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               InkWell(
                 onTap: () {
                   box.clear();
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Sign out successfully"),
-                      backgroundColor: Colors.red,
-                      behavior: SnackBarBehavior.floating,
-                      margin: EdgeInsets.only(
-                        left: 15.w,
-                        bottom: 15.h,
-                        right: 15.w,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.r),
-                        side: BorderSide.none,
-                      ),
-                    ),
-                  );
+                  Fluttertoast.showToast(msg: "Sign out successfully");
                   Navigator.pushAndRemoveUntil(
                     context,
                     CupertinoPageRoute(builder: (context) => LoginScreen()),

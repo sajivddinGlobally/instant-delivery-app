@@ -10,18 +10,42 @@ class BookInstantDeliveryNotifier
     extends StateNotifier<AsyncValue<BookInstantDeliveryResModel>> {
   BookInstantDeliveryNotifier() : super(AsyncValue.loading());
 
-  Future<void> bookInstantDelivery(BookInstantDeliveryBodyModel body) async {
+  //   Future<void> bookInstantDelivery(BookInstantDeliveryBodyModel body) async {
+  //     try {
+  //       state = AsyncValue.loading();
+  //       final service = APIStateNetwork(callPrettyDio());
+  //       final response = await service.bookInstantDelivery(body);
+  //       state = AsyncValue.data(response);
+
+  //       log(response.message);
+
+  //       Fluttertoast.showToast(msg: response.message);
+  //     } catch (e, st) {
+  //       state = AsyncValue.error(e, st);
+  //       log("${e.toString()} / ${st.toString()}");
+  //       Fluttertoast.showToast(msg: e.toString());
+  //     }
+  //   }
+  // }
+  Future<BookInstantDeliveryResModel?> bookInstantDelivery(
+    BookInstantDeliveryBodyModel body,
+  ) async {
     try {
       state = AsyncValue.loading();
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.bookInstantDelivery(body);
       state = AsyncValue.data(response);
+
       log(response.message);
       Fluttertoast.showToast(msg: response.message);
+
+      // ✅ Return the response so UI can use it
+      return response;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       log("${e.toString()} / ${st.toString()}");
       Fluttertoast.showToast(msg: e.toString());
+      return null; // ✅ Return null on error
     }
   }
 }

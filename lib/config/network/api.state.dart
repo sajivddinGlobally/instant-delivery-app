@@ -1,7 +1,9 @@
 import 'package:delivery_mvp_app/data/Model/bookInstantDeliveryResModel.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
+import 'package:delivery_mvp_app/data/Model/deliveryCancelByUserResModel..dart';
 import 'package:delivery_mvp_app/data/Model/forgotSendOTPBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/forgotSentOTPRestModel.dart';
+import 'package:delivery_mvp_app/data/Model/getDeliveryHistoryResModel..dart';
 import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/getDistanceResModel.dart';
 import 'package:delivery_mvp_app/data/Model/getProfileModel.dart';
@@ -22,8 +24,8 @@ import '../../data/Model/CancelOrderModel.dart';
 
 part 'api.state.g.dart';
 
-@RestApi(baseUrl: "https://weloads.com/api")
-// @RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
+//@RestApi(baseUrl: "https://weloads.com/api")
+@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
 abstract class APIStateNetwork {
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
 
@@ -62,12 +64,11 @@ abstract class APIStateNetwork {
     @Body() BookInstantDeliveryBodyModel body,
   );
 
-
-
   @POST("/v1/user/deliveryCancelledByUser")
-  Future<HttpResponse<dynamic>> deliveryCancelledByUser(
-      @Body() CancelOrderModel body,
-      );
+  Future<DriverCancelDeliveryResModel> deliveryCancelledByUser(
+    @Body() CancelOrderModel body,
+  );
 
-
+  @POST("/v1/user/getDeliveryHistory")
+  Future<GetDeliveryHistoryResModel> getDeliveryHistory();
 }

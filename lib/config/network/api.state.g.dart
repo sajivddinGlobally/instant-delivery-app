@@ -12,7 +12,7 @@ part of 'api.state.dart';
 
 class _APIStateNetwork implements APIStateNetwork {
   _APIStateNetwork(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://weloads.com/api';
+    baseUrl ??= 'http://192.168.1.43:4567/api';
   }
 
   final Dio _dio;
@@ -281,7 +281,7 @@ class _APIStateNetwork implements APIStateNetwork {
   }
 
   @override
-  Future<HttpResponse<dynamic>> deliveryCancelledByUser(
+  Future<DriverCancelDeliveryResModel> deliveryCancelledByUser(
     CancelOrderModel body,
   ) async {
     final _extra = <String, dynamic>{};
@@ -289,7 +289,7 @@ class _APIStateNetwork implements APIStateNetwork {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(body.toJson());
-    final _options = _setStreamType<HttpResponse<dynamic>>(
+    final _options = _setStreamType<DriverCancelDeliveryResModel>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -299,10 +299,42 @@ class _APIStateNetwork implements APIStateNetwork {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch(_options);
-    final _value = _result.data;
-    final httpResponse = HttpResponse(_value, _result);
-    return httpResponse;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late DriverCancelDeliveryResModel _value;
+    try {
+      _value = DriverCancelDeliveryResModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<GetDeliveryHistoryResModel> getDeliveryHistory() async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<GetDeliveryHistoryResModel>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/v1/user/getDeliveryHistory',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late GetDeliveryHistoryResModel _value;
+    try {
+      _value = GetDeliveryHistoryResModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
