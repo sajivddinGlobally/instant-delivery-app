@@ -218,11 +218,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 4b92b179405ef1e69babd34810510f910e285240
   @override
   Widget build(BuildContext context) {
     // 🔄 Show loader while checking

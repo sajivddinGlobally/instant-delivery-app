@@ -4211,7 +4211,7 @@ class _PickupScreenState extends State<PickupScreen> {
 
   void _initializeSocket() {
     // Replace 'your-server-url' with the actual socket server URL (e.g., 'http://your-server.com:3000')
-    socket = IO.io('your-server-url', <String, dynamic>{
+    socket = IO.io('http://192.168.1.43:4567', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
