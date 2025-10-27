@@ -1805,6 +1805,26 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                       ),
 
                       SizedBox(height: 15.h),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: 50.h,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: Colors.grey,
+                            strokeAlign: 1.w,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            methodPay("assets/SvgImage/ca.svg"),
+                            methodPay("assets/SvgImage/addpromo.svg"),
+                            methodPay("assets/SvgImage/ed.svg"),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: 15.h),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(double.infinity, 50.h),
@@ -1944,239 +1964,9 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   }
 }
 
-// ✅ New Screen: DeliveryDetailsScreen
-class DeliveryDetailsScreen extends StatelessWidget {
-  final String deliveryId;
-  final Map<String, dynamic> driver;
-  final String? otp;
-  final Map<String, dynamic>? pickup;
-  final Map<String, dynamic>? dropoff;
-
-  const DeliveryDetailsScreen({
-    super.key,
-    required this.deliveryId,
-    required this.driver,
-    this.otp,
-    this.pickup,
-    this.dropoff,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final driverName = driver['name'] ?? 'Unknown Driver';
-    final driverPhone = driver['phone'] ?? 'N/A';
-    final driverId = driver['id'] ?? '';
-
-    // Simple address formatting (extend if you have full address in payload)
-    String pickupAddress = pickup != null
-        ? 'Pickup: Lat ${pickup!['lat'] ?? ''}, Lng ${pickup!['long'] ?? ''}'
-        : 'Pickup Location Not Available';
-    String dropoffAddress = dropoff != null
-        ? 'Dropoff: Lat ${dropoff!['lat'] ?? ''}, Lng ${dropoff!['long'] ?? ''}'
-        : 'Dropoff Location Not Available';
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Delivery #$deliveryId',
-          style: GoogleFonts.inter(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w400,
-            color: Colors.black,
-          ),
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Driver Info Card
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Assigned Driver',
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 20.r,
-                          backgroundColor: Colors.grey[300],
-                          child: Text(
-                            driverName.isNotEmpty
-                                ? driverName[0].toUpperCase()
-                                : '?',
-                            style: GoogleFonts.inter(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                driverName,
-                                style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                driverPhone,
-                                style: GoogleFonts.inter(
-                                  fontSize: 14.sp,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // OTP Card
-            if (otp != null)
-              Card(
-                elevation: 4,
-                color: Colors.blue[50],
-                child: Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.lock_outline,
-                        color: Colors.blue[700],
-                        size: 24.sp,
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'OTP for Pickup Verification',
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            Text(
-                              otp!,
-                              style: GoogleFonts.inter(
-                                fontSize: 24.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue[700],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            SizedBox(height: 16.h),
-
-            // Pickup Location
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Row(
-                  children: [
-                    Icon(Icons.location_on, color: Colors.green, size: 24.sp),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Text(
-                        pickupAddress,
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // Dropoff Location
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Row(
-                  children: [
-                    Icon(Icons.flag, color: Colors.red, size: 24.sp),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Text(
-                        dropoffAddress,
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // Status or Next Action Button (e.g., Track Delivery)
-            Center(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 50.h),
-                  backgroundColor: Color(0xFF006970),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                ),
-                onPressed: () {
-                  // Navigate to tracking screen or handle next step
-                  Fluttertoast.showToast(msg: 'Tracking Delivery...');
-                },
-                child: Text(
-                  'Track Delivery',
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+Widget methodPay(String image) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [SvgPicture.asset(image)],
+  );
 }
