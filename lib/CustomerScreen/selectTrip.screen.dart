@@ -323,38 +323,13 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
     final distanceProviderState = ref.watch(getDistanceProvider);
     return Scaffold(
       backgroundColor: Colors.white,
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
-      //   leading: Padding(
-      //     padding: EdgeInsets.only(left: 15.w),
-      //     child: FloatingActionButton(
-      //       mini: true,
-      //       backgroundColor: Color(0xFFFFFFFF),
-      //       shape: CircleBorder(),
-      //       onPressed: () {
-      //         Navigator.pop(context);
-      //       },
-      //       child: Padding(
-      //         padding: EdgeInsets.only(left: 10.w),
-      //         child: Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
-      //       ),
-      //     ),
-      //   ),
-      //   title: Text(
-      //     "Select Vehical",
-      //     style: GoogleFonts.inter(
-      //       fontSize: 20.sp,
-      //       fontWeight: FontWeight.w400,
-      //       color: Colors.black,
-      //     ),
-      //   ),
-      // ),
       body: distanceProviderState.when(
         data: (snp) {
           final name = snp.data[0].name;
           final phon = snp.data[0].mobNo;
           final pickupAddress = snp.data[0].origName;
           final dropAddress = snp.data[0].destName;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -399,7 +374,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
               ),
               SizedBox(height: 10.h),
               Container(
-                height: 210.h,
+                height: 200.h,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
                   //color: Colors.amber,
@@ -424,7 +399,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                           vertical: isSelected ? 0.h : 10.h,
                         ),
                         width: 130.w,
-                        height: isSelected ? 200.h : 180.h,
+                        height: isSelected ? 180.h : 170.h,
                         decoration: BoxDecoration(
                           color: isSelected ? Color(0xFFE5F0F1) : Colors.white,
                           borderRadius: BorderRadius.circular(15.r),
@@ -503,7 +478,22 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
                   },
                 ),
               ),
-              SizedBox(height: 15.h),
+              Container(
+                margin: EdgeInsets.only(left: 15.w, right: 15.w, top: 10.h),
+                width: MediaQuery.of(context).size.width,
+                height: 50.h,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(color: Colors.grey, strokeAlign: 1.w),
+                ),
+                child: Row(
+                  children: [
+                    methodPay("assets/SvgImage/cashes.svg"),
+                    methodPay("assets/SvgImage/addpromo.svg"),
+                    methodPay("assets/SvgImage/ed.svg"),
+                  ],
+                ),
+              ),
               Padding(
                 padding: EdgeInsets.only(left: 15.w, right: 15.w),
                 child: ElevatedButton(
@@ -674,7 +664,7 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
   int _dotCount = 1;
   double _radius = 30;
   bool _isSearching = true; // 👈 Controls search state
-  int _remainingSeconds = 15; // 👈 Countdown timer (optional)
+  int _remainingSeconds = 30; // 👈 Countdown timer (optional)
 
   @override
   void initState() {
