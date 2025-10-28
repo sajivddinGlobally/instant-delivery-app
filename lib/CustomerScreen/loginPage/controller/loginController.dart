@@ -4,6 +4,7 @@ import 'package:delivery_mvp_app/CustomerScreen/loginPage/loginVerify.screen.dar
 import 'package:delivery_mvp_app/config/network/api.state.dart';
 import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
 import 'package:delivery_mvp_app/data/Model/loginBodyModel.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,7 +17,20 @@ mixin LoginController<T extends LoginScreen> on State<T> {
   final passwordController = TextEditingController();
   bool loadind = false;
 
+ Future<String> getDeviceToken() async {
+    try {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      String? token = await messaging.getToken();
+      return token ?? "unknown_device";
+    } catch (e) {
+      log("Error getting device token: $e");
+      return "unknown_device";
+    }
+  }
+  
+
   void loginUser() async {
+    final diviceID = await getDeviceToken();
     if (!loginformKey.currentState!.validate()) {
       setState(() {
         loadind = false;
@@ -30,6 +44,7 @@ mixin LoginController<T extends LoginScreen> on State<T> {
     final body = LoginBodyModel(
       loginType: emailController.text,
       password: passwordController.text,
+      deviceId:diviceID,
     );
     try {
       final service = APIStateNetwork(callPrettyDio());

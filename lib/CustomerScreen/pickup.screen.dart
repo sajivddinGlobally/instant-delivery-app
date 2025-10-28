@@ -1045,6 +1045,7 @@ class _CancelBottomSheetContentState extends State<CancelBottomSheetContent> {
           // Pop the bottom sheet first
           Navigator.pop(context);
           Navigator.pop(context);
+          Navigator.pop(context);
         }
       } else {
         Fluttertoast.showToast(

@@ -1,5 +1,8 @@
 import 'dart:developer';
+import 'package:delivery_mvp_app/CustomerScreen/firebaseOption.dart';
 import 'package:delivery_mvp_app/CustomerScreen/start.screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +12,7 @@ import 'package:hive_flutter/adapters.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await Hive.initFlutter();
   await Hive.openBox("folder");
 
@@ -18,9 +22,39 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  Future<void> getToken() async {
+    // Permission request करें (iOS/Android पर जरूरी)
+    NotificationSettings settings = await FirebaseMessaging.instance
+        .requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+          provisional: true, // iOS के लिए provisional permission
+          carPlay: true,
+        );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+      print('User granted provisional permission');
+    } else {
+      print('User declined or has not accepted permission');
+      return;
+    }
+
+    // FCM Token निकालें
+    String? token = await FirebaseMessaging.instance.getToken();
+    // setState(() {
+    //   _fcmToken = token;
+    // });
+    log('FCM Token: $token'); // Console में print होगा
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    getToken();
     var box = Hive.box("folder");
     var token = box.get("token");
     log("=====================================");

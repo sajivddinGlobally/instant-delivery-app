@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1081322680532",
+    "project_id": "instant-delivery-e2ec1",
+    "storage_bucket": "instant-delivery-e2ec1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1081322680532:android:e980da3228442ebabe4b41",
+        "android_client_info": {
+          "package_name": "com.InstantDelivery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDLcg13CPs6YUqhaXYKHVAo9gCOcm2zR4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

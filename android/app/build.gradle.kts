@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.delivery_mvp_app"
+    namespace = "com.InstantDelivery"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "26.3.11579264"
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.delivery_mvp_app"
+        applicationId = "com.InstantDelivery"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

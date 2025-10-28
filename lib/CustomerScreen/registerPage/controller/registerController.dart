@@ -4,6 +4,7 @@ import 'package:delivery_mvp_app/config/network/api.state.dart';
 import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
 import 'package:delivery_mvp_app/data/Model/registerBodyModel.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -16,8 +17,19 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
   final passwordController = TextEditingController();
 
   bool isLoading = false;
+  Future<String> _getDeviceToken() async {
+    try {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      String? token = await messaging.getToken();
+      return token ?? "unknown_device";
+    } catch (e) {
+      log("Error getting device token: $e");
+      return "unknown_device";
+    }
+  }
 
   void registerUser() async {
+    final deviceId = await _getDeviceToken();
     if (!registerformKey.currentState!.validate()) {
       setState(() => isLoading = false);
       return;
@@ -29,12 +41,13 @@ mixin Registercontroller<T extends StatefulWidget> on State<T> {
       email: emailController.text,
       phone: phoneNumberController.text,
       password: passwordController.text,
+      deviceId: deviceId,
     );
     try {
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.userRegister(body);
 
-      if (response.error == false) {  
+      if (response.error == false) {
         Fluttertoast.showToast(msg: response.message);
         Navigator.pushAndRemoveUntil(
           context,

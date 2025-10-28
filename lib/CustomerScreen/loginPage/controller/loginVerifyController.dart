@@ -6,6 +6,7 @@ import 'package:delivery_mvp_app/config/utils/navigatorKey.dart';
 import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
 import 'package:delivery_mvp_app/data/Model/loginBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/loginVerifyBodyModel.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -13,6 +14,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 mixin LoginVerifyController<T extends LoginVerifyScreen> on State<T> {
   String otp = "";
   bool loading = false;
+  Future<String> _getDeviceToken() async {
+    try {
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      String? token = await messaging.getToken();
+      return token ?? "unknown_device";
+    } catch (e) {
+      log("Error getting device token: $e");
+      return "unknown_device";
+    }
+  }
 
   void verifyLogin(String token) async {
     final body = LoginverifyBodyModel(token: token, otp: otp);
@@ -59,7 +70,12 @@ mixin LoginVerifyController<T extends LoginVerifyScreen> on State<T> {
   }
 
   void resendOTP(email, pass) async {
-    final body = LoginBodyModel(loginType: email, password: pass);
+    final deviceId = await _getDeviceToken();
+    final body = LoginBodyModel(
+      loginType: email,
+      password: pass,
+      deviceId: deviceId,
+    );
     try {
       final service = APIStateNetwork(callPrettyDio());
       final response = await service.login(body);
