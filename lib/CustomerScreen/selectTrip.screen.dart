@@ -1,14 +1,13 @@
+
+
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'package:delivery_mvp_app/CustomerScreen/MyOrderScreen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/pickup.screen.dart';
-import 'package:delivery_mvp_app/CustomerScreen/selectPayment.screen.dart';
 import 'package:delivery_mvp_app/config/network/api.state.dart';
 import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
-import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
-import 'package:delivery_mvp_app/data/controller/bookInstantDeliveryController.dart';
 import 'package:delivery_mvp_app/data/controller/getDistanceController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,19 +21,25 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:http/http.dart' as http;
 
 class SelectTripScreen extends ConsumerStatefulWidget {
-  // final GetDistanceBodyModel originalBody;
-  const SelectTripScreen({super.key});
-
+  final double pickupLat;
+  final double pickupLon;
+  final double dropLat;
+  final double dropLon;
+  SelectTripScreen(
+      this.pickupLat,
+      this.pickupLon,
+      this.dropLat,
+      this.dropLon,
+      {super.key,});
   @override
   ConsumerState<SelectTripScreen> createState() => _SelectTripScreenState();
-}
-
-var box = Hive.box("folder");
-var id = box.get("id");
-
-class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
+  }
+    var box = Hive.box("folder");
+    var id = box.get("id");
+   class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   List<Map<String, dynamic>> selectTrip = [
     {
       "image": "assets/b.png",
@@ -58,6 +63,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   GoogleMapController? _mapController;
   LatLng? _currentLatlng;
   int selectIndex = 0;
+  bool _routeFetched = false;
   bool isBooking = false;
   Map<String, dynamic>? assignedDriver;
   bool isSocketConnected = false;
@@ -68,14 +74,27 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   StreamSubscription<Position>? _locationSubscription;
   String? userId;
   String? bookedTxtId;
+  final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {};
+  List<LatLng> _routePoints = [];
+  String? toPickupDistance;
+  String? toPickupDuration;
+  String? pickupToDropDistance;
+  String? pickupToDropDuration;
+  String? totalDistance;
+  String? totalDuration;
+  late double pickupLat, pickupLon, dropLat, dropLon;
 
   @override
   void initState() {
     super.initState();
+    pickupLat = widget.pickupLat;
+    pickupLon = widget.pickupLon;
+    dropLat =widget.dropLat;
+    dropLon = widget.dropLon;
     userId = box.get("id")?.toString(); // Safe cast
     if (userId == null) {
       log('❌ User ID missing from Hive!');
-      // Handle: Navigate back or fetch ID
     } else {
       log('✅ User ID: $userId');
     }
@@ -86,15 +105,11 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
-
-    // Check if location service is enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       Fluttertoast.showToast(msg: "Please enable location service");
       return;
     }
-
-    // Check location permission
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -103,32 +118,30 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
         return;
       }
     }
-
     if (permission == LocationPermission.deniedForever) {
       Fluttertoast.showToast(
         msg: "Location permission permanently denied. Enable from settings.",
       );
       return;
     }
-
-    // Get current position
     final position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
-
     safeSetState(() {
       _currentPosition = position;
       _currentLatlng = LatLng(position.latitude, position.longitude);
     });
-
     log('📍 Current Location: ${position.latitude}, ${position.longitude}');
+    if (mounted && _mapController != null) {
+      _addMarkers();
+      _fetchRoute();
+    }
   }
 
   // ---------------- SAFE SETSTATE ----------------
   void safeSetState(VoidCallback fn) {
     if (mounted) setState(fn);
   }
-
   // ---------------- UPDATE ADDRESS ----------------
   Future<void> _updateAddress() async {
     if (_currentPosition == null) return;
@@ -142,24 +155,24 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
         final place = placemarks.first;
         safeSetState(() {
           currentAddress =
-              "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
+          "${place.street ?? ''}, ${place.locality ?? ''}, ${place.country ?? ''}";
         });
       } else {
         safeSetState(() {
           currentAddress =
-              "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
+          "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
         });
       }
     } catch (e) {
       log('Error updating address: $e');
       safeSetState(() {
         currentAddress =
-            "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
+        "${_currentPosition!.latitude}, ${_currentPosition!.longitude}";
       });
     }
   }
-
   // ---------------- UPDATE USER LOCATION TO SOCKET ---------------- (with ack)
+
   void updateUserLocation(double lat, double lon) {
     if (socket != null && socket!.connected && userId != null) {
       socket!.emitWithAck(
@@ -190,11 +203,10 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           safeSetState(() {});
         });
   }
-
   // ---------------- SOCKET CONNECTION ----------------
   void _connectSocket() {
-    const socketUrl = 'http://192.168.1.43:4567';
-    //const socketUrl = 'https://weloads.com';
+    // const socketUrl = 'http://192.168.1.43:4567';
+     const socketUrl = 'https://weloads.com';
     socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket', 'polling'], // Fallback
       'autoConnect': false,
@@ -228,6 +240,16 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
             ); // Backend से response आएगा (e.g., success/error)
           },
         );
+
+        socket!.emitWithAck(
+          'registerCustomer',
+          data,
+          ack: (ackData) {
+            log(
+              '🔐 Registration ACK: $ackData',
+            ); // Backend से response आएगा (e.g., success/error)
+          },
+        );
         log('📤 RegisterCustomer emitted: userId=$userId, role=customer');
       } else {
         log('❌ No userId for registration!');
@@ -237,6 +259,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       startLocationStream();
       _setupEventListeners();
       safeSetState(() {});
+
     });
 
     socket!.onDisconnect((_) {
@@ -269,12 +292,8 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       log('❌ Reconnect error: $error');
     });
   }
-
   // ✅ Centralized method to set up event listeners (avoids duplicates)
   void _setupEventListeners() {
-    // _listenersSetup = true;
-
-    // ✅ MESSAGE EVENT (removed driver_assigned listener as it's handled in Waiting screen)
     socket!.on('receive_message', (data) {
       if (!mounted) return;
       log('📩 Message received: $data');
@@ -286,14 +305,13 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       });
     });
   }
-
   // ---------------- DISPOSE ----------------
+
   @override
   void dispose() {
     // Stop location updates
     _locationSubscription?.cancel();
     _locationSubscription = null;
-
     // Dispose Google Map safely
     if (_mapController != null) {
       try {
@@ -303,7 +321,6 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       }
       _mapController = null;
     }
-
     // Disconnect socket safely
     if (socket != null) {
       // _listenersSetup = false;  // Reset flag
@@ -313,8 +330,228 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       socket!.dispose(); // Better than close()
       socket = null;
     }
-
     super.dispose();
+  }
+  void _addMarkers() {
+    _markers.clear(); // Clear previous markers to avoid duplicates
+    if (_currentLatlng != null) {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('current'),
+          position: _currentLatlng!,
+          infoWindow: const InfoWindow(title: 'Current Location'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueGreen,
+          ),
+        ),
+      );
+    }
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('pickup'),
+        position: LatLng(pickupLat, pickupLon),
+        infoWindow: const InfoWindow(title: 'Pickup Location'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      ),
+    );
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('drop'),
+        position: LatLng(dropLat, dropLon),
+        infoWindow: const InfoWindow(title: 'Drop Location'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueOrange,
+        ),
+      ),
+    );
+    safeSetState(() {});
+  }
+  Future<void> _fetchRoute() async {
+    if (_currentLatlng == null) {
+      print('Error: Current location is null');
+      return;
+    }
+
+    const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
+    double totalDistKm = 0.0;
+    int totalTimeMin = 0;
+    List<LatLng> points1 = [];
+    List<LatLng> points2 = [];
+
+    // Fetch route to pickup
+    String origin1 = '${_currentLatlng!.latitude},${_currentLatlng!.longitude}';
+    String dest1 = '$pickupLat,$pickupLon';
+
+    Uri url1 = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+      'origin': origin1,
+      'destination': dest1,
+      'key': apiKey,
+    });
+
+
+    try {
+      final response1 = await http.get(url1);
+      if (response1.statusCode == 200) {
+        final data1 = json.decode(response1.body);
+        if (data1['status'] == 'OK' && data1['routes'] != null && data1['routes'].isNotEmpty) {
+          final String poly1 = data1['routes'][0]['overview_polyline']['points'];
+          points1 = _decodePolyline(poly1);
+          final leg1 = data1['routes'][0]['legs'][0];
+          toPickupDistance = leg1['distance']['text'];
+          toPickupDuration = leg1['duration']['text'];
+          totalDistKm += (leg1['distance']['value'] as num) / 1000.0;
+          totalTimeMin += (leg1['duration']['value'] as int) ~/ 60;
+        } else {
+          print('Directions API error for to pickup: ${data1['status']}');
+        }
+      } else {
+        print('HTTP error for to pickup: ${response1.statusCode}');
+      }
+    } catch (e) {
+      print('Exception fetching route to pickup: $e');
+    }
+
+    // Fetch route from pickup to drop (if drop location available)
+    String origin2 = dest1;
+    String dest2 = '$dropLat,$dropLon';
+    Uri url2 = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+      'origin': origin2,
+      'destination': dest2,
+      'key': apiKey,
+    });
+
+    try {
+      final response2 = await http.get(url2);
+      if (response2.statusCode == 200) {
+        final data2 = json.decode(response2.body);
+        if (data2['status'] == 'OK' && data2['routes'] != null && data2['routes'].isNotEmpty) {
+          final String poly2 = data2['routes'][0]['overview_polyline']['points'];
+          points2 = _decodePolyline(poly2);
+          final leg2 = data2['routes'][0]['legs'][0];
+          pickupToDropDistance = leg2['distance']['text'];
+          pickupToDropDuration = leg2['duration']['text'];
+          totalDistKm += (leg2['distance']['value'] as num) / 1000.0;
+          totalTimeMin += (leg2['duration']['value'] as int) ~/ 60;
+        } else {
+          print('Directions API error for pickup to drop: ${data2['status']}');
+        }
+      } else {
+        print('HTTP error for pickup to drop: ${response2.statusCode}');
+      }
+    } catch (e) {
+      print('Exception fetching route from pickup to drop: $e');
+    }
+
+    // Update UI
+    if (mounted) {
+
+      safeSetState(() {
+        _polylines.clear();
+
+        if (points1.isNotEmpty) {
+          _polylines.add(
+            Polyline(
+              polylineId: const PolylineId('toPickup'),
+              points: points1,
+              color: Colors.green,
+              width: 5,
+            ),
+          );
+        }
+
+        if (points2.isNotEmpty) {
+          _polylines.add(
+            Polyline(
+              polylineId: const PolylineId('toDrop'),
+              points: points2,
+              color: Colors.blue,
+              width: 5,
+            ),
+          );
+        }
+
+        totalDistance = '${totalDistKm.toStringAsFixed(1)} km';
+        totalDuration = '${totalTimeMin.toStringAsFixed(0)} min';
+        _routePoints = [...points1, ...points2];
+      });
+
+      // Animate camera to fit the route
+      if (_mapController != null && _routePoints.isNotEmpty) {
+        LatLngBounds bounds = _calculateBounds(_routePoints);
+        _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+      }
+
+    }
+
+    print('Route loaded: ${points1.length} points to pickup, ${points2.length} points to drop');
+
+  }
+  LatLngBounds _calculateBounds(List<LatLng> points) {
+    if (points.isEmpty) {
+      return LatLngBounds(
+        southwest: _currentLatlng!,
+        northeast: _currentLatlng!,
+      );
+    }
+    double minLat = points[0].latitude;
+    double maxLat = points[0].latitude;
+    double minLng = points[0].longitude;
+    double maxLng = points[0].longitude;
+    for (LatLng point in points) {
+      if (point.latitude < minLat) minLat = point.latitude;
+      if (point.latitude > maxLat) maxLat = point.latitude;
+      if (point.longitude < minLng) minLng = point.longitude;
+      if (point.longitude > maxLng) maxLng = point.longitude;
+    }
+    // Include pickup and drop if not in points
+    LatLng pickup = LatLng(pickupLat, pickupLon);
+    if (pickup.latitude < minLat) minLat = pickup.latitude;
+    if (pickup.latitude > maxLat) maxLat = pickup.latitude;
+    if (pickup.longitude < minLng) minLng = pickup.longitude;
+    if (pickup.longitude > maxLng) maxLng = pickup.longitude;
+    LatLng drop = LatLng(dropLat, dropLon);
+    if (drop.latitude < minLat) minLat = drop.latitude;
+    if (drop.latitude > maxLat) maxLat = drop.latitude;
+    if (drop.longitude < minLng) minLng = drop.longitude;
+    if (drop.longitude > maxLng) maxLng = drop.longitude;
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+  }
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> points = <LatLng>[];
+    int index = 0;
+    final int len = encoded.length;
+    int lat = 0;
+    int lng = 0;
+
+    while (index < len) {
+      int b;
+      int shift = 0;
+      int result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      final int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      final int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      points.add(LatLng(lat / 1E5, lng / 1E5));
+    }
+
+    return points;
   }
 
   @override
@@ -329,297 +566,429 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           final phon = snp.data[0].mobNo;
           final pickupAddress = snp.data[0].origName;
           final dropAddress = snp.data[0].destName;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          return _currentLatlng == null  // Assuming _currentLatlng is defined; use consistent naming
+              ? const Center(child: CircularProgressIndicator())
+              : Stack(
             children: [
-              Expanded(
-                flex: 1,
-                child: _currentLatlng == null
-                    ? Center(child: CircularProgressIndicator())
-                    : Stack(
-                        children: [
-                          GoogleMap(
-                            initialCameraPosition: CameraPosition(
-                              target: _currentLatlng!,
-                              zoom: 15,
-                            ),
-                            onMapCreated: (controller) {
-                              _mapController = controller;
-                            },
-                            myLocationEnabled: true,
-                            myLocationButtonEnabled: true,
-                          ),
-                          Positioned(
-                            left: 10.w,
-                            top: 40.h,
-                            child: FloatingActionButton(
-                              mini: true,
-                              backgroundColor: Color(0xFFFFFFFF),
-                              shape: CircleBorder(),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 10.w),
-                                child: Icon(
-                                  Icons.arrow_back_ios,
-                                  color: Color(0xFF1D3557),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-              SizedBox(height: 10.h),
-              Container(
-                height: 200.h,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20.r),
-                  //color: Colors.amber,
+
+              // Full-screen map
+              GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: _currentLatlng!,
+                  zoom: 15,
                 ),
-                child: ListView.builder(
-                  itemCount: snp.data.length,
-                  padding: EdgeInsets.zero,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    final isSelected = selectIndex == index;
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectIndex = index;
-                        });
-                      },
-                      child: AnimatedContainer(
-                        duration: Duration(milliseconds: 250),
-                        curve: Curves.easeInOut,
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: isSelected ? 0.h : 10.h,
-                        ),
-                        width: 130.w,
-                        height: isSelected ? 180.h : 170.h,
-                        decoration: BoxDecoration(
-                          color: isSelected ? Color(0xFFE5F0F1) : Colors.white,
-                          borderRadius: BorderRadius.circular(15.r),
-                          border: Border.all(
-                            color: isSelected
-                                ? Colors.black
-                                : Colors.grey.shade400,
-                            width: isSelected ? 1.5.w : 1.w,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isSelected
-                                  ? Colors.black26
-                                  : Colors.black12,
-                              blurRadius: isSelected ? 8 : 4,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 10.h),
-                            Center(
-                              child: Text(
-                                "In 2 min",
-                                style: GoogleFonts.inter(
-                                  fontSize: isSelected ? 15.sp : 13.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(top: 10.h),
-                              child: Center(
-                                child: AnimatedScale(
-                                  duration: const Duration(milliseconds: 250),
-                                  scale: isSelected ? 1.15 : 1.0,
-                                  curve: Curves.easeOutBack,
-                                  child: Image.network(
-                                    snp.data[index].image,
-                                    width: 116.w,
-                                    height: 70.h,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 10.w, top: 10.h),
-                              child: Text(
-                                snp.data[index].name,
-                                style: GoogleFonts.inter(
-                                  fontSize: isSelected ? 17.sp : 15.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 10.w),
-                              child: Text(
-                                "₹${snp.data[index].price}",
-                                style: GoogleFonts.inter(
-                                  fontSize: isSelected ? 16.sp : 14.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                onMapCreated: (controller) {
+                  _mapController = controller;
+                  if (_currentLatlng != null) {
+                    _mapController!.animateCamera(
+                      CameraUpdate.newLatLng(_currentLatlng!),
                     );
+                  }
+                  // Add markers and fetch route if location is ready
+                  if (_currentLatlng != null) {
+                    _addMarkers();
+                    _fetchRoute();
+                  }
+                },
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+                markers: _markers,
+                polylines: _polylines,
+              ),
+              // Back button overlay
+              Positioned(
+                left: 10.w,
+                top: 40.h,
+                child: FloatingActionButton(
+                  mini: true,
+                  backgroundColor: const Color(0xFFFFFFFF),
+                  shape: const CircleBorder(),
+                  onPressed: () {
+                    // Navigator.push(context, MaterialPageRoute(builder: (context)=>InstantDeliveryScreen()));
+                    Navigator.pop(context);
                   },
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 15.w, right: 15.w, top: 10.h),
-                width: MediaQuery.of(context).size.width,
-                height: 50.h,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(color: Colors.grey, strokeAlign: 1.w),
-                ),
-                child: Row(
-                  children: [
-                    methodPay("assets/SvgImage/cashes.svg"),
-                    methodPay("assets/SvgImage/addpromo.svg"),
-                    methodPay("assets/SvgImage/ed.svg"),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 15.w, right: 15.w),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(double.infinity, 50.h),
-                    backgroundColor: Color(0xFF006970),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.r),
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 10.w),
+                    child: const Icon(
+                      Icons.arrow_back_ios,
+                      color: Color(0xFF1D3557),
                     ),
                   ),
-                  onPressed: isBooking
-                      ? null
-                      : () async {
-                          setState(() => isBooking = true);
-                          try {
-                            final selectedVehicle = snp.data[selectIndex];
-                            final body = BookInstantDeliveryBodyModel(
-                              vehicleTypeId: selectedVehicle.vehicleTypeId,
-                              //selectedVehicle.vehicleType,
-                              price: double.parse(
-                                selectedVehicle.price,
-                              ).toInt(),
-                              //                                             price: (selectedVehicle.price.contains('.'))
-                              // ? double.parse(selectedVehicle.price).toInt()
-                              // : int.parse(selectedVehicle.price),
-                              isCopanCode: false,
-                              copanId: null.toString(),
-                              copanAmount: 0,
-                              coinAmount: 0,
-                              taxAmount: 18,
-                              userPayAmount: double.parse(
-                                selectedVehicle.price,
-                              ).toInt(),
-                              distance: selectedVehicle.distance,
-                              // mobNo: selectedVehicle.mobNo,
-                              mobNo: "98767655678",
-                              name: selectedVehicle.name,
-                              // origName: selectedVehicle.origName,
-                              // origLat: selectedVehicle.origLat,
-                              // origLon: selectedVehicle.origLon,
-                              origName: "jaipur",
-                              origLat: 26.9124,
-                              origLon: 75.7873,
-                              destName: selectedVehicle.destName,
-                              destLat: selectedVehicle.destLat,
-                              destLon: selectedVehicle.destLon,
-                              picUpType: selectedVehicle.picUpType,
-                            );
-                            final service = APIStateNetwork(callPrettyDio());
-                            final response = await service.bookInstantDelivery(
-                              body,
-                            );
-                            if (response.code == 0) {
-                              box.put(
-                                "current_booking_txId",
-                                response.data!.txId,
-                              );
-                              log(
-                                '✅ Booking created — txId: ${response.data!.txId}',
-                              );
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => WaitingForDriverScreen(
-                                    body: body,
-                                    socket: socket!,
-                                  ),
-                                  fullscreenDialog: true,
-                                ),
-                              );
-                              Fluttertoast.showToast(
-                                msg: "Delivery booked, waiting for driver...",
-                              );
-                              setState(() {
-                                isBooking = false;
-                              });
-                            } else {
-                              Fluttertoast.showToast(msg: response.message);
-                              setState(() {
-                                isBooking = false;
-                              });
-                            }
-                          } catch (e, st) {
-                            setState(() {
-                              isBooking = false;
-                            });
-                            log("${e.toString()} / ${st.toString()}");
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Booking failed: $e"),
-                                behavior: SnackBarBehavior.floating,
-                                margin: EdgeInsets.only(
-                                  left: 15.w,
-                                  bottom: 15.h,
-                                  right: 15.w,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15.r),
-                                  side: BorderSide.none,
-                                ),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        },
-                  child: isBooking
-                      ? Center(
-                          child: SizedBox(
-                            width: 30.w,
-                            height: 30.h,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.w,
-                            ),
-                          ),
-                        )
-                      : Text(
-                          "Book Now",
-                          style: GoogleFonts.inter(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFFFFFFFF),
-                          ),
-                        ),
                 ),
               ),
+              // Distance info overlay
+              if (toPickupDistance != null || pickupToDropDistance != null)
+                Positioned(
+                  bottom: 70.h,
+                  left: 16.w,
+                  right: 16.w,
+                  child: Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (toPickupDistance != null)
+                          Text(
+                            'To Pickup: $toPickupDistance | $toPickupDuration',
+                            style: GoogleFonts.inter(fontSize: 14.sp),
+                          ),
+                        if (pickupToDropDistance != null)
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 4.h),
+                            child: Text(
+                              'To Drop: $pickupToDropDistance | $pickupToDropDuration',
+                              style: GoogleFonts.inter(fontSize: 14.sp),
+                            ),
+                          ),
+                        Text(
+                          'Total: $totalDistance | $totalDuration',
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              DraggableScrollableSheet(
+                initialChildSize: 0.47,  // Approximate: 400 / screen height (adjust based on device; ~0.47 for 850px screen)
+                minChildSize: 0.47,  // Fixed min to match initial
+                maxChildSize: 0.47,  // Fixed max to keep height constant at ~400 logical pixels
+                builder: (context, scrollController) {
+                  return Container(
+                    height: 400.h,  // Explicit fixed height enforcement
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: SingleChildScrollView(  // Scrollable if content exceeds 400.h
+                      controller: scrollController,
+                      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,  // Fit content within fixed height
+                        children: [
+
+                          // Vehicle selection horizontal list (fixed height container)
+                          SizedBox(
+                            height: 200.h,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: snp.data.length,
+                              padding: EdgeInsets.zero,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                final isSelected = selectIndex == index;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectIndex = index;
+                                    });
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                    margin: EdgeInsets.symmetric(
+                                      horizontal: 10.w,
+                                      vertical: isSelected ? 0.h : 10.h,
+                                    ),
+                                    width: 130.w,
+                                    height: isSelected ? 180.h : 170.h,
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? const Color(0xFFE5F0F1) : Colors.white,
+                                      borderRadius: BorderRadius.circular(15.r),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? Colors.black
+                                            : Colors.grey.shade400,
+                                        width: isSelected ? 1.5.w : 1.w,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isSelected
+                                              ? Colors.black26
+                                              : Colors.black12,
+                                          blurRadius: isSelected ? 8 : 4,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(height: 10),
+                                        Center(
+                                          child: Text(
+                                            "In 2 min",
+                                            style: GoogleFonts.inter(
+                                              fontSize: isSelected ? 15.sp : 13.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          margin: const EdgeInsets.only(top: 10),
+                                          child: Center(
+                                            child: AnimatedScale(
+                                              duration: const Duration(milliseconds: 250),
+                                              scale: isSelected ? 1.15 : 1.0,
+                                              curve: Curves.easeOutBack,
+                                              child: Image.network(
+                                                snp.data[index].image,
+                                                width: 116.w,
+                                                height: 70.h,
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 10, top: 10),
+                                          child: Text(
+                                            snp.data[index].name,
+                                            style: GoogleFonts.inter(
+                                              fontSize: isSelected ? 17.sp : 15.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 10),
+                                          child: Text(
+                                            "₹${snp.data[index].price}",
+                                            style: GoogleFonts.inter(
+                                              fontSize: isSelected ? 16.sp : 14.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+
+                          // Payment methods row
+                          Container(
+                            margin: EdgeInsets.only(left: 0.w, right: 0.w, top: 10.h),  // Adjusted margin
+                            width: MediaQuery.of(context).size.width,
+                            height: 50.h,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(color: Colors.grey, width: 1.w),  // Fixed strokeAlign -> width
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Row(children: [
+                                  Image.asset(
+                                      height: 20.h,
+                                      width: 20.w,
+                                      "assets/cash.png"),
+                                  SizedBox(width: 10.w,),
+                                  Text(
+                                    "Cash",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],),
+                                Row(children: [
+                                  Image.asset(
+                                      height: 20.h,
+                                      width: 20.w,
+                                      "assets/promo.png"),
+                                  SizedBox(width: 10.w,),
+                                  Text(
+                                    "Promo Code",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],),
+
+                                Row(children: [
+                                  Image.asset(
+                                      height: 20.h,
+                                      width: 20.w,
+                                      "assets/note.png"),
+                                  SizedBox(width: 10.w,),
+                                  Text(
+                                    "Add Note",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+
+                                ],)
+
+
+                                // methodPay("assets/SvgImage/cashes.svg"),
+                                // methodPay("assets/SvgImage/addpromo.svg"),
+                                // methodPay("assets/SvgImage/ed.svg"),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+
+                          // Book Now button
+                          Padding(
+                            padding: EdgeInsets.only(left: 0.w, right: 0.w),  // Adjusted for full width
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 50),
+                                backgroundColor: const Color(0xFF006970),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.r),
+                                ),
+                              ),
+                              onPressed: isBooking
+                                  ? null
+                                  : () async {
+                                setState(() => isBooking = true);
+                                try {
+                                  final selectedVehicle = snp.data[selectIndex];
+                                  final body = BookInstantDeliveryBodyModel(
+                                    vehicleTypeId: selectedVehicle.vehicleTypeId,
+                                    price: double.parse(selectedVehicle.price).toInt(),
+                                    isCopanCode: false,
+                                    copanId: null.toString(),
+                                    copanAmount: 0,
+                                    coinAmount: 0,
+                                    taxAmount: 18,
+                                    userPayAmount: double.parse(selectedVehicle.price).toInt(),
+                                    distance: selectedVehicle.distance,
+                                    mobNo: phon,  // Dynamic from snp
+                                    name: name,  // Dynamic from snp
+                                    origName: pickupAddress,  // Dynamic from snp
+                                    origLat:widget.pickupLat,
+                                    // snp.data[0].origLat,  // Dynamic from snp
+                                    origLon:widget.pickupLon,
+                                    // snp.data[0].origLon,  // Dynamic from snp
+                                    destName: dropAddress,  // Dynamic from snp
+                                    destLat:widget.dropLat,
+                                    // selectedVehicle.destLat,
+                                    destLon:widget.dropLon,
+                                    // selectedVehicle.destLon,
+                                    picUpType: selectedVehicle.picUpType,
+                                  );
+                                  final service = APIStateNetwork(callPrettyDio());
+                                  final response = await service.bookInstantDelivery(body);
+                                  if (response.code == 0) {
+                                    box.put("current_booking_txId", response.data!.txId);
+                                    log('✅ Booking created — txId: ${response.data!.txId}');
+                                    Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder: (context) => WaitingForDriverScreen(
+                                          body: body,
+                                          socket: socket!,  // Ensure socket is defined
+                                          pickupLat: pickupLat,
+                                          pickupLon: pickupLon,
+                                          dropLat: dropLat,
+                                          dropLon: dropLon,
+                                        ),
+                                        fullscreenDialog: true,
+                                      ),
+                                    );
+                                    Fluttertoast.showToast(
+                                      msg: "Delivery booked, waiting for driver...",
+                                    );
+                                    setState(() {
+                                      isBooking = false;
+                                    });
+                                  } else {
+                                    Fluttertoast.showToast(msg: response.message);
+                                    setState(() {
+                                      isBooking = false;
+                                    });
+                                  }
+                                } catch (e, st) {
+                                  setState(() {
+                                    isBooking = false;
+                                  });
+                                  log("${e.toString()} / ${st.toString()}");
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Booking failed: $e"),
+                                      behavior: SnackBarBehavior.floating,
+                                      margin: EdgeInsets.only(
+                                        left: 15.w,
+                                        bottom: 15.h,
+                                        right: 15.w,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15.r),
+                                        side: BorderSide.none,
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                              child: isBooking
+                                  ? Center(
+                                child: SizedBox(
+                                  width: 30.w,
+                                  height: 30.h,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.w,
+                                  ),
+                                ),
+                              )
+                                  : Text(
+                                "Book Now",
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFFFFFFFF),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20.h),
+
+                          // Bottom padding
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+
             ],
           );
         },
@@ -627,52 +996,79 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
           log(stackTrace.toString());
           return Center(child: Text(error.toString()));
         },
-        loading: () => Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }
 }
 
-Widget methodPay(String image) {
-  return Row(
+
+   Widget methodPay(String image) {
+     return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [SvgPicture.asset(image)],
   );
 }
 
+
+
+
+
 class WaitingForDriverScreen extends StatefulWidget {
   final BookInstantDeliveryBodyModel body;
   final IO.Socket socket;
-
+  final double pickupLat;
+  final double pickupLon;
+  final double dropLat;
+  final double dropLon;
   const WaitingForDriverScreen({
     super.key,
     required this.body,
     required this.socket,
+    required this.pickupLat,
+    required this.pickupLon,
+    required this.dropLat,
+    required this.dropLon,
   });
-
   @override
   State<WaitingForDriverScreen> createState() => _WaitingForDriverScreenState();
 }
-
 class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
   var box = Hive.box("folder");
   late IO.Socket _socket;
   late Timer _dotTimer;
   Timer? _pulseTimer;
   Timer? _searchTimer;
-
   int _dotCount = 1;
   double _radius = 30;
   bool _isSearching = true; // 👈 Controls search state
   int _remainingSeconds = 30; // 👈 Countdown timer (optional)
+  GoogleMapController? _mapController;
+  final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {};
+  List<LatLng> _routePoints = [];
+  String? pickupToDropDistance;
+  String? pickupToDropDuration;
+  bool _routeFetched = false;
+  late double pickupLat, pickupLon, dropLat, dropLon;
 
   @override
   void initState() {
     super.initState();
     _socket = widget.socket;
+    pickupLat = widget.pickupLat;
+    pickupLon = widget.pickupLon;
+    dropLat = widget.dropLat;
+    dropLon = widget.dropLon;
     _setupEventListeners();
     _startSearching();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initMap();
+    });
   }
+  void _initMap() {
+    _addMarkers();
+    _fetchRoute();}
 
   void _setupEventListeners() {
     _socket.on('user:driver_assigned', _handleAssigned);
@@ -680,26 +1076,21 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
 
   Future<void> _handleAssigned(dynamic payload) async {
     if (!mounted) return;
-
     log(
       '👨‍✈️ DRIVER ASSIGNED FULL PAYLOAD:\n${const JsonEncoder.withIndent('  ').convert(payload)}',
     );
-
     try {
       if (payload is! Map) {
         log('⚠️ Invalid payload type: ${payload.runtimeType}');
         return;
       }
-
       log('🧾 Payload keys: ${payload.keys.join(', ')}');
-
       final deliveryId = payload['deliveryId'] as String?;
       if (deliveryId == null) {
         log('⚠️ Missing deliveryId in payload');
         return;
       }
       log("✅ Delivery Assigned: $deliveryId");
-
       // ✅ Define all fields before using
       final driver = payload['driver'] ?? {};
       final driverFirstName = driver['firstName'] ?? '';
@@ -707,31 +1098,28 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
       final driverName = '$driverFirstName $driverLastName'.trim();
       final driverPhone = driver['phone'] ?? 'N/A';
       final driverRating = driver['averageRating'] ?? 'N/A';
-
       final otp = payload['otp']?.toString() ?? 'N/A';
       final amount = payload['amount'] ?? 'N/A';
       final vehicleType = payload['vehicleType'] ?? {};
       final pickup = payload['pickup'] ?? {};
       final dropoff = payload['dropoff'] ?? {};
       final status = payload['status'] ?? 'N/A';
-
       Fluttertoast.showToast(
         msg: "Driver Assigned : $driverName",
         toastLength: Toast.LENGTH_LONG,
       );
-
       // Handle OTP
       if (payload.containsKey('otp')) {
         final otp = payload['otp'].toString();
         log('🔑 OTP Received: $otp');
       }
-
       // Navigate
       if (mounted) {
         Navigator.push(
           context,
           CupertinoPageRoute(
             builder: (context) => PickupScreen(
+              socket:widget.socket,
               deliveryId: deliveryId,
               driver: driver as Map<String, dynamic>,
               otp: otp,
@@ -752,7 +1140,142 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
       Fluttertoast.showToast(msg: e.toString());
     }
   }
+  void _addMarkers() {
+    _markers.clear();
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('pickup'),
+        position: LatLng(pickupLat, pickupLon),
+        infoWindow: const InfoWindow(title: 'Pickup Location'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      ),
+    );
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('drop'),
+        position: LatLng(dropLat, dropLon),
+        infoWindow: const InfoWindow(title: 'Drop Location'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+  Future<void> _fetchRoute() async {
+    const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
 
+    // Fetch route from pickup to drop
+    String origin = '$pickupLat,$pickupLon';
+    String dest = '$dropLat,$dropLon';
+    Uri url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+      'origin': origin,
+      'destination': dest,
+      'key': apiKey,
+    });
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'OK' && data['routes'] != null && data['routes'].isNotEmpty) {
+          final String poly = data['routes'][0]['overview_polyline']['points'];
+          _routePoints = _decodePolyline(poly);
+          final leg = data['routes'][0]['legs'][0];
+          pickupToDropDistance = leg['distance']['text'];
+          pickupToDropDuration = leg['duration']['text'];
+          _routeFetched = true;
+          if (mounted) {
+            setState(() {
+              _polylines.clear();
+              _polylines.add(
+                Polyline(
+                  polylineId: const PolylineId('route'),
+                  points: _routePoints,
+                  color: Colors.blue,
+                  width: 5,
+                ),
+              );
+            });
+            // Animate camera
+            if (_mapController != null && _routePoints.isNotEmpty) {
+              LatLngBounds bounds = _calculateBounds(_routePoints);
+              _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+            }
+          }
+        } else {
+          print('Directions API error: ${data['status']}');
+        }
+      } else {
+        print('HTTP error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Exception fetching route: $e');
+    }
+  }
+  LatLngBounds _calculateBounds(List<LatLng> points) {
+    if (points.isEmpty) {
+      return LatLngBounds(
+        southwest: LatLng(pickupLat, pickupLon),
+        northeast: LatLng(pickupLat, pickupLon),
+      );
+    }
+    double minLat = points[0].latitude;
+    double maxLat = points[0].latitude;
+    double minLng = points[0].longitude;
+    double maxLng = points[0].longitude;
+    for (LatLng point in points) {
+      if (point.latitude < minLat) minLat = point.latitude;
+      if (point.latitude > maxLat) maxLat = point.latitude;
+      if (point.longitude < minLng) minLng = point.longitude;
+      if (point.longitude > maxLng) maxLng = point.longitude;
+    }
+    // Include pickup and drop
+    if (pickupLat < minLat) minLat = pickupLat;
+    if (pickupLat > maxLat) maxLat = pickupLat;
+    if (pickupLon < minLng) minLng = pickupLon;
+    if (pickupLon > maxLng) maxLng = pickupLon;
+    if (dropLat < minLat) minLat = dropLat;
+    if (dropLat > maxLat) maxLat = dropLat;
+    if (dropLon < minLng) minLng = dropLon;
+    if (dropLon > maxLng) maxLng = dropLon;
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+  }
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> points = <LatLng>[];
+    int index = 0;
+    final int len = encoded.length;
+    int lat = 0;
+    int lng = 0;
+
+    while (index < len) {
+      int b;
+      int shift = 0;
+      int result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      final int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      final int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      points.add(LatLng(lat / 1E5, lng / 1E5));
+    }
+
+    return points;
+  }
   void _startDotTimer() {
     _dotTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (mounted) {
@@ -762,7 +1285,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
       }
     });
   }
-
   void _startPulseTimer() {
     _pulseTimer = Timer.periodic(const Duration(milliseconds: 800), (timer) {
       if (mounted) {
@@ -772,7 +1294,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
       }
     });
   }
-
   void _startSearchTimer() {
     _searchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -786,7 +1307,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
       }
     });
   }
-
   void _startSearching() {
     setState(() {
       _isSearching = true;
@@ -794,12 +1314,10 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
       _dotCount = 1;
       _radius = 30;
     });
-
     _startDotTimer();
     _startPulseTimer();
     _startSearchTimer();
   }
-
   void _stopSearching() {
     _dotTimer.cancel();
     _pulseTimer?.cancel();
@@ -808,7 +1326,6 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
       _isSearching = false;
     });
   }
-
   void _retrySearch() async {
     _stopSearching();
     setState(() {
@@ -846,12 +1363,14 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
     }
   }
 
+
   @override
   void dispose() {
     _socket.off('user:driver_assigned');
     _dotTimer.cancel();
     _pulseTimer?.cancel();
     _searchTimer?.cancel();
+    _mapController?.dispose();
     super.dispose();
   }
 
@@ -861,12 +1380,51 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Pulsating circle animation
-            Center(
+      body: _routeFetched
+          ? Stack(
+        children: [
+
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: LatLng(pickupLat, pickupLon),
+              zoom: 12,
+            ),
+            onMapCreated: (controller) {
+              _mapController = controller;
+              if (_routePoints.isNotEmpty) {
+                LatLngBounds bounds = _calculateBounds(_routePoints);
+                _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+              }
+            },
+            markers: _markers,
+            polylines: _polylines,
+          ),
+          // Back button overlay
+          Positioned(
+            left: 10.w,
+            top: 40.h,
+            child: FloatingActionButton(
+              mini: true,
+              backgroundColor: const Color(0xFFFFFFFF),
+              shape: const CircleBorder(),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Padding(
+                padding: EdgeInsets.only(left: 10.w),
+                child: const Icon(
+                  Icons.arrow_back_ios,
+                  color: Color(0xFF1D3557),
+                ),
+              ),
+            ),
+          ),
+          // Pulsating circle animation overlay
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.3,
+            left: 0,
+            right: 0,
+            child: Center(
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 800),
                 width: _radius * 2,
@@ -888,43 +1446,84 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
                 ),
               ),
             ),
-
-            const SizedBox(height: 40),
-
-            Text(
-              _isSearching
-                  ? "Searching for nearby drivers$dots"
-                  : "No drivers found nearby",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+          ),
+          // Route info overlay
+          if (pickupToDropDistance != null)
+            Positioned(
+              bottom: 170.h, // Adjust based on sheet height
+              left: 16.w,
+              right: 16.w,
+              child: Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  'Route: $pickupToDropDistance | $pickupToDropDuration',
+                  style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              textAlign: TextAlign.center,
             ),
-
-            const SizedBox(height: 12),
-
-            _isSearching
-                ? Text(
+          // Search status overlay
+           Positioned(
+            // top: 100.h,
+            bottom: 10.h,
+            left: 16.w,
+            right: 16.w,
+            child: Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(12.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    _isSearching
+                        ? "Searching for nearby drivers$dots"
+                        : "No drivers found nearby",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  _isSearching
+                      ? Text(
                     "Please wait while we connect you to a driver.\n(${_remainingSeconds}s)",
                     style: const TextStyle(fontSize: 15, color: Colors.grey),
                     textAlign: TextAlign.center,
                   )
-                : const Text(
+                      : const Text(
                     "Please try again or cancel your request.",
                     style: TextStyle(fontSize: 15, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
-
-            const SizedBox(height: 50),
-
-            _isSearching
-                ? const CircularProgressIndicator(
+                  const SizedBox(height: 16),
+                  _isSearching
+                      ? const CircularProgressIndicator(
                     strokeWidth: 3,
                     color: Colors.blueAccent,
                   )
-                : ElevatedButton(
+                      : ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,
                       padding: const EdgeInsets.symmetric(
@@ -944,599 +1543,16 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
                       ),
                     ),
                   ),
-          ],
-        ),
-      ),
+                ],
+              ),
+            ),
+          ),
+
+        ],
+      )
+          : const Center(child: CircularProgressIndicator()),
     );
   }
+
+
 }
-
-
-//////////////////////////  old Design /////////////////////////////////
-
-// Container(
-              //   margin: EdgeInsets.only(top: 10.h, left: 20.w, right: 20.w),
-              //   padding: EdgeInsets.only(
-              //     left: 12.w,
-              //     right: 12.w,
-              //     top: 18.h,
-              //     bottom: 18.h,
-              //   ),
-              //   decoration: BoxDecoration(
-              //     color: Colors.white,
-              //     borderRadius: BorderRadius.circular(15.r),
-              //     boxShadow: [
-              //       BoxShadow(
-              //         offset: Offset(0, 2),
-              //         blurRadius: 3,
-              //         spreadRadius: 2,
-              //         color: Color.fromARGB(28, 0, 0, 0),
-              //       ),
-              //     ],
-              //   ),
-              //   child: Column(
-              //     children: [
-              //       Row(
-              //         children: [
-              //           Icon(Icons.circle, size: 12.sp, color: Colors.green),
-              //           SizedBox(width: 10.w),
-              //           Expanded(
-              //             child: Column(
-              //               crossAxisAlignment: CrossAxisAlignment.start,
-              //               children: [
-              //                 Text.rich(
-              //                   TextSpan(
-              //                     children: [
-              //                       TextSpan(
-              //                         text: "${name} ·",
-              //                         style: GoogleFonts.poppins(
-              //                           fontWeight: FontWeight.w500,
-              //                           fontSize: 15.sp,
-              //                         ),
-              //                       ),
-              //                       TextSpan(
-              //                         text: " ${phon}",
-              //                         style: GoogleFonts.poppins(
-              //                           fontWeight: FontWeight.w400,
-              //                           fontSize: 13.sp,
-              //                           color: Colors.grey[700],
-              //                         ),
-              //                       ),
-              //                     ],
-              //                   ),
-              //                 ),
-              //                 SizedBox(height: 2.h),
-              //                 Text(
-              //                   maxLines: 1,
-              //                   overflow: TextOverflow.ellipsis,
-              //                   // "60 Feet Rd, Sanjay Nagar, Jagann...",
-              //                   pickupAddress,
-              //                   style: GoogleFonts.poppins(
-              //                     fontSize: 14.sp,
-              //                     color: Colors.grey[800],
-              //                   ),
-              //                 ),
-              //               ],
-              //             ),
-              //           ),
-              //         ],
-              //       ),
-              //       SizedBox(height: 15.h),
-              //       Row(
-              //         children: [
-              //           Icon(Icons.location_on, size: 14.sp, color: Colors.red),
-              //           SizedBox(width: 10.w),
-              //           Expanded(
-              //             child: Column(
-              //               crossAxisAlignment: CrossAxisAlignment.start,
-              //               children: [
-              //                 Text.rich(
-              //                   TextSpan(
-              //                     children: [
-              //                       TextSpan(
-              //                         text: "${name} ·",
-              //                         style: GoogleFonts.poppins(
-              //                           fontWeight: FontWeight.w500,
-              //                           fontSize: 15.sp,
-              //                         ),
-              //                       ),
-              //                       TextSpan(
-              //                         text: " ${phon}",
-              //                         style: GoogleFonts.poppins(
-              //                           fontWeight: FontWeight.w400,
-              //                           fontSize: 13.sp,
-              //                           color: Colors.grey[700],
-              //                         ),
-              //                       ),
-              //                     ],
-              //                   ),
-              //                 ),
-              //                 SizedBox(height: 2.h),
-              //                 Text(
-              //                   maxLines: 1,
-              //                   overflow: TextOverflow.ellipsis,
-              //                   dropAddress,
-              //                   style: GoogleFonts.poppins(
-              //                     fontSize: 14.sp,
-              //                     color: Colors.grey[800],
-              //                   ),
-              //                 ),
-              //               ],
-              //             ),
-              //           ),
-              //         ],
-              //       ),
-              //     ],
-              //   ),
-              // ),
-              // SizedBox(height: 10.h),
-              // Expanded(
-              //   child: Container(
-              //     padding: EdgeInsets.symmetric(horizontal: 16.w),
-              //     decoration: BoxDecoration(
-              //       color: Color(0xFFFFFFFF),
-              //       borderRadius: BorderRadius.only(
-              //         topLeft: Radius.circular(16.r),
-              //         topRight: Radius.circular(16.r),
-              //       ),
-              //       boxShadow: [
-              //         BoxShadow(
-              //           color: Colors.black12,
-              //           blurRadius: 10,
-              //           spreadRadius: 5,
-              //         ),
-              //       ],
-              //     ),
-              //     child: ListView(
-              //       padding: EdgeInsets.zero,
-              //       children: [
-              //         SizedBox(height: 8.h),
-              //         Center(
-              //           child: Container(
-              //             width: 50.w,
-              //             height: 4.h,
-              //             decoration: BoxDecoration(
-              //               color: Colors.grey[300],
-              //               borderRadius: BorderRadius.circular(10.r),
-              //             ),
-              //           ),
-              //         ),
-              //         SizedBox(height: 8.h),
-              //         Center(
-              //           child: Text(
-              //             "Choose a Trip",
-              //             style: GoogleFonts.inter(
-              //               fontSize: 18.sp,
-              //               fontWeight: FontWeight.w600,
-              //               color: Color(0xFF000000),
-              //               letterSpacing: -1,
-              //             ),
-              //           ),
-              //         ),
-              //         SizedBox(height: 10.h),
-              //         Container(
-              //           width: double.infinity,
-              //           height: 170.h,
-              //           decoration: BoxDecoration(
-              //             borderRadius: BorderRadius.circular(20.r),
-              //             border: Border.all(
-              //               color: Color(0xFF000000),
-              //               width: 3,
-              //             ),
-              //           ),
-              //           child: Column(
-              //             crossAxisAlignment: CrossAxisAlignment.start,
-              //             children: [
-              //               SizedBox(height: 10.h),
-              //               Center(
-              //                 child: Image.network(
-              //                   // "assets/car.png",
-              //                   snp.data[selectIndex].image,
-              //                   width: 110.w,
-              //                   height: 70.h,
-              //                   fit: BoxFit.contain,
-              //                   errorBuilder: (context, error, stackTrace) {
-              //                     return Image.asset(
-              //                       "assets/car.png",
-              //                       width: 106.w,
-              //                       height: 60.h,
-              //                       fit: BoxFit.cover,
-              //                     );
-              //                   },
-              //                 ),
-              //               ),
-              //               Row(
-              //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //                 children: [
-              //                   Padding(
-              //                     padding: EdgeInsets.only(left: 18.w),
-              //                     child: Text(
-              //                       //Delivery Go
-              //                       "${snp.data[selectIndex].vehicleType}",
-              //                       style: GoogleFonts.inter(
-              //                         fontSize: 18.sp,
-              //                         fontWeight: FontWeight.w500,
-              //                         color: Color(0xfF000000),
-              //                         letterSpacing: -0.5,
-              //                       ),
-              //                     ),
-              //                   ),
-              //                   Padding(
-              //                     padding: EdgeInsets.only(right: 18.w),
-              //                     child: Text(
-              //                       // "₹170.71",
-              //                       "₹${snp.data[selectIndex].price}",
-              //                       style: GoogleFonts.inter(
-              //                         fontSize: 18.sp,
-              //                         fontWeight: FontWeight.w500,
-              //                         color: Color(0xfF000000),
-              //                         letterSpacing: -0.5,
-              //                       ),
-              //                     ),
-              //                   ),
-              //                 ],
-              //               ),
-              //               Padding(
-              //                 padding: EdgeInsets.only(left: 18.w),
-              //                 child: Row(
-              //                   children: [
-              //                     Text(
-              //                       "8:46pm",
-              //                       style: GoogleFonts.inter(
-              //                         fontSize: 14.sp,
-              //                         fontWeight: FontWeight.w400,
-              //                         color: Color(0xFF000000),
-              //                         letterSpacing: 1,
-              //                       ),
-              //                     ),
-              //                     SizedBox(width: 6.w),
-              //                     CircleAvatar(
-              //                       radius: 4.r,
-              //                       backgroundColor: Color(0xFFD9D9D9),
-              //                     ),
-              //                     SizedBox(width: 6.w),
-              //                     Text(
-              //                       "4 min away",
-              //                       style: GoogleFonts.inter(
-              //                         fontSize: 14.sp,
-              //                         fontWeight: FontWeight.w400,
-              //                         color: Color(0xFF000000),
-              //                         letterSpacing: 1,
-              //                       ),
-              //                     ),
-              //                   ],
-              //                 ),
-              //               ),
-              //               SizedBox(height: 5.h),
-              //               Container(
-              //                 margin: EdgeInsets.only(left: 18.w),
-              //                 width: 65.w,
-              //                 height: 22.h,
-              //                 decoration: BoxDecoration(
-              //                   borderRadius: BorderRadius.circular(4.r),
-              //                   color: const Color(0xFF3B6CE9),
-              //                 ),
-              //                 child: Row(
-              //                   mainAxisAlignment: MainAxisAlignment.center,
-              //                   crossAxisAlignment: CrossAxisAlignment.center,
-              //                   children: [
-              //                     Icon(
-              //                       Icons.bolt,
-              //                       color: Colors.white,
-              //                       size: 16.sp,
-              //                     ),
-              //                     SizedBox(width: 3.w),
-              //                     Text(
-              //                       "Faster",
-              //                       style: GoogleFonts.inter(
-              //                         fontSize: 12.sp,
-              //                         fontWeight: FontWeight.w500,
-              //                         color: Colors.white,
-              //                         letterSpacing: -0.5,
-              //                       ),
-              //                     ),
-              //                   ],
-              //                 ),
-              //               ),
-              //             ],
-              //           ),
-              //         ),
-              //         SizedBox(height: 25.h),
-              //         ListView.builder(
-              //           padding: EdgeInsets.zero,
-              //           physics: const NeverScrollableScrollPhysics(),
-              //           shrinkWrap: true,
-              //           itemCount: snp.data.length,
-              //           itemBuilder: (context, index) {
-              //             return InkWell(
-              //               onTap: () {
-              //                 setState(() {
-              //                   selectIndex = index;
-              //                 });
-              //               },
-              //               child: Padding(
-              //                 padding: EdgeInsets.only(
-              //                   bottom: 20.h,
-              //                   left: 5.w,
-              //                   right: 5.w,
-              //                 ),
-              //                 child: Container(
-              //                   padding: EdgeInsets.only(
-              //                     left: 10.w,
-              //                     right: 12.w,
-              //                     top: 10.h,
-              //                     bottom: 10.h,
-              //                   ),
-              //                   decoration: BoxDecoration(
-              //                     borderRadius: BorderRadius.circular(10.r),
-              //                     border: Border.all(
-              //                       color: selectIndex == index
-              //                           ? Color.fromARGB(127, 0, 0, 0)
-              //                           : Colors.transparent,
-              //                       width: 1.w,
-              //                     ),
-              //                   ),
-              //                   child: Row(
-              //                     children: [
-              //                       Image.network(
-              //                         // "assets/b.png",
-              //                         //selectTrip[index]["image"].toString(),
-              //                         snp.data[index].image,
-              //                         width: 50.w,
-              //                         height: 50.h,
-              //                         fit: BoxFit.contain,
-              //                         errorBuilder: (context, error, stackTrace) {
-              //                           return Image.asset(
-              //                             // "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/624px-No-Image-Placeholder.svg.png",
-              //                             "assets/b.png",
-              //                             width: 50.w,
-              //                             height: 50.h,
-              //                             fit: BoxFit.contain,
-              //                           );
-              //                         },
-              //                       ),
-              //                       SizedBox(width: 10.w),
-              //                       Column(
-              //                         crossAxisAlignment:
-              //                             CrossAxisAlignment.start,
-              //                         children: [
-              //                           Text(
-              //                             //"Delivery Go",
-              //                             // selectTrip[index]['name'],
-              //                             snp.data[index].vehicleType,
-              //                             style: GoogleFonts.inter(
-              //                               fontSize: 18.sp,
-              //                               fontWeight: FontWeight.w400,
-              //                               color: Color(0xff000000),
-              //                               letterSpacing: -1,
-              //                             ),
-              //                           ),
-              //                           Row(
-              //                             children: [
-              //                               Text(
-              //                                 "8:46pm",
-              //                                 style: GoogleFonts.inter(
-              //                                   fontSize: 14.sp,
-              //                                   fontWeight: FontWeight.w400,
-              //                                   color: Color(0xFF000000),
-              //                                   letterSpacing: -0.5,
-              //                                 ),
-              //                               ),
-              //                               SizedBox(width: 6.w),
-              //                               CircleAvatar(
-              //                                 radius: 3.r,
-              //                                 backgroundColor: Color(
-              //                                   0xFFD9D9D9,
-              //                                 ),
-              //                               ),
-              //                               SizedBox(width: 6.w),
-              //                               Text(
-              //                                 "4 min away",
-              //                                 style: GoogleFonts.inter(
-              //                                   fontSize: 14.sp,
-              //                                   fontWeight: FontWeight.w400,
-              //                                   color: Color(0xFF000000),
-              //                                   letterSpacing: -0.5,
-              //                                 ),
-              //                               ),
-              //                             ],
-              //                           ),
-              //                         ],
-              //                       ),
-              //                       Spacer(),
-              //                       Column(
-              //                         crossAxisAlignment:
-              //                             CrossAxisAlignment.start,
-              //                         children: [
-              //                           Text(
-              //                             // "₹170.71",
-              //                             // selectTrip[index]['ammount'],
-              //                             "₹${snp.data[index].price}",
-              //                             style: GoogleFonts.inter(
-              //                               fontSize: 18.sp,
-              //                               fontWeight: FontWeight.w500,
-              //                               color: Color(0xfF000000),
-              //                               letterSpacing: -1,
-              //                             ),
-              //                           ),
-              //                           if (index == 0 || index == 1)
-              //                             Text(
-              //                               //"₹188.71",
-              //                               selectTrip[index]['discount'],
-              //                               style: GoogleFonts.inter(
-              //                                 fontSize: 14.sp,
-              //                                 fontWeight: FontWeight.w400,
-              //                                 color: Color(0xFF6B6B6B),
-              //                                 letterSpacing: 0,
-              //                                 decoration:
-              //                                     TextDecoration.lineThrough,
-              //                                 decorationColor: Color(
-              //                                   0xFF6B6B6B,
-              //                                 ),
-              //                               ),
-              //                             ),
-              //                         ],
-              //                       ),
-              //                     ],
-              //                   ),
-              //                 ),
-              //               ),
-              //             );
-              //           },
-              //         ),
-              //         SizedBox(height: 15.h),
-              //         Container(
-              //           width: MediaQuery.of(context).size.width,
-              //           height: 50.h,
-              //           decoration: BoxDecoration(
-              //             borderRadius: BorderRadius.circular(10.r),
-              //             border: Border.all(
-              //               color: Colors.grey,
-              //               strokeAlign: 1.w,
-              //             ),
-              //           ),
-              //           child: Row(
-              //             children: [
-              //               methodPay("assets/SvgImage/cashes.svg"),
-              //               methodPay("assets/SvgImage/addpromo.svg"),
-              //               methodPay("assets/SvgImage/ed.svg"),
-              //             ],
-              //           ),
-              //         ),
-              //         SizedBox(height: 15.h),
-              //         ElevatedButton(
-              //           style: ElevatedButton.styleFrom(
-              //             minimumSize: Size(double.infinity, 50.h),
-              //             backgroundColor: Color(0xFF006970),
-              //             shape: RoundedRectangleBorder(
-              //               borderRadius: BorderRadius.circular(10.r),
-              //             ),
-              //           ),
-              //           onPressed: isBooking
-              //               ? null
-              //               : () async {
-              //                   setState(() => isBooking = true);
-              //                   try {
-              //                     final selectedVehicle = snp.data[selectIndex];
-              //                     final body = BookInstantDeliveryBodyModel(
-              //                       vehicleTypeId:
-              //                           selectedVehicle.vehicleTypeId,
-              //                       //selectedVehicle.vehicleType,
-              //                       price: double.parse(
-              //                         selectedVehicle.price,
-              //                       ).toInt(),
-              //                       //                                             price: (selectedVehicle.price.contains('.'))
-              //                       // ? double.parse(selectedVehicle.price).toInt()
-              //                       // : int.parse(selectedVehicle.price),
-              //                       isCopanCode: false,
-              //                       copanId: null.toString(),
-              //                       copanAmount: 0,
-              //                       coinAmount: 0,
-              //                       taxAmount: 18,
-              //                       userPayAmount: double.parse(
-              //                         selectedVehicle.price,
-              //                       ).toInt(),
-              //                       distance: selectedVehicle.distance,
-              //                       // mobNo: selectedVehicle.mobNo,
-              //                       mobNo: "98767655678",
-              //                       name: selectedVehicle.name,
-              //                       // origName: selectedVehicle.origName,
-              //                       // origLat: selectedVehicle.origLat,
-              //                       // origLon: selectedVehicle.origLon,
-              //                       origName: "jaipur",
-              //                       origLat: 26.9124,
-              //                       origLon: 75.7873,
-              //                       destName: selectedVehicle.destName,
-              //                       destLat: selectedVehicle.destLat,
-              //                       destLon: selectedVehicle.destLon,
-              //                       picUpType: selectedVehicle.picUpType,
-              //                     );
-              //                     final service = APIStateNetwork(
-              //                       callPrettyDio(),
-              //                     );
-              //                     final response = await service
-              //                         .bookInstantDelivery(body);
-              //                     if (response.code == 0) {
-              //                       box.put(
-              //                         "current_booking_txId",
-              //                         response.data!.txId,
-              //                       );
-              //                       log(
-              //                         '✅ Booking created — txId: ${response.data!.txId}',
-              //                       );
-              //                       Navigator.push(
-              //                         context,
-              //                         CupertinoPageRoute(
-              //                           builder: (context) =>
-              //                               WaitingForDriverScreen(
-              //                                 body: body,
-              //                                 socket: socket!,
-              //                               ),
-              //                           fullscreenDialog: true,
-              //                         ),
-              //                       );
-              //                       Fluttertoast.showToast(
-              //                         msg:
-              //                             "Delivery booked, waiting for driver...",
-              //                       );
-              //                       setState(() {
-              //                         isBooking = false;
-              //                       });
-              //                     } else {
-              //                       Fluttertoast.showToast(
-              //                         msg: response.message,
-              //                       );
-              //                       setState(() {
-              //                         isBooking = false;
-              //                       });
-              //                     }
-              //                   } catch (e, st) {
-              //                     setState(() {
-              //                       isBooking = false;
-              //                     });
-              //                     log("${e.toString()} / ${st.toString()}");
-              //                     ScaffoldMessenger.of(context).showSnackBar(
-              //                       SnackBar(
-              //                         content: Text("Booking failed: $e"),
-              //                         behavior: SnackBarBehavior.floating,
-              //                         margin: EdgeInsets.only(
-              //                           left: 15.w,
-              //                           bottom: 15.h,
-              //                           right: 15.w,
-              //                         ),
-              //                         shape: RoundedRectangleBorder(
-              //                           borderRadius: BorderRadius.circular(
-              //                             15.r,
-              //                           ),
-              //                           side: BorderSide.none,
-              //                         ),
-              //                         backgroundColor: Colors.red,
-              //                       ),
-              //                     );
-              //                   }
-              //                 },
-              //           child: isBooking
-              //               ? Center(
-              //                   child: SizedBox(
-              //                     width: 30.w,
-              //                     height: 30.h,
-              //                     child: CircularProgressIndicator(
-              //                       color: Colors.white,
-              //                       strokeWidth: 2.w,
-              //                     ),
-              //                   ),
-              //                 )
-              //               : Text(
-              //                   "Book Now",
-              //                   style: GoogleFonts.inter(
-              //                     fontSize: 16.sp,
-              //                     fontWeight: FontWeight.w400,
-              //                     color: Color(0xFFFFFFFF),
-              //                   ),
-              //                 ),
-              //         ),
-              //         SizedBox(height: 10.h),
-              //       ],
-              //     ),
-              //   ),
-              // ),

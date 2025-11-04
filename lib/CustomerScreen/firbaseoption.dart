@@ -22,9 +22,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'instant-delivery-e2ec1.firebasestorage.app',
   );
 
-
-
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'your-ios-api-key',
     appId: 'your-ios-app-id',
@@ -35,3 +32,6 @@ class DefaultFirebaseOptions {
   );
 
 }
+
+
+

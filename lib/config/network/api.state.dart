@@ -1,3 +1,4 @@
+import 'package:delivery_mvp_app/data/Model/UpdateAddressBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantDeliveryResModel.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/deliveryCancelByUserResModel..dart';
@@ -19,15 +20,20 @@ import 'package:delivery_mvp_app/data/Model/verifyRegisterBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/verifyRegisterResModel.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
-
+import '../../data/Model/AddAddressModel.dart';
 import '../../data/Model/CancelOrderModel.dart';
-
+import '../../data/Model/DeleteAddressModel.dart';
+import '../../data/Model/GetAddressResponseModel.dart';
+import '../../data/Model/GetDeliveryByIdResModel.dart';
 part 'api.state.g.dart';
 
-//@RestApi(baseUrl: "https://weloads.com/api")
-@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
+@RestApi(baseUrl: "https://weloads.com/api")
+// @RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
 abstract class APIStateNetwork {
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
+
+  @GET("/v1/user/getAllAddresses")
+  Future<GetAddressRsponseModel> getAllAddresses();
 
   @POST("/v1/user/register")
   Future<RegisterResModel> userRegister(@Body() RegisterBodyModel body);
@@ -69,6 +75,41 @@ abstract class APIStateNetwork {
     @Body() CancelOrderModel body,
   );
 
+
+
   @POST("/v1/user/getDeliveryHistory")
   Future<GetDeliveryHistoryResModel> getDeliveryHistory();
+
+
+  @GET("/v1/user/getDeliveryById")
+  Future<GetDeliveryByIdResModel> getDeliveryById(@Query("deliveryId") String deliveryId);
+
+
+
+  @POST("/v1/user/addAddress")
+  Future<HttpResponse<dynamic>> addAddress(
+      @Body() AddAddressModel body,);
+
+
+  @POST("/v1/user/updateAddress")
+  Future<HttpResponse<dynamic>> updateAddress(
+      @Body() UpdateAddressBodyModel body,);
+
+
+
+
+  @POST("/v1/user/deleteAddress")
+  Future<HttpResponse<dynamic>> deleteAddress(
+      @Body() DeleteAddressModel body,);
+
+
+
+
+
+
+
+
+
+
 }
+

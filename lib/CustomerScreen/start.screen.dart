@@ -22,6 +22,8 @@ class _StartScreenState extends State<StartScreen> {
       var box = Hive.box("folder");
       var token = box.get("token");
 
+
+
       Navigator.pushAndRemoveUntil(
         context,
         CupertinoPageRoute(

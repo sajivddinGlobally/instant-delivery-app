@@ -1,3 +1,4 @@
+/*
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/firebaseOption.dart';
 import 'package:delivery_mvp_app/CustomerScreen/start.screen.dart';
@@ -10,9 +11,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 
+import 'CustomerScreen/notificationService.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService().init();
+
   await Hive.initFlutter();
   await Hive.openBox("folder");
 
@@ -99,3 +104,94 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+*/
+import 'dart:developer';
+import 'package:delivery_mvp_app/CustomerScreen/firebaseOption.dart';
+import 'package:delivery_mvp_app/CustomerScreen/start.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/notificationService.dart'; // Assuming PickupScreen is in a similar path; adjust import as needed
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'CustomerScreen/Newscreen.dart';
+
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Initialize NotificationService (singleton)
+  await NotificationService().init();
+  await Hive.initFlutter();
+  await Hive.openBox("folder");
+  runApp(ProviderScope(child: const MyApp()));
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  @override
+  void initState() {
+    super.initState();
+    // Set up navigation callback after the first frame to ensure navigator is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final service = NotificationService();
+      service.setNavigationCallback((deliveryId) {
+        // Navigate to PickupScreen with deliveryId
+        // If using named routes, use: navigatorKey.currentState?.pushNamed('/pickup', arguments: deliveryId);
+        // For now, using direct push; adjust as per your routing setup
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (context) => PickupScreenNotification( deliveryId: deliveryId,), // Pass deliveryId as needed
+          ),
+        );
+      });
+    });
+  }
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    var box = Hive.box("folder");
+    var token = box.get("token");
+    log("=====================================");
+    log(token ?? "No token found");
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Color(0xFF092325),
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: ScreenUtilInit(
+        designSize: Size(375, 812),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          return MaterialApp(
+            navigatorKey: navigatorKey, // Attach the global navigator key
+            debugShowCheckedModeBanner: false,
+            title: 'Flutter Demo',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            ),
+            home: StartScreen(),
+            // If using named routes, add here:
+            // routes: {
+            //   '/pickup': (context) => PickupScreen(deliveryId: ModalRoute.of(context)?.settings.arguments as String? ?? ''),
+            // },
+          );
+        },
+      ),
+    );
+  }
+}
+
+

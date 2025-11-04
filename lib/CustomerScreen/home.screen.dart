@@ -382,13 +382,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 SizedBox(height: 20.h),
                 Expanded(
-                  child: Padding(
+                  child:
+
+                  Padding(
                     padding: EdgeInsets.only(
                       left: 15.w,
                       right: 15.w,
                       bottom: 10.h,
                     ),
-                    child: GridView.builder(
+                    child:
+                    GridView.builder(
                       itemCount: myList.length,
                       padding: EdgeInsets.zero,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -398,7 +401,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         childAspectRatio: 160 / 165,
                       ),
                       itemBuilder: (context, index) {
-                        return InkWell(
+                        return
+                          InkWell(
                           onTap: () {
                             if (index == 4) {
                               Navigator.push(
@@ -492,6 +496,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       },
                     ),
                   ),
+
+
                 ),
               ],
             )
