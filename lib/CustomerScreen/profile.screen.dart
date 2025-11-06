@@ -110,7 +110,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 .isNotEmpty)
                         ? ClipOval(
                             child: Image.network(
-                              profile.data!.doc!.image,
+                              profile.data!.doc!.image ??
+                                  "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png",
                               fit: BoxFit.cover,
                               width: 72.w,
                               height: 72.h,
