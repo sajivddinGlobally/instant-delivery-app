@@ -457,7 +457,31 @@ class _UpdateUserProfilePageState extends ConsumerState<UpdateUserProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 66.h),
+                  SizedBox(height: 50.h),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(6.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF006970),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 4,
+                            offset: const Offset(1, 1),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.arrow_back,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                   Center(
                     child: Image.asset(
                       "assets/scooter.png",
@@ -465,7 +489,7 @@ class _UpdateUserProfilePageState extends ConsumerState<UpdateUserProfilePage> {
                       height: 72.h,
                     ),
                   ),
-                  SizedBox(height: 28.h),
+                  SizedBox(height: 20.h),
                   Text(
                     "Edit Your Profile",
                     style: GoogleFonts.inter(
