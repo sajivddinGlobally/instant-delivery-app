@@ -30,9 +30,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       backgroundColor: Color(0xFFFFFFFF),
       body: provider.when(
         data: (profile) {
-          log(
-            "https://weloads.com/${profile.data!.empty!.activePaths!.paths!.image!}",
-          );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -58,7 +55,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 .isNotEmpty)
                         ? ClipOval(
                             child: Image.network(
-                              "https://weloads.com${profile.data!.empty!.activePaths!.paths!.image!}",
+                              profile.data!.doc!.image,
                               fit: BoxFit.cover,
                               width: 72.w,
                               height: 72.h,
