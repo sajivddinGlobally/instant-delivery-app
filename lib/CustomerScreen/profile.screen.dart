@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/deliveryHistory.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/updateUserProfile.page.dart';
 import 'package:delivery_mvp_app/data/Model/getProfileModel.dart';
 import 'package:delivery_mvp_app/data/controller/getProfileController.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,6 +30,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       backgroundColor: Color(0xFFFFFFFF),
       body: provider.when(
         data: (profile) {
+          log(
+            "https://weloads.com/${profile.data!.empty!.activePaths!.paths!.image!}",
+          );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -39,22 +43,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   height: 72.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color(0xFFA8DADC),
+                    color: const Color(0xFFA8DADC),
                   ),
                   child: Center(
-                    child: Text(
-                      // "DE",
-                      profile.data!.doc!.firstName![0].toUpperCase() +
-                          profile.data!.doc!.lastName![0].toUpperCase(),
-                      style: GoogleFonts.inter(
-                        fontSize: 32.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF4F4F4F),
-                      ),
-                    ),
+                    child:
+                        (profile.data?.empty?.activePaths?.paths?.image !=
+                                null &&
+                            profile
+                                .data!
+                                .empty!
+                                .activePaths!
+                                .paths!
+                                .image!
+                                .isNotEmpty)
+                        ? ClipOval(
+                            child: Image.network(
+                              "https://weloads.com${profile.data!.empty!.activePaths!.paths!.image!}",
+                              fit: BoxFit.cover,
+                              width: 72.w,
+                              height: 72.h,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    Icons.person,
+                                    size: 40.sp,
+                                    color: Colors.grey,
+                                  ),
+                            ),
+                          )
+                        : Text(
+                            "${profile.data?.doc?.firstName?[0].toUpperCase() ?? ''}${profile.data?.doc?.lastName?[0].toUpperCase() ?? ''}",
+                            style: GoogleFonts.inter(
+                              fontSize: 32.sp,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF4F4F4F),
+                            ),
+                          ),
                   ),
                 ),
               ),
+
               SizedBox(height: 5.h),
               Center(
                 child: Text(
@@ -73,6 +100,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 endIndent: 24,
                 indent: 24,
               ),
+              buildProfile(Icons.edit, "Edit Profile", () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => UpdateUserProfilePage(),
+                  ),
+                );
+              }),
               buildProfile(Icons.payment, "Payment", () {}),
               buildProfile(Icons.history, "Delivery History", () {
                 Navigator.push(

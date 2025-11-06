@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:delivery_mvp_app/data/Model/UpdateAddressBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantDeliveryResModel.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
@@ -14,11 +16,15 @@ import 'package:delivery_mvp_app/data/Model/loginVerifyBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/loginVerifyResModel.dart';
 import 'package:delivery_mvp_app/data/Model/registerBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/registerResModel.dart';
+import 'package:delivery_mvp_app/data/Model/updateUserProfileBodyModel.dart';
+import 'package:delivery_mvp_app/data/Model/updateUserProfileResModel.dart';
+import 'package:delivery_mvp_app/data/Model/uploadImageResModel.dart';
 import 'package:delivery_mvp_app/data/Model/verifyOrResetPassBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/verifyOrResetPassResModel.dart';
 import 'package:delivery_mvp_app/data/Model/verifyRegisterBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/verifyRegisterResModel.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/retrofit.dart';
 import '../../data/Model/AddAddressModel.dart';
 import '../../data/Model/CancelOrderModel.dart';
@@ -30,14 +36,13 @@ import '../../data/Model/SubmitRatingModel.dart';
 
 part 'api.state.g.dart';
 
-@RestApi(baseUrl: "https://weloads.com/api")
-// @RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
+//@RestApi(baseUrl: "https://weloads.com/api")
+@RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
 abstract class APIStateNetwork {
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
 
   @POST("/v1/user/reviewRating")
-  Future<RatingResponseModel> reviewRating(
-      @Body() SubmitRatingRequest body,);
+  Future<RatingResponseModel> reviewRating(@Body() SubmitRatingRequest body);
 
   @GET("/v1/user/getAllAddresses")
   Future<GetAddressRsponseModel> getAllAddresses();
@@ -47,7 +52,8 @@ abstract class APIStateNetwork {
 
   @POST("/v1/user/registerVerify")
   Future<VerifyRegisterResModel> verifyRegister(
-    @Body() VerifyRegisterBodyModel body,);
+    @Body() VerifyRegisterBodyModel body,
+  );
 
   @POST("/v1/user/login")
   Future<LoginResModel> login(@Body() LoginBodyModel body);
@@ -65,20 +71,16 @@ abstract class APIStateNetwork {
     @Body() VerifyOrResetPassBodyModel body,
   );
 
-
   @GET("/v1/user/getProfile")
   Future<GetProfileModel> fetchProfile();
 
-
   @POST("/v1/user/getDistance")
   Future<GetDistanceResModel> getDistance(@Body() GetDistanceBodyModel body);
-
 
   @POST("/v1/user/bookInstantDelivery")
   Future<BookInstantDeliveryResModel> bookInstantDelivery(
     @Body() BookInstantDeliveryBodyModel body,
   );
-
 
   @POST("/v1/user/deliveryCancelledByUser")
   Future<DriverCancelDeliveryResModel> deliveryCancelledByUser(
@@ -88,24 +90,28 @@ abstract class APIStateNetwork {
   @POST("/v1/user/getDeliveryHistory")
   Future<GetDeliveryHistoryResModel> getDeliveryHistory();
 
-
   @GET("/v1/user/getDeliveryById")
-  Future<GetDeliveryByIdResModel> getDeliveryById(@Query("deliveryId") String deliveryId);
-
+  Future<GetDeliveryByIdResModel> getDeliveryById(
+    @Query("deliveryId") String deliveryId,
+  );
 
   @POST("/v1/user/addAddress")
-  Future<HttpResponse<dynamic>> addAddress( @Body() AddAddressModel body,);
-
-
+  Future<HttpResponse<dynamic>> addAddress(@Body() AddAddressModel body);
 
   @POST("/v1/user/updateAddress")
   Future<HttpResponse<dynamic>> updateAddress(
-      @Body() UpdateAddressBodyModel body,);
-
+    @Body() UpdateAddressBodyModel body,
+  );
 
   @POST("/v1/user/deleteAddress")
-  Future<HttpResponse<dynamic>> deleteAddress(
-      @Body() DeleteAddressModel body,);
+  Future<HttpResponse<dynamic>> deleteAddress(@Body() DeleteAddressModel body);
 
+  @MultiPart()
+  @POST("/v1/uploadImage")
+  Future<UploadImageReModel> uploadImage(@Part(name: "file") File file);
+
+  @PUT("/v1/user/updateCostumerProfile")
+  Future<UpdateUserProfileResModel> updateCutomerProfile(
+    @Body() UpdateUserProfileBodyModel body,
+  );
 }
-
