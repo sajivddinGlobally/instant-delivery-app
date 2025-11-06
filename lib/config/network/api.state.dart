@@ -25,12 +25,19 @@ import '../../data/Model/CancelOrderModel.dart';
 import '../../data/Model/DeleteAddressModel.dart';
 import '../../data/Model/GetAddressResponseModel.dart';
 import '../../data/Model/GetDeliveryByIdResModel.dart';
+import '../../data/Model/RatingResponseModel.dart';
+import '../../data/Model/SubmitRatingModel.dart';
+
 part 'api.state.g.dart';
 
 @RestApi(baseUrl: "https://weloads.com/api")
 // @RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
 abstract class APIStateNetwork {
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
+
+  @POST("/v1/user/reviewRating")
+  Future<RatingResponseModel> reviewRating(
+      @Body() SubmitRatingRequest body,);
 
   @GET("/v1/user/getAllAddresses")
   Future<GetAddressRsponseModel> getAllAddresses();
@@ -40,8 +47,7 @@ abstract class APIStateNetwork {
 
   @POST("/v1/user/registerVerify")
   Future<VerifyRegisterResModel> verifyRegister(
-    @Body() VerifyRegisterBodyModel body,
-  );
+    @Body() VerifyRegisterBodyModel body,);
 
   @POST("/v1/user/login")
   Future<LoginResModel> login(@Body() LoginBodyModel body);
@@ -59,23 +65,25 @@ abstract class APIStateNetwork {
     @Body() VerifyOrResetPassBodyModel body,
   );
 
+
   @GET("/v1/user/getProfile")
   Future<GetProfileModel> fetchProfile();
 
+
   @POST("/v1/user/getDistance")
   Future<GetDistanceResModel> getDistance(@Body() GetDistanceBodyModel body);
+
 
   @POST("/v1/user/bookInstantDelivery")
   Future<BookInstantDeliveryResModel> bookInstantDelivery(
     @Body() BookInstantDeliveryBodyModel body,
   );
 
+
   @POST("/v1/user/deliveryCancelledByUser")
   Future<DriverCancelDeliveryResModel> deliveryCancelledByUser(
     @Body() CancelOrderModel body,
   );
-
-
 
   @POST("/v1/user/getDeliveryHistory")
   Future<GetDeliveryHistoryResModel> getDeliveryHistory();
@@ -85,10 +93,9 @@ abstract class APIStateNetwork {
   Future<GetDeliveryByIdResModel> getDeliveryById(@Query("deliveryId") String deliveryId);
 
 
-
   @POST("/v1/user/addAddress")
-  Future<HttpResponse<dynamic>> addAddress(
-      @Body() AddAddressModel body,);
+  Future<HttpResponse<dynamic>> addAddress( @Body() AddAddressModel body,);
+
 
 
   @POST("/v1/user/updateAddress")
@@ -96,20 +103,9 @@ abstract class APIStateNetwork {
       @Body() UpdateAddressBodyModel body,);
 
 
-
-
   @POST("/v1/user/deleteAddress")
   Future<HttpResponse<dynamic>> deleteAddress(
       @Body() DeleteAddressModel body,);
-
-
-
-
-
-
-
-
-
 
 }
 

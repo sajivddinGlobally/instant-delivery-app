@@ -15,10 +15,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import '../config/network/api.state.dart';
 import '../config/utils/pretty.dio.dart';
 import '../data/Model/GetDeliveryByIdResModel.dart';
 import 'Chat/chating.page.dart';
+import 'Rating/ratingPage.dart';
 
 class PickupScreen extends StatefulWidget {
   final IO.Socket socket;
@@ -73,6 +75,8 @@ class _PickupScreenState extends State<PickupScreen> {
   bool isLoadingData = true;
   String? error;  // Fetched data variables
   GetDeliveryByIdResModel? deliveryData;
+  bool status=false;
+  String? driverToPickupETA; // ← नया वैरिएबल: Live ETA
 
   @override
   void initState() {
@@ -83,8 +87,6 @@ class _PickupScreenState extends State<PickupScreen> {
     _setupEventListeners();
     _fetchDeliveryData();
   }
-
-
   Future<void> _fetchDeliveryData() async {
     try {
       setState(() {
@@ -121,10 +123,15 @@ class _PickupScreenState extends State<PickupScreen> {
         log("Status updated response: $data");
         // Handle success (e.g., update UI, stop loader, etc.)
         // Check if status is "completed"
-        if (data['status'] == 'completed' ||data['status'] == 'cancelled_by_driver') {
+       status=  data['status'];
+        if (data['status'] == 'completed' ) {
           // Navigate to Home screen
+          _navigateToGiveRatingScreen();
+        }else if(data['status'] == 'cancelled_by_driver')
+        {
           _navigateToHomeScreen();
-        } else {
+        }
+        else {
           // Handle other status updates
           _handleStatusUpdateSuccess(data);
         }
@@ -140,6 +147,18 @@ class _PickupScreenState extends State<PickupScreen> {
     } else {
       log("Socket not connected, retrying...");
       Future.delayed(const Duration(seconds: 2), _emitDriverArrivedAtPickup);
+    }
+  }
+  void _navigateToGiveRatingScreen() {
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>
+        GiveRatingScreen(driverId:deliveryData!.data!.deliveryBoy!.id??"")));
+  }
+  Future<void> _makePhoneCall(String? phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      Fluttertoast.showToast(msg: "कॉल नहीं हो पाया!");
     }
   }
   void _navigateToHomeScreen() {
@@ -195,6 +214,8 @@ class _PickupScreenState extends State<PickupScreen> {
           final leg1 = data1['routes'][0]['legs'][0];
           toPickupDistance = leg1['distance']['text'];
           toPickupDuration = leg1['duration']['text'];
+          // ← यहीं Live ETA सेव हो रही है!
+          driverToPickupETA = leg1['duration']['text']; // "7 mins"
           totalDistKm += (leg1['distance']['value'] as num) / 1000.0;
           totalTimeMin += (leg1['duration']['value'] as int) ~/ 60;
         } else {
@@ -506,9 +527,6 @@ class _PickupScreenState extends State<PickupScreen> {
     _addMarkers(); // Re-add markers after location is set
     _fetchRoute(); // Fetch route after location is set
   }
-
-
-
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
@@ -548,7 +566,12 @@ class _PickupScreenState extends State<PickupScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Stack(
         children: [
+
           GoogleMap(
+            padding: EdgeInsets.only(
+              top: 40.h,    // ऊपर से दूरी
+              right: 16.w,  // दाएँ से थोड़ा अंदर
+            ),
             initialCameraPosition: CameraPosition(
               target: _currentLatLng!,
               zoom: 15,
@@ -611,6 +634,7 @@ class _PickupScreenState extends State<PickupScreen> {
                 ),
               ),
             ),
+
           DraggableScrollableSheet(
             initialChildSize: 0.45,
             minChildSize: 0.25,
@@ -662,7 +686,7 @@ class _PickupScreenState extends State<PickupScreen> {
                             color: Colors.black,
                           ),
                         ),
-                        Container(
+                       /* Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 10.w,
                             vertical: 4.h,
@@ -676,6 +700,21 @@ class _PickupScreenState extends State<PickupScreen> {
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),*/
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: Text(
+                            driverToPickupETA ?? "Calculating...", // ← डायनामिक!
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14.sp,
                             ),
                           ),
                         ),
@@ -829,6 +868,61 @@ class _PickupScreenState extends State<PickupScreen> {
                         ),
                       ),
                     ],
+                    SizedBox(height: 20.h),
+                    // Center(
+                    //   child: ElevatedButton.icon(
+                    //     onPressed: _openCustomerLiveTracking,
+                    //     icon: const Icon(Icons.navigation, color: Colors.white),
+                    //     label:
+                    //     Text(
+                    //       "Start Navigation on Google Maps",
+                    //       style: GoogleFonts.inter(
+                    //         fontSize: 15.sp,
+                    //         fontWeight: FontWeight.w600,
+                    //         color: Colors.white,
+                    //       ),
+                    //     ),
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: Colors.green,
+                    //       padding: EdgeInsets.symmetric(vertical: 14.h),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(12.r),
+                    //       ),
+                    //       elevation: 4,
+                    //     ),
+                    //   ),
+                    // ),
+                    SizedBox(height: 20.h),
+
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w), // ← यही लेफ्ट-राइट मार्जिन
+                      child: ElevatedButton.icon(
+                        onPressed: _openCustomerLiveTracking,
+                        icon: const Icon(Icons.navigation_rounded, color: Colors.white, size: 28),
+                        label: Text(
+                          "Start Navigation on Google Maps",
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00C853), // Ola जैसा हरा
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.r), // गोल कोने
+                          ),
+                          elevation: 8,
+                          shadowColor: Colors.green.withOpacity(0.4),
+                          minimumSize: const Size(double.infinity, 56), // फुल चौड़ाई पैडिंग के अंदर
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 10.h),
                     SizedBox(height: 15.h),
                     Divider(),
 
@@ -929,6 +1023,7 @@ class _PickupScreenState extends State<PickupScreen> {
                             onTap:(){
                               Navigator.push(context, MaterialPageRoute(builder: (context)=>
                                   ChatingPage(
+                                    name:deliveryData!.data!.deliveryBoy!.firstName??"",
                                     socket:  widget.socket,
                                     senderId:  deliveryData!.data!.customer??"",
                                     receiverId: deliveryData!.data!.deliveryBoy!.id??"",
@@ -968,9 +1063,9 @@ class _PickupScreenState extends State<PickupScreen> {
                           ),
                         ),
 
-SizedBox(width: 20.w,),
+     SizedBox(width: 20.w,),
 
-                        actionButton("assets/SvgImage/calld.svg"),
+                        actionButton("assets/SvgImage/calld.svg",deliveryData!.data!.deliveryBoy!.phone!),
 
 
                       ],
@@ -1064,18 +1159,23 @@ SizedBox(width: 20.w,),
       );
     }
   }
-  Widget actionButton(String icon, ) {
+  Widget actionButton(String icon,String phone ) {
     return Column(
       children: [
-        Container(
-          width: 45.w,
-          height: 45.h,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Color(0xFFEEEDEF),
-          ),
-          child: Center(
-            child: SvgPicture.asset(icon, width: 18.w, height: 18.h),
+        GestureDetector(
+          onTap: (){
+            _makePhoneCall(phone);
+          },
+          child: Container(
+            width: 45.w,
+            height: 45.h,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFFEEEDEF),
+            ),
+            child: Center(
+              child: SvgPicture.asset(icon, width: 18.w, height: 18.h),
+            ),
           ),
         ),
         SizedBox(height: 6.h),
@@ -1085,6 +1185,35 @@ SizedBox(width: 20.w,),
         // ),
       ],
     );
+  }
+  Future<void> _openCustomerLiveTracking() async {
+    if (_currentLatLng == null || widget.pickup == null || widget.dropoff == null) {
+      Fluttertoast.showToast(msg: "Location loading...");
+      return;
+    }
+
+    final driverLat = _currentLatLng!.latitude;
+    final driverLng = _currentLatLng!.longitude;
+    final pickupLat = widget.pickup!['lat'];
+    final pickupLng = widget.pickup!['long'];
+    final dropLat = widget.dropoff!['lat'];
+    final dropLng = widget.dropoff!['long'];
+
+    // Rapido/Ola जैसा URL - Customer के फोन पर खुलेगा
+    final url = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1'
+            '&origin=$driverLat,$driverLng'
+            '&destination=$dropLat,$dropLng'
+            '&waypoints=$pickupLat,$pickupLng'
+            '&travelmode=driving'
+            '&dir_action=navigate'
+    );
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      Fluttertoast.showToast(msg: "Google Maps not installed");
+    }
   }
 }
 

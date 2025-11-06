@@ -342,7 +342,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           minimumSize: Size(180.w, 50.h),
                           backgroundColor: Colors.amber,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>InstantDeliveryScreen()));
+                        },
                         child: Text(
                           "Book",
                           style: GoogleFonts.inter(
