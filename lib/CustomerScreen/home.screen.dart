@@ -321,7 +321,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       SizedBox(height: 50.h),
                       Text(
-                        "Hey Sajiv",
+                        "Hey ${box.get("firstName")}",
                         style: GoogleFonts.inter(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w500,

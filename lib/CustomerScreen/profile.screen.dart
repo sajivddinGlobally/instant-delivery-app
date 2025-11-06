@@ -21,6 +21,61 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  Future<void> showLogoutDialog() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            "Logout",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text("Are you sure you want to log out?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF006970),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () async {
+                log("Clear data....");
+                Navigator.pop(context);
+
+                final box = await Hive.box("folder");
+
+                await box.clear();
+
+                Fluttertoast.showToast(msg: "Sign out successfully");
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  CupertinoPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false,
+                );
+              },
+              child: const Text(
+                "Logout",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var box = Hive.box("folder");
@@ -114,23 +169,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 );
               }),
-              buildProfile(Icons.settings, "Setting", () {}),
+
               buildProfile(Icons.contact_support, "Support/FAQ", () {}),
-              buildProfile(
-                Icons.markunread_mailbox_rounded,
-                "Invite Friends",
-                () {},
-              ),
+              //buildProfile(Icons.settings, "Setting", () {}),
+              // buildProfile(
+              //   Icons.markunread_mailbox_rounded,
+              //   "Invite Friends",
+              //   () {
+              //   },
+              // ),
               SizedBox(height: 50.h),
               InkWell(
                 onTap: () {
-                  box.clear();
-                  Fluttertoast.showToast(msg: "Sign out successfully");
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    CupertinoPageRoute(builder: (context) => LoginScreen()),
-                    (route) => false,
-                  );
+                  showLogoutDialog();
                 },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
