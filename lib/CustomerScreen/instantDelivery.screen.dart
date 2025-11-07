@@ -15,6 +15,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../config/network/api.state.dart';
 import '../config/utils/pretty.dio.dart';
@@ -22,8 +23,13 @@ import '../data/Model/DeleteAddressModel.dart';
 import '../data/Model/GetAddressResponseModel.dart';
 import '../data/controller/getAllAddress.dart';
 import 'AddAddressPage.dart';
+
+
+
+
 class InstantDeliveryScreen extends ConsumerStatefulWidget {
-  const InstantDeliveryScreen({super.key});
+  final IO.Socket? socket;
+  const InstantDeliveryScreen(this.socket,{super.key});
   @override
   ConsumerState<InstantDeliveryScreen> createState() =>
       _InstantDeliveryScreenState();
@@ -42,69 +48,6 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
     super.initState();
     _getCurrentLocation();
   }
-
-
-
-  // Future<void> _getCurrentLocation() async {
-  //   LocationPermission permission;
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text("Location permission denied")),
-  //       );
-  //       return;
-  //     }
-  //   }
-  //   if (permission == LocationPermission.deniedForever) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text(
-  //           "Location permission permanently denied. Please enable it from settings.",
-  //         ),
-  //       ),
-  //     );
-  //     return;
-  //   }
-  //   Position position = await Geolocator.getCurrentPosition(
-  //     desiredAccuracy: LocationAccuracy.high,
-  //   );
-  //   List<Placemark> placemarks = await placemarkFromCoordinates(
-  //     position.latitude,
-  //     position.longitude,
-  //   );
-  //
-  //   Placemark place = placemarks.first;
-  //
-  //   String address =
-  //       "${place.name?.isNotEmpty == true ? '${place.name}, ' : ''}"
-  //       "${place.street?.isNotEmpty == true ? '${place.street}, ' : ''}"
-  //       "${place.subLocality?.isNotEmpty == true ? '${place.subLocality}, ' : ''}"
-  //       "${place.locality?.isNotEmpty == true ? '${place.locality}, ' : ''}"
-  //       "${place.administrativeArea?.isNotEmpty == true ? '${place.administrativeArea}, ' : ''}"
-  //       "${place.postalCode?.isNotEmpty == true ? '${place.postalCode}, ' : ''}"
-  //       "${place.country ?? ''}";
-  //
-  //   final parts = address.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-  //
-  //   final uniqueParts = <String>{};
-  //
-  //   final cleanParts = parts.where((e) => uniqueParts.add(e)).toList();
-  //
-  //   address = cleanParts.join(', ');
-  //
-  //   pickupController.text = address;
-  //
-  //   setState(() {
-  //     _currentLatLng = LatLng(position.latitude, position.longitude);
-  //     _currentAddress = address;
-  //     pickupController.text = address;
-  //   });
-  //
-  //   _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLatLng!));
-  // }
-
 
 
 
@@ -371,6 +314,7 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
                               CupertinoPageRoute(
                                 builder: (context) =>
                                     SelectTripScreen(
+                                      widget.socket,
                                        pickupLat,
                                         pickupLon,
                                      dropLat,

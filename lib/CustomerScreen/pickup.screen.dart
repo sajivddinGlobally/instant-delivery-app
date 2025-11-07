@@ -1065,7 +1065,7 @@ class _PickupScreenState extends State<PickupScreen> {
 
      SizedBox(width: 20.w,),
 
-                        actionButton("assets/SvgImage/calld.svg",deliveryData!.data!.deliveryBoy!.phone!),
+                        // actionButton("assets/SvgImage/calld.svg",deliveryData!.data!.deliveryBoy!.phone!),
 
 
                       ],

@@ -24,11 +24,13 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
 
 class SelectTripScreen extends ConsumerStatefulWidget {
+  final IO.Socket? socket;
   final double pickupLat;
   final double pickupLon;
   final double dropLat;
   final double dropLon;
   SelectTripScreen(
+      this.socket,
       this.pickupLat,
       this.pickupLon,
       this.dropLat,
@@ -88,6 +90,7 @@ class SelectTripScreen extends ConsumerStatefulWidget {
   @override
   void initState() {
     super.initState();
+    socket=widget.socket;
     pickupLat = widget.pickupLat;
     pickupLon = widget.pickupLon;
     dropLat =widget.dropLat;
@@ -98,8 +101,13 @@ class SelectTripScreen extends ConsumerStatefulWidget {
     } else {
       log('✅ User ID: $userId');
     }
+    socket = widget.socket;               // <-- use the passed socket
+    // No need to call _connectSocket() any more
+
+    userId = box.get("id")?.toString();
     _getCurrentLocation();
-    _connectSocket();
+    startLocationStream();                // <-- start streaming right away
+    _setupEventListeners();               // <-- set up listeners
   }
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled;
@@ -200,94 +208,97 @@ class SelectTripScreen extends ConsumerStatefulWidget {
         });
   }
   // ---------------- SOCKET CONNECTION ----------------
-  void _connectSocket() {
-    // const socketUrl = 'http://192.168.1.43:4567';
-     const socketUrl = 'https://weloads.com';
-    socket = IO.io(socketUrl, <String, dynamic>{
-      'transports': ['websocket', 'polling'], // Fallback
-      'autoConnect': false,
-      // 'auth': {'token': userToken},  // If needed
-    });
 
-    // ✅ Log all events for debugging
-    socket!.onAny((event, data) {
-      log("📡 SOCKET EVENT: $event → $data");
-    });
 
-    socket!.connect();
+  // void _connectSocket() {
+  //   const socketUrl = 'http://192.168.1.43:4567';
+  //    // const socketUrl = 'https://weloads.com';
+  //   socket = IO.io(socketUrl, <String, dynamic>{
+  //     'transports': ['websocket', 'polling'], // Fallback
+  //     'autoConnect': false,
+  //     // 'auth': {'token': userToken},  // If needed
+  //   });
+  //   // ✅ Log all events for debugging
+  //   socket!.onAny((event, data) {
+  //     log("📡 SOCKET EVENT: $event → $data");
+  //   });
+  //
+  //   socket!.connect();
+  //
+  //   socket!.onConnect((_) {
+  //     log('✅ Socket connected');
+  //     Fluttertoast.showToast(msg: "Socket connected");
+  //     isSocketConnected = true;
+  //     // ✅ FIRST: Emit registration with ACK
+  //     if (userId != null) {
+  //       final data = {
+  //         'userId': userId,
+  //         'role': 'customer', // Backend handler के अनुसार
+  //       };
+  //       socket!.emitWithAck(
+  //         'registerCustomer',
+  //         data,
+  //         ack: (ackData) {
+  //           log(
+  //             '🔐 Registration ACK: $ackData',
+  //           ); // Backend से response आएगा (e.g., success/error)
+  //         },
+  //       );
+  //       socket!.emitWithAck(
+  //         'registerCustomer',
+  //         data,
+  //         ack: (ackData) {
+  //           log(
+  //             '🔐 Registration ACK: $ackData',
+  //           ); // Backend से response आएगा (e.g., success/error)
+  //         },
+  //       );
+  //       log('📤 RegisterCustomer emitted: userId=$userId, role=customer');
+  //     } else {
+  //       log('❌ No userId for registration!');
+  //     }
+  //     // THEN: Start stream and setup listeners
+  //     startLocationStream();
+  //     _setupEventListeners();
+  //     safeSetState(() {});
+  //   });
+  //
+  //
+  //   socket!.onDisconnect((_) {
+  //     log('❌ Socket disconnected');
+  //     Fluttertoast.showToast(msg: "Socket disconnected");
+  //     isSocketConnected = false;
+  //     safeSetState(() {});
+  //   });
+  //
+  //
+  //   socket!.onReconnect((data) {
+  //     log(
+  //       '🔄 Reconnected Event Triggered | Raw data: $data (${data.runtimeType})',
+  //     );
+  //     // Socket.IO usually sends attempt count as int
+  //     int? attempt;
+  //     if (data is Map && data.containsKey('data')) {
+  //       attempt = data['data']['attempts'];
+  //     } else if (data is int) {
+  //       attempt = data;
+  //     }
+  //     log('🔄 Reconnected${attempt != null ? ' (Attempt $attempt)' : ''}');
+  //     isSocketConnected = true;
+  //     safeSetState(() {});
+  //     // Re-join logic
+  //     socket!.emit('join:user', {'userId': userId});
+  //     _setupEventListeners();
+  //   });
+  //
+  //   socket!.onReconnectError((error) {
+  //     log('❌ Reconnect error: $error');
+  //   });
+  //
+  // }
 
-    socket!.onConnect((_) {
-      log('✅ Socket connected');
-      Fluttertoast.showToast(msg: "Socket connected");
-      isSocketConnected = true;
 
-      // ✅ FIRST: Emit registration with ACK
-      if (userId != null) {
-        final data = {
-          'userId': userId,
-          'role': 'customer', // Backend handler के अनुसार
-        };
-        socket!.emitWithAck(
-          'registerCustomer',
-          data,
-          ack: (ackData) {
-            log(
-              '🔐 Registration ACK: $ackData',
-            ); // Backend से response आएगा (e.g., success/error)
-          },
-        );
 
-        socket!.emitWithAck(
-          'registerCustomer',
-          data,
-          ack: (ackData) {
-            log(
-              '🔐 Registration ACK: $ackData',
-            ); // Backend से response आएगा (e.g., success/error)
-          },
-        );
-        log('📤 RegisterCustomer emitted: userId=$userId, role=customer');
-      } else {
-        log('❌ No userId for registration!');
-      }
-
-      // THEN: Start stream and setup listeners
-      startLocationStream();
-      _setupEventListeners();
-      safeSetState(() {});
-
-    });
-
-    socket!.onDisconnect((_) {
-      log('❌ Socket disconnected');
-      Fluttertoast.showToast(msg: "Socket disconnected");
-      isSocketConnected = false;
-      safeSetState(() {});
-    });
-
-    socket!.onReconnect((data) {
-      log(
-        '🔄 Reconnected Event Triggered | Raw data: $data (${data.runtimeType})',
-      );
-      // Socket.IO usually sends attempt count as int
-      int? attempt;
-      if (data is Map && data.containsKey('data')) {
-        attempt = data['data']['attempts'];
-      } else if (data is int) {
-        attempt = data;
-      }
-      log('🔄 Reconnected${attempt != null ? ' (Attempt $attempt)' : ''}');
-      isSocketConnected = true;
-      safeSetState(() {});
-      // Re-join logic
-      socket!.emit('join:user', {'userId': userId});
-      _setupEventListeners();
-    });
-
-    socket!.onReconnectError((error) {
-      log('❌ Reconnect error: $error');
-    });
-  }
   // ✅ Centralized method to set up event listeners (avoids duplicates)
   void _setupEventListeners() {
     socket!.on('receive_message', (data) {
@@ -327,6 +338,8 @@ class SelectTripScreen extends ConsumerStatefulWidget {
     }
     super.dispose();
   }
+
+
   void _addMarkers() {
     _markers.clear(); // Clear previous markers to avoid duplicates
     if (_currentLatlng != null) {
@@ -1002,1062 +1015,6 @@ class SelectTripScreen extends ConsumerStatefulWidget {
     children: [SvgPicture.asset(image)],
   );
 }
-
-
-/*
-
-   class WaitingForDriverScreen extends StatefulWidget {
-  final BookInstantDeliveryBodyModel body;
-  final IO.Socket socket;
-  final double pickupLat;
-  final double pickupLon;
-  final double dropLat;
-  final double dropLon;
-  const WaitingForDriverScreen({
-    super.key,
-    required this.body,
-    required this.socket,
-    required this.pickupLat,
-    required this.pickupLon,
-    required this.dropLat,
-    required this.dropLon,
-  });
-  @override
-  State<WaitingForDriverScreen> createState() => _WaitingForDriverScreenState();
-}
-   class _WaitingForDriverScreenState extends State<WaitingForDriverScreen> {
-  var box = Hive.box("folder");
-  late IO.Socket _socket;
-  late Timer _dotTimer;
-  Timer? _pulseTimer;
-  Timer? _searchTimer;
-  int _dotCount = 1;
-  double _radius = 30;
-  bool _isSearching = true; // 👈 Controls search state
-  int _remainingSeconds = 30; // 👈 Countdown timer (optional)
-  GoogleMapController? _mapController;
-  final Set<Marker> _markers = {};
-  final Set<Polyline> _polylines = {};
-  List<LatLng> _routePoints = [];
-  String? pickupToDropDistance;
-  String? pickupToDropDuration;
-  bool _routeFetched = false;
-  late double pickupLat, pickupLon, dropLat, dropLon;
-
-  @override
-  void initState() {
-    super.initState();
-    _socket = widget.socket;
-    pickupLat = widget.pickupLat;
-    pickupLon = widget.pickupLon;
-    dropLat = widget.dropLat;
-    dropLon = widget.dropLon;
-    _setupEventListeners();
-    _startSearching();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initMap();
-    });
-  }
-  void _initMap() {
-    _addMarkers();
-    _fetchRoute();}
-  void _setupEventListeners() {
-    _socket.on('user:driver_assigned', _handleAssigned);
-  }
-  Future<void> _handleAssigned(dynamic payload) async {
-    if (!mounted) return;
-    log(
-      '👨‍✈️ DRIVER ASSIGNED FULL PAYLOAD:\n${const JsonEncoder.withIndent('  ').convert(payload)}',
-    );
-    try {
-      if (payload is! Map) {
-        log('⚠️ Invalid payload type: ${payload.runtimeType}');
-        return;
-      }
-      log('🧾 Payload keys: ${payload.keys.join(', ')}');
-      final deliveryId = payload['deliveryId'] as String?;
-      if (deliveryId == null) {
-        log('⚠️ Missing deliveryId in payload');
-        return;
-      }
-      log("✅ Delivery Assigned: $deliveryId");
-      // ✅ Define all fields before using
-      final driver = payload['driver'] ?? {};
-      final driverFirstName = driver['firstName'] ?? '';
-      final driverLastName = driver['lastName'] ?? '';
-      final driverName = '$driverFirstName $driverLastName'.trim();
-      final driverPhone = driver['phone'] ?? 'N/A';
-      final driverRating = driver['averageRating'] ?? 'N/A';
-      final otp = payload['otp']?.toString() ?? 'N/A';
-      final amount = payload['amount'] ?? 'N/A';
-      final vehicleType = payload['vehicleType'] ?? {};
-      final pickup = payload['pickup'] ?? {};
-      final dropoff = payload['dropoff'] ?? {};
-      final status = payload['status'] ?? 'N/A';
-      Fluttertoast.showToast(
-        msg: "Driver Assigned : $driverName",
-        toastLength: Toast.LENGTH_LONG,
-      );
-      // Handle OTP
-      if (payload.containsKey('otp')) {
-        final otp = payload['otp'].toString();
-        log('🔑 OTP Received: $otp');
-      }
-      // Navigate
-      if (mounted) {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => PickupScreen(
-              socket:widget.socket,
-              deliveryId: deliveryId,
-              driver: driver as Map<String, dynamic>,
-              otp: otp,
-              pickup: pickup as Map<String, dynamic>,
-              dropoff: dropoff as Map<String, dynamic>,
-              amount: amount,
-              vehicleType: vehicleType as Map<String, dynamic>,
-              status: status.toString(),
-              txId: box.get("current_booking_txId")?.toString() ?? '',
-            ),
-          ),
-        );
-      }
-    } catch (e, st) {
-      log('⚠️ Error parsing driver data: $e');
-      log('Stack trace: $st');
-      log('Payload type: ${payload.runtimeType}');
-      Fluttertoast.showToast(msg: e.toString());
-    }
-  }
-  void _addMarkers() {
-    _markers.clear();
-    _markers.add(
-      Marker(
-        markerId: const MarkerId('pickup'),
-        position: LatLng(pickupLat, pickupLon),
-        infoWindow: const InfoWindow(title: 'Pickup Location'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      ),
-    );
-    _markers.add(
-      Marker(
-        markerId: const MarkerId('drop'),
-        position: LatLng(dropLat, dropLon),
-        infoWindow: const InfoWindow(title: 'Drop Location'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-      ),
-    );
-    if (mounted) setState(() {});
-  }
-  Future<void> _fetchRoute() async {
-    const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
-    // Fetch route from pickup to drop
-    String origin = '$pickupLat,$pickupLon';
-    String dest = '$dropLat,$dropLon';
-    Uri url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
-      'origin': origin,
-      'destination': dest,
-      'key': apiKey,
-    });
-
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['status'] == 'OK' && data['routes'] != null && data['routes'].isNotEmpty) {
-          final String poly = data['routes'][0]['overview_polyline']['points'];
-          _routePoints = _decodePolyline(poly);
-          final leg = data['routes'][0]['legs'][0];
-          pickupToDropDistance = leg['distance']['text'];
-          pickupToDropDuration = leg['duration']['text'];
-          _routeFetched = true;
-          if (mounted) {
-            setState(() {
-              _polylines.clear();
-              _polylines.add(
-                Polyline(
-                  polylineId: const PolylineId('route'),
-                  points: _routePoints,
-                  color: Colors.blue,
-                  width: 5,
-                ),
-              );
-            });
-            // Animate camera
-            if (_mapController != null && _routePoints.isNotEmpty) {
-              LatLngBounds bounds = _calculateBounds(_routePoints);
-              _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
-            }
-          }
-        } else {
-          print('Directions API error: ${data['status']}');
-        }
-      } else {
-        print('HTTP error: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Exception fetching route: $e');
-    }
-  }
-  LatLngBounds _calculateBounds(List<LatLng> points) {
-    if (points.isEmpty) {
-      return LatLngBounds(
-        southwest: LatLng(pickupLat, pickupLon),
-        northeast: LatLng(pickupLat, pickupLon),
-      );
-    }
-    double minLat = points[0].latitude;
-    double maxLat = points[0].latitude;
-    double minLng = points[0].longitude;
-    double maxLng = points[0].longitude;
-    for (LatLng point in points) {
-      if (point.latitude < minLat) minLat = point.latitude;
-      if (point.latitude > maxLat) maxLat = point.latitude;
-      if (point.longitude < minLng) minLng = point.longitude;
-      if (point.longitude > maxLng) maxLng = point.longitude;
-    }
-    // Include pickup and drop
-    if (pickupLat < minLat) minLat = pickupLat;
-    if (pickupLat > maxLat) maxLat = pickupLat;
-    if (pickupLon < minLng) minLng = pickupLon;
-    if (pickupLon > maxLng) maxLng = pickupLon;
-    if (dropLat < minLat) minLat = dropLat;
-    if (dropLat > maxLat) maxLat = dropLat;
-    if (dropLon < minLng) minLng = dropLon;
-    if (dropLon > maxLng) maxLng = dropLon;
-    return LatLngBounds(
-      southwest: LatLng(minLat, minLng),
-      northeast: LatLng(maxLat, maxLng),
-    );
-  }
-  List<LatLng> _decodePolyline(String encoded) {
-    List<LatLng> points = <LatLng>[];
-    int index = 0;
-    final int len = encoded.length;
-    int lat = 0;
-    int lng = 0;
-
-    while (index < len) {
-      int b;
-      int shift = 0;
-      int result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      final int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lat += dlat;
-
-      shift = 0;
-      result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      final int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lng += dlng;
-
-      points.add(LatLng(lat / 1E5, lng / 1E5));
-    }
-
-    return points;
-  }
-  void _startDotTimer() {
-    _dotTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (mounted) {
-        setState(() {
-          _dotCount = (_dotCount % 3) + 1;
-        });
-      }
-    });
-  }
-  void _startPulseTimer() {
-    _pulseTimer = Timer.periodic(const Duration(milliseconds: 800), (timer) {
-      if (mounted) {
-        setState(() {
-          _radius = _radius == 30 ? 50 : 30;
-        });
-      }
-    });
-  }
-  void _startSearchTimer() {
-    _searchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        if (_remainingSeconds > 0) {
-          setState(() {
-            _remainingSeconds--;
-          });
-        } else {
-          _stopSearching();
-        }
-      }
-    });
-  }
-  void _startSearching() {
-    setState(() {
-      _isSearching = true;
-      _remainingSeconds = 15;
-      _dotCount = 1;
-      _radius = 30;
-    });
-    _startDotTimer();
-    _startPulseTimer();
-    _startSearchTimer();
-  }
-  void _stopSearching() {
-    _dotTimer.cancel();
-    _pulseTimer?.cancel();
-    _searchTimer?.cancel();
-    setState(() {
-      _isSearching = false;
-    });
-  }
-  void _retrySearch() async {
-    _stopSearching();
-    setState(() {
-      _isSearching = true;
-    });
-
-    try {
-      final service = APIStateNetwork(callPrettyDio());
-      final response = await service.bookInstantDelivery(widget.body);
-      if (response.code == 0) {
-        box.put("current_booking_txId", response.data!.txId);
-        log('✅ Re-booked — new txId: ${response.data!.txId}');
-
-        setState(() {
-          _remainingSeconds = 15;
-          _dotCount = 1;
-          _radius = 30;
-        });
-
-        _startDotTimer();
-        _startPulseTimer();
-        _startSearchTimer();
-
-        Fluttertoast.showToast(
-          msg: "Re-booking successful, searching again...",
-        );
-      } else {
-        setState(() => _isSearching = false);
-        Fluttertoast.showToast(msg: response.message);
-      }
-    } catch (e, st) {
-      setState(() => _isSearching = false);
-      log("Retry error: $e / $st");
-      Fluttertoast.showToast(msg: "Failed to re-book: $e");
-    }
-  }
-
-
-  @override
-  void dispose() {
-    _socket.off('user:driver_assigned');
-    _dotTimer.cancel();
-    _pulseTimer?.cancel();
-    _searchTimer?.cancel();
-    _mapController?.dispose();
-    super.dispose();
-  }
-  @override
-  Widget build(BuildContext context) {
-    final dots = '.' * _dotCount;
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: _routeFetched
-          ?
-      Stack(
-        children: [
-
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: LatLng(pickupLat, pickupLon),
-              zoom: 12,
-            ),
-            onMapCreated: (controller) {
-              _mapController = controller;
-              if (_routePoints.isNotEmpty) {
-                LatLngBounds bounds = _calculateBounds(_routePoints);
-                _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
-              }
-            },
-            markers: _markers,
-            polylines: _polylines,
-          ),
-          Positioned(
-            left: 10.w,
-            top: 40.h,
-            child: FloatingActionButton(
-              mini: true,
-              backgroundColor: const Color(0xFFFFFFFF),
-              shape: const CircleBorder(),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Padding(
-                padding: EdgeInsets.only(left: 10.w),
-                child: const Icon(
-                  Icons.arrow_back_ios,
-                  color: Color(0xFF1D3557),
-                ),
-              ),
-            ),
-          ),
-          // Pulsating circle animation overlay
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.3,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 800),
-                width: _radius * 2,
-                height: _radius * 2,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.blue.withOpacity(0.1),
-                  border: Border.all(color: Colors.blueAccent, width: 2),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 25,
-                    height: 25,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Route info overlay
-          if (pickupToDropDistance != null)
-            Positioned(
-              bottom: 170.h, // Adjust based on sheet height
-              left: 16.w,
-              right: 16.w,
-              child: Container(
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  'Route: $pickupToDropDistance | $pickupToDropDuration',
-                  style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          // Search status overlay
-           Positioned(
-            // top: 100.h,
-            bottom: 10.h,
-            left: 16.w,
-            right: 16.w,
-            child: Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    _isSearching
-                        ? "Searching for nearby drivers$dots"
-                        : "No drivers found nearby",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  _isSearching
-                      ? Text(
-                    "Please wait while we connect you to a driver.\n(${_remainingSeconds}s)",
-                    style: const TextStyle(fontSize: 15, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  )
-                      : const Text(
-                    "Please try again or cancel your request.",
-                    style: TextStyle(fontSize: 15, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  _isSearching
-                      ? const CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: Colors.blueAccent,
-                  )
-                      : ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 40,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: _retrySearch,
-                    child: const Text(
-                      "Try Again",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      )
-          : const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-
-}*/
-
-/*
-
-class WaitingForDriverScreen extends StatefulWidget {
-  final BookInstantDeliveryBodyModel body;
-  final IO.Socket socket;
-  final double pickupLat;
-  final double pickupLon;
-  final double dropLat;
-  final double dropLon;
-
-  const WaitingForDriverScreen({
-    super.key,
-    required this.body,
-    required this.socket,
-    required this.pickupLat,
-    required this.pickupLon,
-    required this.dropLat,
-    required this.dropLon,
-  });
-
-  @override
-  State<WaitingForDriverScreen> createState() => _WaitingForDriverScreenState();
-}
-
-class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
-    with TickerProviderStateMixin {
-  var box = Hive.box("folder");
-  late IO.Socket _socket;
-  late Timer _dotTimer;
-  Timer? _pulseTimer;
-  Timer? _searchTimer;
-  int _dotCount = 1;
-  double _radius = 30;
-  bool _isSearching = true;
-  int _remainingSeconds = 15;
-
-  GoogleMapController? _mapController;
-  final Set<Marker> _markers = {};
-  final Set<Polyline> _polylines = {};
-  List<LatLng> _routePoints = [];
-  String? pickupToDropDistance;
-  String? pickupToDropDuration;
-  bool _routeFetched = false;
-
-  late double pickupLat, pickupLon, dropLat, dropLon;
-
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _socket = widget.socket;
-    pickupLat = widget.pickupLat;
-    pickupLon = widget.pickupLon;
-    dropLat = widget.dropLat;
-    dropLon = widget.dropLon;
-
-    // Pulse animation controller
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _pulseAnimation = Tween<double>(begin: 30, end: 60).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
-    );
-
-    _setupEventListeners();
-    _startSearching();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initMap();
-    });
-  }
-
-  void _initMap() {
-    _addMarkers();
-    _fetchRoute();
-  }
-
-  void _setupEventListeners() {
-    _socket.on('user:driver_assigned', _handleAssigned);
-  }
-
-  Future<void> _handleAssigned(dynamic payload) async {
-    if (!mounted) return;
-
-    try {
-      if (payload is! Map) return;
-      final deliveryId = payload['deliveryId'] as String?;
-      if (deliveryId == null) return;
-
-      final driver = payload['driver'] ?? {};
-      final driverName =
-      '${driver['firstName'] ?? ''} ${driver['lastName'] ?? ''}'.trim();
-      final otp = payload['otp']?.toString() ?? 'N/A';
-
-      Fluttertoast.showToast(msg: "Driver Assigned: $driverName");
-
-      if (mounted) {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => PickupScreen(
-              socket: widget.socket,
-              deliveryId: deliveryId,
-              driver: driver as Map<String, dynamic>,
-              otp: otp,
-              pickup: payload['pickup'] ?? {},
-              dropoff: payload['dropoff'] ?? {},
-              amount: payload['amount'],
-              vehicleType: payload['vehicleType'] ?? {},
-              status: payload['status'].toString(),
-              txId: box.get("current_booking_txId")?.toString() ?? '',
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Error: $e");
-    }
-  }
-
-  void _addMarkers() {
-    _markers.clear();
-    _markers.add(
-      Marker(
-        markerId: const MarkerId('pickup'),
-        position: LatLng(pickupLat, pickupLon),
-        infoWindow: const InfoWindow(title: 'Pickup Location'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-      ),
-    );
-    _markers.add(
-      Marker(
-        markerId: const MarkerId('drop'),
-        position: LatLng(dropLat, dropLon),
-        infoWindow: const InfoWindow(title: 'Drop Location'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-      ),
-    );
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _fetchRoute() async {
-    const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
-    String origin = '$pickupLat,$pickupLon';
-    String dest = '$dropLat,$dropLon';
-    Uri url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
-      'origin': origin,
-      'destination': dest,
-      'key': apiKey,
-    });
-
-    try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['status'] == 'OK' && data['routes'].isNotEmpty) {
-          final String poly = data['routes'][0]['overview_polyline']['points'];
-          _routePoints = _decodePolyline(poly);
-          final leg = data['routes'][0]['legs'][0];
-          pickupToDropDistance = leg['distance']['text'];
-          pickupToDropDuration = leg['duration']['text'];
-          _routeFetched = true;
-
-          setState(() {
-            _polylines.clear();
-            _polylines.add(
-              Polyline(
-                polylineId: const PolylineId('route'),
-                points: _routePoints,
-                color: Colors.blue,
-                width: 5,
-              ),
-            );
-          });
-
-          if (_mapController != null && _routePoints.isNotEmpty) {
-            LatLngBounds bounds = _calculateBounds(_routePoints);
-            _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Route error: $e');
-    }
-  }
-
-  LatLngBounds _calculateBounds(List<LatLng> points) {
-    double minLat = pickupLat, maxLat = pickupLat;
-    double minLng = pickupLon, maxLng = pickupLon;
-
-    for (LatLng p in points) {
-      if (p.latitude < minLat) minLat = p.latitude;
-      if (p.latitude > maxLat) maxLat = p.latitude;
-      if (p.longitude < minLng) minLng = p.longitude;
-      if (p.longitude > maxLng) maxLng = p.longitude;
-    }
-    if (dropLat < minLat) minLat = dropLat;
-    if (dropLat > maxLat) maxLat = dropLat;
-    if (dropLon < minLng) minLng = dropLon;
-    if (dropLon > maxLng) maxLng = dropLon;
-
-    return LatLngBounds(
-      southwest: LatLng(minLat, minLng),
-      northeast: LatLng(maxLat, maxLng),
-    );
-  }
-
-  List<LatLng> _decodePolyline(String encoded) {
-    List<LatLng> points = [];
-    int index = 0, len = encoded.length;
-    int lat = 0, lng = 0;
-
-    while (index < len) {
-      int b, shift = 0, result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      lat += (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-
-      shift = 0;
-      result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      lng += (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-
-      points.add(LatLng(lat / 1E5, lng / 1E5));
-    }
-    return points;
-  }
-
-  void _startDotTimer() {
-    _dotTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (mounted) {
-        setState(() => _dotCount = (_dotCount % 3) + 1);
-      }
-    });
-  }
-
-  void _startSearchTimer() {
-    _searchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        if (_remainingSeconds > 0) {
-          setState(() => _remainingSeconds--);
-        } else {
-          _stopSearching();
-        }
-      }
-    });
-  }
-
-  void _startSearching() {
-    setState(() {
-      _isSearching = true;
-      _remainingSeconds = 15;
-      _dotCount = 1;
-    });
-    _pulseController.repeat(reverse: true);
-    _startDotTimer();
-    _startSearchTimer();
-  }
-
-  void _stopSearching() {
-    _dotTimer.cancel();
-    _searchTimer?.cancel();
-    _pulseController.stop();
-    setState(() => _isSearching = false);
-  }
-
-  void _retrySearch() async {
-    _stopSearching();
-    setState(() => _isSearching = true);
-
-    try {
-      final service = APIStateNetwork(callPrettyDio());
-      final response = await service.bookInstantDelivery(widget.body);
-      if (response.code == 0) {
-        box.put("current_booking_txId", response.data!.txId);
-        setState(() {
-          _remainingSeconds = 15;
-          _dotCount = 1;
-        });
-        _pulseController.repeat(reverse: true);
-        _startDotTimer();
-        _startSearchTimer();
-        Fluttertoast.showToast(msg: "Re-booking successful...");
-      } else {
-        setState(() => _isSearching = false);
-        Fluttertoast.showToast(msg: response.message);
-      }
-    } catch (e) {
-      setState(() => _isSearching = false);
-      Fluttertoast.showToast(msg: "Retry failed: $e");
-    }
-  }
-
-  @override
-  void dispose() {
-    _socket.off('user:driver_assigned');
-    _dotTimer.cancel();
-    _searchTimer?.cancel();
-    _pulseController.dispose();
-    _mapController?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final dots = '.' * _dotCount;
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: _routeFetched
-          ? Stack(
-        children: [
-          // Google Map
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: LatLng(pickupLat, pickupLon),
-              zoom: 15,
-            ),
-            onMapCreated: (controller) {
-              _mapController = controller;
-              _centerCameraOnPickup();
-            },
-            markers: _markers,
-            polylines: _polylines,
-            myLocationEnabled: false,
-            zoomControlsEnabled: false,
-          ),
-
-          // Back Button
-          Positioned(
-            left: 10.w,
-            top: 40.h,
-            child: FloatingActionButton(
-              mini: true,
-              backgroundColor: Colors.white,
-              shape: const CircleBorder(),
-              onPressed: () => Navigator.pop(context),
-              child: const Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
-              ),
-            ),
-          ),
-
-          // PULSATING CIRCLE ON PICKUP (CENTERED)
-          Center(
-            child: AnimatedBuilder(
-              animation: _pulseAnimation,
-              builder: (context, child) {
-                return Transform.translate(
-                  offset: const Offset(0, -55), // Adjust to align with pin
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Outer pulsating ring
-                      Container(
-                        width: _pulseAnimation.value,
-                        height: _pulseAnimation.value,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.blueAccent.withOpacity(0.6),
-                            width: 2,
-                          ),
-                          color: Colors.blue.withOpacity(0.1),
-                        ),
-                      ),
-                      // Inner dot
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.blueAccent,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // Route Info
-          if (pickupToDropDistance != null)
-            Positioned(
-              bottom: 170.h,
-              left: 16.w,
-              right: 16.w,
-              child: Container(
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  'Route: $pickupToDropDistance | $pickupToDropDuration',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-
-          // Search Status Bottom Sheet
-          Positioned(
-            bottom: 10.h,
-            left: 16.w,
-            right: 16.w,
-            child: Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _isSearching
-                        ? "Searching for nearby drivers$dots"
-                        : "No drivers found nearby",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  _isSearching
-                      ? Text(
-                    "Please wait... (${_remainingSeconds}s)",
-                    style: const TextStyle(fontSize: 15, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  )
-                      : const Text(
-                    "Try again or cancel request.",
-                    style: TextStyle(fontSize: 15, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  _isSearching
-                      ? const CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: Colors.blueAccent,
-                  )
-                      : ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 40,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: _retrySearch,
-                    child: const Text(
-                      "Try Again",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      )
-          : const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  void _centerCameraOnPickup() {
-    _mapController?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(pickupLat, pickupLon),
-          zoom: 15,
-        ),
-      ),
-    );
-  }
-}*/
 
 
 class WaitingForDriverScreen extends StatefulWidget {

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:delivery_mvp_app/CustomerScreen/Newscreen.dart';
 import 'package:delivery_mvp_app/data/controller/getDeliveryHistoryController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +9,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+
+import '../config/network/api.state.dart';
+import 'DetailPage.dart';
 
 class DeliveryHistoryScreen extends ConsumerStatefulWidget {
-  const DeliveryHistoryScreen({super.key});
+  final IO.Socket? socket;
+  const DeliveryHistoryScreen(this.socket,{super.key});
 
   @override
   ConsumerState<DeliveryHistoryScreen> createState() =>
@@ -22,6 +28,8 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
     switch (status?.toLowerCase()) {
       case "assigned":
         return const Color(0xFFE3F2FD); // light blue
+      case "ongoing":
+        return const Color(0xFF7DCF4A); // light blue
       case "not_assigned":
         return const Color(0xFFFFEBEE); // light red
       case "completed":
@@ -47,6 +55,88 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
         return const Color(0xFF424242); // dark gray
     }
   }
+
+/*
+  Future<void> _handleAssigned(
+      final IO.Socket? socket,
+      String id,
+      String status,
+      ) async {
+    try {
+      final dio = await callDio();
+      final service = APIStateNetwork(dio);
+      final response = await service.getDeliveryById(id);
+
+      if (response.error == false && response.data != null) {
+        final data = response.data!;
+
+        Widget targetPage;
+
+        if (status == "assigned") {
+          targetPage = RequestDetailsPage(
+            socket:   widget.socket,
+            deliveryData: data,
+            txtID: data.txId.toString(),
+          );
+        } else if (status == "ongoing") {
+          targetPage = MapLiveScreen(
+            socket: widget.socket,
+            deliveryData: data,
+            pickupLat: data.pickup?.lat,
+            pickupLong: data.pickup?.long,
+            dropLat: data.dropoff?.lat,
+            droplong: data.dropoff?.long,
+            txtid: data.txId.toString(),
+          );
+        } else if (status == "picked") {
+          targetPage = RequestDetailsPage(
+            socket:   widget.socket,
+            deliveryData: data,
+            txtID: data.txId.toString(),
+          );
+          // targetPage = MapRequestDetailsPage(
+          //   socket: widget.,
+          //   deliveryData: data,
+          //   pickupLat: data.pickup?.lat,
+          //   pickupLong: data.pickup?.long,
+          //   dropLat: data.dropoff?.lat,
+          //   droplong: data.dropoff?.long,
+          //   txtid: data.txId.toString(),
+          // );
+        } else {
+          // targetPage = DetailPage(
+          //
+          //   deliveryData: data,
+          //   txtID: data.txId.toString(),
+          //
+          //
+          // );
+          targetPage = RequestDetailsPage(
+            socket:   widget.socket,
+            deliveryData: data,
+            txtID: data.txId.toString(),
+          );
+        }
+
+        // Navigate
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => targetPage),
+        );
+
+        print('🔙 Back from details | Refreshing profile');
+        // Optionally refresh after returning
+        // getDriverProfile();
+      } else {
+        Fluttertoast.showToast(
+          msg: response.message ?? "Failed to fetch delivery details",
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Error fetching delivery details");
+      debugPrint('❌ Error in _handleAssigned: $e');
+    }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -104,109 +194,168 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                     padding: EdgeInsets.zero,
                     itemCount: history.data.deliveries.length,
                     itemBuilder: (context, index) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom: 15.h,
-                          left: 25.w,
-                          right: 25.w,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  // "ORDB1234",
-                                  history.data.deliveries[index].id,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF0C341F),
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      "Receipient: ${history.data.deliveries[index].name ?? "Unknow"}",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xFF545454),
-                                      ),
+                      return GestureDetector(
+                        onTap: (){
+
+                          history.data.deliveries[index].status=="assigned" ||    history.data.deliveries[index].status=="ongoing"?
+
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>
+
+                              PickupScreenNotification(
+                                  deliveryId: history.data.deliveries[index].id
+                              )))
+
+                              :   Navigator.push(context, MaterialPageRoute(builder: (context)=>
+
+                              RequestDetailsPage(
+                                  deliveryId: history.data.deliveries[index].id
+                              )));
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            bottom: 15.h,
+                            left: 25.w,
+                            right: 25.w,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    // "ORDB1234",
+                                    history.data.deliveries[index].id,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF0C341F),
                                     ),
-                                    Spacer(),
-                                    // if (index == 0)
-                                    Container(
-                                      padding: EdgeInsets.only(
-                                        left: 6.w,
-                                        right: 6.w,
-                                        top: 2.h,
-                                        bottom: 2.h,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(
-                                          3.r,
-                                        ),
-                                        // color: Color(0xFFFFF4C7),
-                                        color: _getStatusColor(
-                                          history.data.deliveries[index].status,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "Receipient: ${history.data.deliveries[index].name ?? "Unknow"}",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF545454),
                                         ),
                                       ),
-                                      child: Center(
-                                        child: Text(
-                                          // "In progress",
-                                          history.data.deliveries[index].status
-                                              .toString(),
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w500,
-                                            // color: Color(0xFF7E6604),
-                                            color: _getStatusTextColor(
-                                              history
-                                                  .data
-                                                  .deliveries[index]
-                                                  .status,
+                                      Spacer(),
+                                      // if (index == 0)
+                                      Container(
+                                        padding: EdgeInsets.only(
+                                          left: 6.w,
+                                          right: 6.w,
+                                          top: 2.h,
+                                          bottom: 2.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            3.r,
+                                          ),
+                                          // color: Color(0xFFFFF4C7),
+                                          color: _getStatusColor(
+                                            history.data.deliveries[index].status,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            // "In progress",
+                                            history.data.deliveries[index].status
+                                                .toString(),
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w500,
+                                              // color: Color(0xFF7E6604),
+                                              color: _getStatusTextColor(
+                                                history
+                                                    .data
+                                                    .deliveries[index]
+                                                    .status,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10.h),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 35.w,
-                                  height: 35.h,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5.r),
-                                    color: Color(0xFFF7F7F7),
+                                    ],
                                   ),
-                                  child: Center(
-                                    child: SvgPicture.asset(
-                                      "assets/SvgImage/bikess.svg",
+                                ],
+                              ),
+                              SizedBox(height: 10.h),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: 35.w,
+                                    height: 35.h,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5.r),
+                                      color: Color(0xFFF7F7F7),
+                                    ),
+                                    child: Center(
+                                      child: SvgPicture.asset(
+                                        "assets/SvgImage/bikess.svg",
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(width: 10.w),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
+                                  SizedBox(width: 10.w),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Icon(
-                                          Icons.location_on,
-                                          size: 16.sp,
-                                          color: Color(0xFF27794D),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.location_on,
+                                              size: 16.sp,
+                                              color: Color(0xFF27794D),
+                                            ),
+                                            SizedBox(width: 5.w),
+                                            Text(
+                                              "Drop off",
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12.sp,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xFF545454),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        SizedBox(width: 5.w),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                            left: 3.w,
+                                            top: 2.h,
+                                          ),
+                                          child: Text(
+                                            // "21b, Karimu Kotun Street, Victoria Island",
+                                            history
+                                                .data
+                                                .deliveries[index]
+                                                .dropoff
+                                                .name
+                                                .toString(),
+                                            style: GoogleFonts.inter(
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xFF0C341F),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: 2.h),
                                         Text(
-                                          "Drop off",
+                                          //2 January 2020, 2:43pm",
+                                          DateFormat("dd MMMM yyyy, h:mma")
+                                              .format(
+                                                DateTime.fromMillisecondsSinceEpoch(
+                                                  history
+                                                      .data
+                                                      .deliveries[index]
+                                                      .createdAt,
+                                                ),
+                                              )
+                                              .toLowerCase(),
                                           style: GoogleFonts.inter(
                                             fontSize: 12.sp,
                                             fontWeight: FontWeight.w400,
@@ -215,52 +364,13 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
                                         ),
                                       ],
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        left: 3.w,
-                                        top: 2.h,
-                                      ),
-                                      child: Text(
-                                        // "21b, Karimu Kotun Street, Victoria Island",
-                                        history
-                                            .data
-                                            .deliveries[index]
-                                            .dropoff
-                                            .name
-                                            .toString(),
-                                        style: GoogleFonts.inter(
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xFF0C341F),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 2.h),
-                                    Text(
-                                      //2 January 2020, 2:43pm",
-                                      DateFormat("dd MMMM yyyy, h:mma")
-                                          .format(
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                              history
-                                                  .data
-                                                  .deliveries[index]
-                                                  .createdAt,
-                                            ),
-                                          )
-                                          .toLowerCase(),
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xFF545454),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 12.h),
-                            Divider(color: Color(0xFFDCE8E9)),
-                          ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12.h),
+                              Divider(color: Color(0xFFDCE8E9)),
+                            ],
+                          ),
                         ),
                       );
                     },

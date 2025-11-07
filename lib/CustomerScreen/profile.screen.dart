@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/deliveryHistory.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
-import 'package:delivery_mvp_app/data/Model/getProfileModel.dart';
 import 'package:delivery_mvp_app/data/controller/getProfileController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,9 +10,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key});
+  final IO.Socket? socket;
+  const ProfileScreen(this.socket,{super.key});
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -78,7 +79,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Navigator.push(
                   context,
                   CupertinoPageRoute(
-                    builder: (context) => DeliveryHistoryScreen(),
+                    builder: (context) => DeliveryHistoryScreen(widget.socket),
                   ),
                 );
               }),

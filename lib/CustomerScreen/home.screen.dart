@@ -1,14 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
-import 'package:another_stepper/dto/stepper_data.dart';
-import 'package:another_stepper/widgets/another_stepper.dart';
 import 'package:delivery_mvp_app/CustomerScreen/instantDelivery.screen.dart';
-import 'package:delivery_mvp_app/CustomerScreen/map.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/orderList.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/packerMover.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/payment.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/profile.screen.dart';
-import 'package:delivery_mvp_app/data/controller/getProfileController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,7 +59,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       "title": "Choose from Our Fleet",
     },
   ];
-
   final List<Color> cardColors = [
     Color(0xFF87BEB5),
     Color(0xFFDEC9A9),
@@ -72,7 +67,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     Color(0xFFDEC9A9),
     Color(0xFF87BEB5),
   ];
-
   int activeStep = 2;
   String? currentAddress;
   bool isSocketConnected = false;
@@ -83,15 +77,70 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String receivedMessage = "";
   final List<Map<String, dynamic>> messages = [];
   bool _isCheckingLocation = true;
-
+  String? userId;
   late IO.Socket socket;
 
   @override
   void initState() {
     super.initState();
     _checkLocationPermission();
+    userId = box.get("id")?.toString(); // fetch once
+    _connectSocket();                   // <-- start socket connection early
   }
 
+  // -------------------------------------------------
+  // SOCKET CONNECTION (centralised in HomeScreen)
+  // -------------------------------------------------
+  void _connectSocket() {
+    const socketUrl = 'http://192.168.1.43:4567';
+    // const socketUrl = 'https://weloads.com';
+
+    socket = IO.io(socketUrl, <String, dynamic>{
+      'transports': ['websocket', 'polling'],
+      'autoConnect': false,
+    });
+
+    // Log everything for debugging
+    socket.onAny((event, data) => log("SOCKET EVENT: $event → $data"));
+
+    socket.connect();
+
+    socket.onConnect((_) {
+      log('✅ Socket connected');
+      Fluttertoast.showToast(msg: "Socket connected");
+      setState(() => isSocketConnected = true);
+
+      // Register the customer once connected
+      if (userId != null) {
+        socket.emitWithAck('registerCustomer', {
+          'userId': userId,
+          'role': 'customer',
+        }, ack: (ack) => log('🔐 Registration ACK: $ack'));
+      } else {
+        log('❌ No userId for registration!');
+      }
+
+      // You can start location streaming here if you need it on HomeScreen
+      // startLocationStream();
+    });
+
+    socket.onDisconnect((_) {
+      log('❌ Socket disconnected');
+      Fluttertoast.showToast(msg: "Socket disconnected");
+      setState(() => isSocketConnected = false);
+    });
+
+    socket.onReconnect((data) {
+      log('🔄 Socket reconnected');
+      setState(() => isSocketConnected = true);
+      // Re-register on reconnect
+      if (userId != null) {
+        socket.emit('join:user', {'userId': userId});
+      }
+    });
+
+    socket.onReconnectError((err) => log('❌ Reconnect error: $err'));
+  }
   Future<void> _checkLocationPermission() async {
     setState(() {
       _isCheckingLocation = true;
@@ -142,7 +191,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       setState(() => _isCheckingLocation = false);
     }
   }
-
   void _showLocationDialog(String message) {
     showDialog(
       context: context,
@@ -165,7 +213,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-
   Future<void> _updateAddress() async {
     if (_currentPosition == null) return;
     try {
@@ -193,7 +240,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       });
     }
   }
-
   void startLocationStream() {
     _locationSubscription =
         Geolocator.getPositionStream(
@@ -211,7 +257,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _updateAddress();
         });
   }
-
   @override
   void dispose() {
     _locationSubscription?.cancel();
@@ -303,7 +348,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
       body: selectIndex == 0
-          ? Column(
+          ?
+      Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
@@ -344,7 +390,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         onPressed: () {
 
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>InstantDeliveryScreen()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>InstantDeliveryScreen(socket)));
                         },
                         child: Text(
                           "Book",
@@ -418,7 +464,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               Navigator.push(
                                 context,
                                 CupertinoPageRoute(
-                                  builder: (context) => InstantDeliveryScreen(),
+                                  builder: (context) => InstantDeliveryScreen(socket),
                                 ),
                               );
                             }
@@ -508,7 +554,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ? OrderListScreen()
           : selectIndex == 2
           ? PaymentScreen()
-          : ProfileScreen(),
+          : ProfileScreen(socket),
       bottomNavigationBar: BottomNavigationBar(
         onTap: (value) {
           setState(() {
