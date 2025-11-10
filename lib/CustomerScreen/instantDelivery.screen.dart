@@ -169,6 +169,10 @@ class _InstantDeliveryScreenState extends ConsumerState<InstantDeliveryScreen> {
 
 
           GoogleMap(
+            padding: EdgeInsets.only(
+              top: 40.h,    // ऊपर से दूरी
+              right: 16.w,  // दाएँ से थोड़ा अंदर
+            ),
             initialCameraPosition: CameraPosition(
               target: _currentLatLng!,
               zoom: 15,

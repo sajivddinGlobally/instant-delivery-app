@@ -107,19 +107,23 @@ class CurrentLocation {
 class VehicleDetail {
   String? numberPlate;
   String? model;
+  String? vehicleName;
 
   VehicleDetail({
     this.numberPlate,
     this.model,
+    this.vehicleName,
   });
 
   factory VehicleDetail.fromJson(Map<String, dynamic> json) => VehicleDetail(
     numberPlate: json["numberPlate"],
     model: json["model"],
+    vehicleName: json["vehicleName"],
   );
 
   Map<String, dynamic> toJson() => {
     "numberPlate": numberPlate,
     "model": model,
+    "vehicleName": vehicleName,
   };
 }

@@ -100,6 +100,7 @@ class _MapPageState extends State<MapPage> {
           : Stack(
               children: [
                 GoogleMap(
+
                   initialCameraPosition: CameraPosition(
                     target: _currentLatLng!,
                     zoom: 15,

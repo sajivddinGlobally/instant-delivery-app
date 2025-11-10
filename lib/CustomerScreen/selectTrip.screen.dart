@@ -1449,27 +1449,28 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
       final double finalLon = baseLon + offsetLon;
 
       final String model = (driver.vehicleDetails?.isNotEmpty == true)
-          ? (driver.vehicleDetails![0].model ?? "").toLowerCase()
+          ? (driver.vehicleDetails![0].vehicleName ?? "").toLowerCase()
           : "bike";
 
       BitmapDescriptor icon;
-      if (model.contains("Truck") ) {
+      if (model.contains("truck") ) {
 
         icon = driverTruckIcon; // Ya truck icon bana lo
-      } else if (model.contains("Car") ) {
+      } else if (model.contains("car") ) {
         icon = driverCarIcon;
 
       }
 
-      else if (model.contains("Bike")){
+      else if (model.contains("bike")){
         icon = driverBikeIcon;
       }
 
       else if(model.contains("Auto")){
         icon = driverAutoIcon;
       } else{
-        icon = driverAutoIcon;
+        icon = driverCycleIcon;
       }
+
       _markers.add(Marker(
         markerId: MarkerId(markerId),
         position: LatLng(finalLat, finalLon),
@@ -1637,6 +1638,10 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
               : Stack(
             children: [
               GoogleMap(
+                padding: EdgeInsets.only(
+                  top: 40.h,    // ऊपर से दूरी
+                  right: 16.w,  // दाएँ से थोड़ा अंदर
+                ),
                 initialCameraPosition: CameraPosition(target: _currentLatlng!, zoom: 15),
                 onMapCreated: (controller) {
                   _mapController = controller;
@@ -2255,6 +2260,10 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
         children: [
           // Google Map
           GoogleMap(
+            padding: EdgeInsets.only(
+              top: 40.h,    // ऊपर से दूरी
+              right: 16.w,  // दाएँ से थोड़ा अंदर
+            ),
             initialCameraPosition: CameraPosition(
               target: LatLng(pickupLat, pickupLon),
               zoom: 15,
@@ -2265,8 +2274,8 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
             },
             markers: _markers,
             polylines: _polylines,
-            myLocationEnabled: false,
-            zoomControlsEnabled: false,
+            myLocationEnabled: true,
+            zoomControlsEnabled: true,
           ),
 
           // Back Button
