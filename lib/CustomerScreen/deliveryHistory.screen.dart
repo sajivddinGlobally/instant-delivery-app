@@ -183,6 +183,18 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
             SizedBox(height: 15.h),
             historyProvier.when(
               data: (history) {
+                if (history.data.deliveries.isEmpty) {
+                  return Center(
+                    child: Text(
+                      "No History Available",
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.black,
+                      ),
+                    ),
+                  );
+                }
                 DateTime date = DateTime.fromMillisecondsSinceEpoch(
                   1761395019837,
                 );

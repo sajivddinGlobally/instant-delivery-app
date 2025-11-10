@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/instantDelivery.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/orderList.screen.dart';
-import 'package:delivery_mvp_app/CustomerScreen/packerMover.page.dart';
 import 'package:delivery_mvp_app/CustomerScreen/payment.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/profile.screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -79,6 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isCheckingLocation = true;
   String? userId;
   late IO.Socket socket;
+
 
   @override
   void initState() {
@@ -367,7 +367,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       SizedBox(height: 50.h),
                       Text(
-                        "Hey Sajiv",
+                        "Hey ${box.get("firstName")}",
                         style: GoogleFonts.inter(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w500,
@@ -390,7 +390,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         onPressed: () {
 
+
                           Navigator.push(context, MaterialPageRoute(builder: (context)=>InstantDeliveryScreen(socket)));
+
+
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) =>
+                          //
+                          //         InstantDeliveryScreen(),
+                          //   ),
+                          // );
+
                         },
                         child: Text(
                           "Book",
@@ -431,35 +443,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 SizedBox(height: 20.h),
                 Expanded(
-                  child:
-
-                  Padding(
+                  child: Padding(
                     padding: EdgeInsets.only(
                       left: 15.w,
                       right: 15.w,
                       bottom: 10.h,
                     ),
-                    child:
-                    GridView.builder(
+                    child: GridView.builder(
                       itemCount: myList.length,
                       padding: EdgeInsets.zero,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 20.w,
                         mainAxisSpacing: 20.w,
-                        childAspectRatio: 160 / 165,
+                        childAspectRatio: 0.91,
                       ),
                       itemBuilder: (context, index) {
-                        return
-                          InkWell(
+                        return InkWell(
                           onTap: () {
-                            if (index == 4) {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => PackerMoverPage(),
-                                ),
-                              );
+                            if (index == 4 || index == 5) {
+                              // Navigator.push(
+                              //   context,
+                              //   CupertinoPageRoute(
+                              //     builder: (context) => PackerMoverPage(),
+                              //   ),
+                              // );
+                              Fluttertoast.showToast(msg: "Comming Soon");
                             } else {
                               Navigator.push(
                                 context,
@@ -545,8 +554,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       },
                     ),
                   ),
-
-
                 ),
               ],
             )

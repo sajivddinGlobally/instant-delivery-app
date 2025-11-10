@@ -1,6 +1,10 @@
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/deliveryHistory.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
+
+import 'package:delivery_mvp_app/CustomerScreen/updateUserProfile.page.dart';
+import 'package:delivery_mvp_app/data/Model/getProfileModel.dart';
+
 import 'package:delivery_mvp_app/data/controller/getProfileController.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +25,61 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  Future<void> showLogoutDialog() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            "Logout",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text("Are you sure you want to log out?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF006970),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () async {
+                log("Clear data....");
+                Navigator.pop(context);
+
+                final box = await Hive.box("folder");
+
+                await box.clear();
+
+                Fluttertoast.showToast(msg: "Sign out successfully");
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  CupertinoPageRoute(builder: (context) => LoginScreen()),
+                  (route) => false,
+                );
+              },
+              child: const Text(
+                "Logout",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var box = Hive.box("folder");
@@ -40,22 +99,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   height: 72.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color(0xFFA8DADC),
+                    color: const Color(0xFFA8DADC),
                   ),
                   child: Center(
-                    child: Text(
-                      // "DE",
-                      profile.data!.doc!.firstName![0].toUpperCase() +
-                          profile.data!.doc!.lastName![0].toUpperCase(),
-                      style: GoogleFonts.inter(
-                        fontSize: 32.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF4F4F4F),
-                      ),
-                    ),
+                    child:
+                        (profile.data?.empty?.activePaths?.paths?.image !=
+                                null &&
+                            profile
+                                .data!
+                                .empty!
+                                .activePaths!
+                                .paths!
+                                .image!
+                                .isNotEmpty)
+                        ? ClipOval(
+                            child: Image.network(
+                              profile.data!.doc!.image ??
+                                  "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png",
+                              fit: BoxFit.cover,
+                              width: 72.w,
+                              height: 72.h,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    Icons.person,
+                                    size: 40.sp,
+                                    color: Colors.grey,
+                                  ),
+                            ),
+                          )
+                        : Text(
+                            "${profile.data?.doc?.firstName?[0].toUpperCase() ?? ''}${profile.data?.doc?.lastName?[0].toUpperCase() ?? ''}",
+                            style: GoogleFonts.inter(
+                              fontSize: 32.sp,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF4F4F4F),
+                            ),
+                          ),
                   ),
                 ),
               ),
+
               SizedBox(height: 5.h),
               Center(
                 child: Text(
@@ -74,6 +157,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 endIndent: 24,
                 indent: 24,
               ),
+              buildProfile(Icons.edit, "Edit Profile", () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => UpdateUserProfilePage(),
+                  ),
+                );
+              }),
               buildProfile(Icons.payment, "Payment", () {}),
               buildProfile(Icons.history, "Delivery History", () {
                 Navigator.push(
@@ -83,23 +174,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 );
               }),
-              buildProfile(Icons.settings, "Setting", () {}),
+
               buildProfile(Icons.contact_support, "Support/FAQ", () {}),
-              buildProfile(
-                Icons.markunread_mailbox_rounded,
-                "Invite Friends",
-                () {},
-              ),
+              //buildProfile(Icons.settings, "Setting", () {}),
+              // buildProfile(
+              //   Icons.markunread_mailbox_rounded,
+              //   "Invite Friends",
+              //   () {
+              //   },
+              // ),
               SizedBox(height: 50.h),
               InkWell(
                 onTap: () {
-                  box.clear();
-                  Fluttertoast.showToast(msg: "Sign out successfully");
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    CupertinoPageRoute(builder: (context) => LoginScreen()),
-                    (route) => false,
-                  );
+                  showLogoutDialog();
                 },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,

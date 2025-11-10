@@ -1,4 +1,5 @@
 
+/*
 
 
 import 'dart:async';
@@ -22,6 +23,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:http/http.dart' as http;
+
+import '../data/Model/GetNearByDriverResponseModel.dart';
+import '../data/Model/NearByDriverModel.dart';
 
 class SelectTripScreen extends ConsumerStatefulWidget {
   final IO.Socket? socket;
@@ -86,7 +90,8 @@ class SelectTripScreen extends ConsumerStatefulWidget {
   String? totalDistance;
   String? totalDuration;
   late double pickupLat, pickupLon, dropLat, dropLon;
-
+  late GetNearByDriverResponse nearbyDrivers;
+  bool isLoadingDrivers = false;
   @override
   void initState() {
     super.initState();
@@ -210,95 +215,6 @@ class SelectTripScreen extends ConsumerStatefulWidget {
   // ---------------- SOCKET CONNECTION ----------------
 
 
-  // void _connectSocket() {
-  //   const socketUrl = 'http://192.168.1.43:4567';
-  //    // const socketUrl = 'https://weloads.com';
-  //   socket = IO.io(socketUrl, <String, dynamic>{
-  //     'transports': ['websocket', 'polling'], // Fallback
-  //     'autoConnect': false,
-  //     // 'auth': {'token': userToken},  // If needed
-  //   });
-  //   // ✅ Log all events for debugging
-  //   socket!.onAny((event, data) {
-  //     log("📡 SOCKET EVENT: $event → $data");
-  //   });
-  //
-  //   socket!.connect();
-  //
-  //   socket!.onConnect((_) {
-  //     log('✅ Socket connected');
-  //     Fluttertoast.showToast(msg: "Socket connected");
-  //     isSocketConnected = true;
-  //     // ✅ FIRST: Emit registration with ACK
-  //     if (userId != null) {
-  //       final data = {
-  //         'userId': userId,
-  //         'role': 'customer', // Backend handler के अनुसार
-  //       };
-  //       socket!.emitWithAck(
-  //         'registerCustomer',
-  //         data,
-  //         ack: (ackData) {
-  //           log(
-  //             '🔐 Registration ACK: $ackData',
-  //           ); // Backend से response आएगा (e.g., success/error)
-  //         },
-  //       );
-  //       socket!.emitWithAck(
-  //         'registerCustomer',
-  //         data,
-  //         ack: (ackData) {
-  //           log(
-  //             '🔐 Registration ACK: $ackData',
-  //           ); // Backend से response आएगा (e.g., success/error)
-  //         },
-  //       );
-  //       log('📤 RegisterCustomer emitted: userId=$userId, role=customer');
-  //     } else {
-  //       log('❌ No userId for registration!');
-  //     }
-  //     // THEN: Start stream and setup listeners
-  //     startLocationStream();
-  //     _setupEventListeners();
-  //     safeSetState(() {});
-  //   });
-  //
-  //
-  //   socket!.onDisconnect((_) {
-  //     log('❌ Socket disconnected');
-  //     Fluttertoast.showToast(msg: "Socket disconnected");
-  //     isSocketConnected = false;
-  //     safeSetState(() {});
-  //   });
-  //
-  //
-  //   socket!.onReconnect((data) {
-  //     log(
-  //       '🔄 Reconnected Event Triggered | Raw data: $data (${data.runtimeType})',
-  //     );
-  //     // Socket.IO usually sends attempt count as int
-  //     int? attempt;
-  //     if (data is Map && data.containsKey('data')) {
-  //       attempt = data['data']['attempts'];
-  //     } else if (data is int) {
-  //       attempt = data;
-  //     }
-  //     log('🔄 Reconnected${attempt != null ? ' (Attempt $attempt)' : ''}');
-  //     isSocketConnected = true;
-  //     safeSetState(() {});
-  //     // Re-join logic
-  //     socket!.emit('join:user', {'userId': userId});
-  //     _setupEventListeners();
-  //   });
-  //
-  //   socket!.onReconnectError((error) {
-  //     log('❌ Reconnect error: $error');
-  //   });
-  //
-  // }
-
-
-
   // ✅ Centralized method to set up event listeners (avoids duplicates)
   void _setupEventListeners() {
     socket!.on('receive_message', (data) {
@@ -338,8 +254,6 @@ class SelectTripScreen extends ConsumerStatefulWidget {
     }
     super.dispose();
   }
-
-
   void _addMarkers() {
     _markers.clear(); // Clear previous markers to avoid duplicates
     if (_currentLatlng != null) {
@@ -561,6 +475,56 @@ class SelectTripScreen extends ConsumerStatefulWidget {
 
     return points;
   }
+
+  void _addNearbyDriverMarkers() {
+    if (nearbyDrivers.data == null || nearbyDrivers.data!.isEmpty) {
+      log("No nearby drivers to show");
+      return;
+    }
+
+    // Remove old driver markers only
+    _markers.removeWhere((m) => m.markerId.value.startsWith('driver_'));
+
+    for (int i = 0; i < nearbyDrivers.data!.length; i++) {
+      final driver = nearbyDrivers.data![i];
+
+      final coordinates = driver.currentLocation?.coordinates;
+      if (coordinates == null || coordinates.length < 2) {
+        log("Skipping driver ${driver.firstName}: invalid coordinates");
+        continue;
+      }
+
+      final double lon = coordinates[0] is num ? coordinates[0].toDouble() : 0.0;
+      final double lat = coordinates[1] is num ? coordinates[1].toDouble() : 0.0;
+
+      if (lat == 0.0 || lon == 0.0) {
+        continue;
+      }
+
+      final markerId = MarkerId('driver_$i');
+
+      _markers.add(
+        Marker(
+          markerId: markerId,
+          position: LatLng(lat, lon), // Note: LatLng(lat, lon) → latitude first
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          infoWindow: InfoWindow(
+            title: driver.firstName ?? "Driver",
+            snippet: "${driver.vehicleDetails ?? "Vehicle"} • ${driver.distance ?? "?"} km",
+          ),
+          onTap: () {
+            Fluttertoast.showToast(
+              msg: "${driver.firstName} (${driver.phone})",
+            );
+          },
+        ),
+      );
+    }
+
+    safeSetState(() {});
+    log("Added ${nearbyDrivers.data!.length} driver markers on map");
+  }
+
   @override
   Widget build(BuildContext context) {
     var box = Hive.box("folder");
@@ -706,11 +670,55 @@ class SelectTripScreen extends ConsumerStatefulWidget {
                               itemBuilder: (context, index) {
                                 final isSelected = selectIndex == index;
                                 return GestureDetector(
-                                  onTap: () {
+                                  onTap: () async {
+                                    setState(() {
+                                      selectIndex = index;
+                                      isLoadingDrivers = true;
+                                    });
+
+                                    try {
+                                      final selectedVehicle = snp.data[index];
+
+                                      // API Body
+                                      final body = NearByDriverModel(
+                                        lat: widget.pickupLat,
+                                        long: widget.pickupLon,
+                                        vehicleId: selectedVehicle.vehicleTypeId, // या जो भी field server expect करता है
+                                      );
+
+                                      // API Call
+                                      final drivers = await APIStateNetwork(callPrettyDio()).getNearByDriverList(body); // आपका service function
+
+                                      setState(() {
+                                        nearbyDrivers = drivers;
+                                        isLoadingDrivers = false;
+                                        _addNearbyDriverMarkers(); // YEH LINE ADD KARO
+                                      });
+
+                                      log("Nearby Drivers: ${drivers.data!.length} found for vehicle: ${selectedVehicle.name}");
+
+                                      // Optional: Show toast
+                                      Fluttertoast.showToast(msg: "${drivers.data!.length} drivers nearby");
+
+                                    } catch (e) {
+                                      setState(() {
+                                        isLoadingDrivers = false;
+                                      });
+                                      Fluttertoast.showToast(msg: "No drivers found");
+                                      log("Error fetching drivers: $e");
+                                    }
+                                  },
+                             */
+/*     onTap: () {
+
+
                                     setState(() {
                                       selectIndex = index;
                                     });
-                                  },
+
+
+                                  },*//*
+
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 250),
                                     curve: Curves.easeInOut,
@@ -1016,6 +1024,910 @@ class SelectTripScreen extends ConsumerStatefulWidget {
   );
 }
 
+*/
+
+
+import 'dart:async';
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:math' hide log;
+import 'package:delivery_mvp_app/CustomerScreen/pickup.screen.dart';
+import 'package:delivery_mvp_app/config/network/api.state.dart';
+import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
+import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
+import 'package:delivery_mvp_app/data/controller/getDistanceController.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:http/http.dart' as http;
+
+import '../data/Model/GetNearByDriverResponseModel.dart';
+import '../data/Model/NearByDriverModel.dart';
+
+class SelectTripScreen extends ConsumerStatefulWidget {
+  final IO.Socket? socket;
+  final double pickupLat;
+  final double pickupLon;
+  final double dropLat;
+  final double dropLon;
+
+  const SelectTripScreen(
+      this.socket,
+      this.pickupLat,
+      this.pickupLon,
+      this.dropLat,
+      this.dropLon, {
+        super.key,
+      });
+
+  @override
+  ConsumerState<SelectTripScreen> createState() => _SelectTripScreenState();
+}
+
+class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
+  final box = Hive.box("folder");
+
+  GoogleMapController? _mapController;
+  LatLng? _currentLatlng;
+  Position? _currentPosition;
+  StreamSubscription<Position>? _locationSubscription;
+  String? userId;
+
+  late double pickupLat, pickupLon, dropLat, dropLon;
+  String? toPickupDistance, toPickupDuration;
+  String? pickupToDropDistance, pickupToDropDuration;
+  String? totalDistance, totalDuration;
+
+  int selectIndex = 0;
+  bool isBooking = false;
+  bool isLoadingDrivers = false;
+  IO.Socket? socket;
+
+  final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {};
+  List<LatLng> _routePoints = [];
+
+  late GetNearByDriverResponse nearbyDrivers;
+
+  // Custom Icons
+
+  late BitmapDescriptor driverCarIcon;
+  late BitmapDescriptor driverBikeIcon;
+  late BitmapDescriptor driverAutoIcon;
+  late BitmapDescriptor driverTruckIcon;
+  late BitmapDescriptor driverCycleIcon;
+  bool _iconsLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    socket = widget.socket;
+    pickupLat = widget.pickupLat;
+    pickupLon = widget.pickupLon;
+    dropLat = widget.dropLat;
+    dropLon = widget.dropLon;
+
+    userId = box.get("id")?.toString();
+    log('User ID: $userId');
+
+    _getCurrentLocation();
+    startLocationStream();
+    _setupEventListeners();
+    _loadCustomIcons();
+  }
+
+  Future<void> _loadCustomIcons() async {
+    try {
+      driverCarIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/car.png',
+      );
+      driverBikeIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/b.png',
+      );
+      driverAutoIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/t.png',
+      );
+
+      driverTruckIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/truck.png',
+      );
+
+      driverCycleIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(72, 72)),
+        'assets/icons/cycle.png',
+      );
+
+      _iconsLoaded = true;
+      if (mounted) safeSetState(() {});
+      log("Custom driver icons loaded");
+    } catch (e) {
+      log("Icon load error: $e");
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      Fluttertoast.showToast(msg: "Enable location service");
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+    if (permission == LocationPermission.deniedForever) {
+      Fluttertoast.showToast(msg: "Location denied permanently");
+      return;
+    }
+
+    final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    safeSetState(() {
+      _currentPosition = position;
+      _currentLatlng = LatLng(position.latitude, position.longitude);
+    });
+
+    if (mounted && _mapController != null) {
+      _addMarkers();
+      _fetchRoute();
+      _fitAllMarkersAndDrivers();
+    }
+  }
+
+  void safeSetState(VoidCallback fn) {
+    if (mounted) setState(fn);
+  }
+
+  void startLocationStream() {
+    _locationSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 10),
+    ).listen((position) {
+      updateUserLocation(position.latitude, position.longitude);
+      _currentPosition = position;
+    });
+  }
+
+  void updateUserLocation(double lat, double lon) {
+    if (socket?.connected == true && userId != null) {
+      socket!.emitWithAck('user:location_update', {'userId': userId, 'lat': lat, 'lon': lon});
+    }
+  }
+
+  void _setupEventListeners() {
+    socket?.on('receive_message', (data) => log('Message: $data'));
+  }
+
+  @override
+  void dispose() {
+    _locationSubscription?.cancel();
+    _mapController?.dispose();
+    socket?.clearListeners();
+    socket?.disconnect();
+    super.dispose();
+  }
+
+  void _addMarkers() {
+    _markers.clear();
+    if (_currentLatlng != null) {
+      _markers.add(Marker(
+        markerId: const MarkerId('current'),
+        position: _currentLatlng!,
+        infoWindow: const InfoWindow(title: 'You'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+      ));
+    }
+    _markers.add(Marker(
+      markerId: const MarkerId('pickup'),
+      position: LatLng(pickupLat, pickupLon),
+      infoWindow: const InfoWindow(title: 'Pickup'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+    ));
+    _markers.add(Marker(
+      markerId: const MarkerId('drop'),
+      position: LatLng(dropLat, dropLon),
+      infoWindow: const InfoWindow(title: 'Drop'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+    ));
+    safeSetState(() {});
+  }
+
+  // void _addNearbyDriverMarkers() {
+  //   if (nearbyDrivers.data == null || nearbyDrivers.data!.isEmpty || !_iconsLoaded) {
+  //     log("No drivers or icons not ready");
+  //     return;
+  //   }
+  //
+  //   _markers.removeWhere((m) => m.markerId.value.startsWith('driver_'));
+  //
+  //   for (int i = 0; i < nearbyDrivers.data!.length; i++) {
+  //     final driver = nearbyDrivers.data![i];
+  //
+  //     final coords = driver.currentLocation?.coordinates;
+  //     if (coords == null || coords.length < 2) continue;
+  //
+  //     final double lon = coords[0];
+  //     final double lat = coords[1];
+  //     if (lat == 0.0 || lon == 0.0) continue;
+  //
+  //     final String model = (driver.vehicleDetails?.isNotEmpty == true)
+  //         ? (driver.vehicleDetails![0].model ?? "").toLowerCase()
+  //         : "";
+  //
+  //     BitmapDescriptor icon;
+  //     if (model.contains("bike") || model.contains("motorcycle") || model.contains("activa") || model.contains("scooter")) {
+  //       icon = driverBikeIcon;
+  //     } else if (model.contains("car") || model.contains("sedan") || model.contains("innova") || model.contains("ertiga")) {
+  //       icon = driverCarIcon;
+  //     } else {
+  //       icon = driverScooterIcon;
+  //     }
+  //
+  //     _markers.add(Marker(
+  //       markerId: MarkerId('driver_$i'),
+  //       position: LatLng(lat, lon),
+  //       icon: icon,
+  //       infoWindow: InfoWindow(
+  //         title: "${driver.firstName ?? "Driver"} ${driver.lastName ?? ""}",
+  //         snippet: "${driver.vehicleDetails?[0].model ?? "Vehicle"} • ${driver.distance?.toStringAsFixed(1) ?? "?"} km",
+  //       ),
+  //       onTap: () {
+  //         Fluttertoast.showToast(
+  //           msg: "${driver.firstName} • ${driver.phone} • ${driver.vehicleDetails?[0].model}",
+  //           toastLength: Toast.LENGTH_LONG,
+  //         );
+  //       },
+  //     ));
+  //   }
+  //
+  //   safeSetState(() {});
+  //   _fitAllMarkersAndDrivers();
+  //   log("Added ${nearbyDrivers.data!.length} drivers with custom icons");
+  // }
+  // void _addNearbyDriverMarkers() {
+  //   if (nearbyDrivers.data == null || nearbyDrivers.data!.isEmpty || !_iconsLoaded) {
+  //     log("No drivers to show or icons not loaded");
+  //     return;
+  //   }
+  //
+  //   // ALWAYS clear old drivers first
+  //   _markers.removeWhere((m) => m.markerId.value.startsWith('driver_'));
+  //
+  //   for (int i = 0; i < nearbyDrivers.data!.length; i++) {
+  //     // ... same code as before ...
+  //     final driver = nearbyDrivers.data![i];
+  //     //
+  //         final coords = driver.currentLocation?.coordinates;
+  //         if (coords == null || coords.length < 2) continue;
+  //
+  //         final double lon = coords[0];
+  //         final double lat = coords[1];
+  //         if (lat == 0.0 || lon == 0.0) continue;
+  //
+  //         final String model = (driver.vehicleDetails?.isNotEmpty == true)
+  //             ? (driver.vehicleDetails![0].model ?? "").toLowerCase()
+  //             : "";
+  //
+  //         BitmapDescriptor icon;
+  //         if (model.contains("bike") || model.contains("motorcycle") || model.contains("activa") || model.contains("scooter")) {
+  //           icon = driverBikeIcon;
+  //         } else if (model.contains("car") || model.contains("sedan") || model.contains("innova") || model.contains("ertiga")) {
+  //           icon = driverCarIcon;
+  //         } else {
+  //           icon = driverScooterIcon;
+  //         }
+  //
+  //         _markers.add(Marker(
+  //           markerId: MarkerId('driver_$i'),
+  //           position: LatLng(lat, lon),
+  //           icon: icon,
+  //           infoWindow: InfoWindow(
+  //             title: "${driver.firstName ?? "Driver"} ${driver.lastName ?? ""}",
+  //             snippet: "${driver.vehicleDetails?[0].model ?? "Vehicle"} • ${driver.distance?.toStringAsFixed(1) ?? "?"} km",
+  //           ),
+  //           onTap: () {
+  //             Fluttertoast.showToast(
+  //               msg: "${driver.firstName} • ${driver.phone} • ${driver.vehicleDetails?[0].model}",
+  //               toastLength: Toast.LENGTH_LONG,
+  //             );
+  //           },
+  //         ));
+  //   }
+  //
+  //   safeSetState(() {});
+  //   _fitAllMarkersAndDrivers();
+  // }
+
+
+  // void _addNearbyDriverMarkers() {
+  //   if (nearbyDrivers.data == null || nearbyDrivers.data!.isEmpty || !_iconsLoaded) {
+  //     log("No drivers or icons not loaded");
+  //     return;
+  //   }
+  //
+  //   // CLEAR OLD DRIVERS
+  //   _markers.removeWhere((m) => m.markerId.value.startsWith('driver_'));
+  //
+  //   for (int i = 0; i < nearbyDrivers.data!.length; i++) {
+  //     final driver = nearbyDrivers.data![i];
+  //
+  //     final coords = driver.currentLocation?.coordinates;
+  //     if (coords == null || coords.length < 2) continue;
+  //
+  //     final double lon = coords[0];
+  //     final double lat = coords[1];
+  //     if (lat == 0.0 || lon == 0.0) continue;
+  //
+  //     // UNIQUE ID USING DRIVER'S _id (NEVER REPEATS)
+  //     final String uniqueId = 'driver_${driver.id ?? i}_${DateTime.now().millisecondsSinceEpoch}';
+  //     final markerId = MarkerId(uniqueId);
+  //
+  //     final String model = (driver.vehicleDetails?.isNotEmpty == true)
+  //         ? (driver.vehicleDetails![0].model ?? "").toLowerCase()
+  //         : "";
+  //
+  //     BitmapDescriptor icon;
+  //     if (model.contains("bike") || model.contains("yamaha") || model.contains("activa")) {
+  //       icon = driverBikeIcon;
+  //     } else if (model.contains("car") || model.contains("sedan") || model.contains("innova")) {
+  //       icon = driverCarIcon;
+  //     } else if (model.contains("truck") || model.contains("tata") || model.contains("eicher")) {
+  //       icon = driverScooterIcon; // Ya truck icon bana lo
+  //     } else {
+  //       icon = driverBikeIcon;
+  //     }
+  //
+  //     // ADD SMALL OFFSET SO MULTIPLE DRIVERS AT SAME LOCATION ARE VISIBLE
+  //     final double offsetLat = lat + (i * 0.00003); // 3 meter offset
+  //     final double offsetLon = lon + (i * 0.00003);
+  //
+  //     _markers.add(Marker(
+  //       markerId: markerId,
+  //       position: LatLng(offsetLat, offsetLon), // Offset so all show
+  //       icon: icon,
+  //       infoWindow: InfoWindow(
+  //         title: "${driver.firstName} ${driver.lastName}",
+  //         snippet: "${driver.vehicleDetails?[0].model} • ${(driver.distance! / 1000).toStringAsFixed(1)} km",
+  //       ),
+  //       onTap: () {
+  //         Fluttertoast.showToast(
+  //           msg: "${driver.firstName} • ${driver.phone} • ${driver.vehicleDetails?[0].model}",
+  //           toastLength: Toast.LENGTH_LONG,
+  //         );
+  //       },
+  //     ));
+  //   }
+  //
+  //   safeSetState(() {});
+  //   _fitAllMarkersAndDrivers();
+  //   log("Added ${nearbyDrivers.data!.length} drivers (with offset for visibility)");
+  // }
+
+  void _addNearbyDriverMarkers() {
+    if (nearbyDrivers.data == null || nearbyDrivers.data!.isEmpty || !_iconsLoaded) {
+      log("No drivers or icons not loaded");
+      return;
+    }
+
+    // CLEAR OLD DRIVERS
+    _markers.removeWhere((m) => m.markerId.value.startsWith('driver_'));
+
+    final int totalDrivers = nearbyDrivers.data!.length;
+    log("Adding $totalDrivers drivers to map");
+
+    for (int i = 0; i < totalDrivers; i++) {
+      final driver = nearbyDrivers.data![i];
+      final coords = driver.currentLocation?.coordinates;
+      if (coords == null || coords.length < 2) continue;
+
+      double baseLat = coords[1];
+      double baseLon = coords[0];
+
+      // UNIQUE ID using driver _id
+      final String markerId = 'driver_${driver.id ?? i}_${i}';
+
+      // APPLY OFFSET IN A CIRCLE AROUND THE POINT
+      final double angle = (i * 137.508); // Golden angle for even spread
+      final double radius = 0.00008; // ~8-10 meters
+      final double offsetLat = radius * cos(angle * pi / 180);
+      final double offsetLon = radius * cos(angle * pi / 180) / cos(baseLat * pi / 180);
+
+      final double finalLat = baseLat + offsetLat;
+      final double finalLon = baseLon + offsetLon;
+
+      final String model = (driver.vehicleDetails?.isNotEmpty == true)
+          ? (driver.vehicleDetails![0].model ?? "").toLowerCase()
+          : "bike";
+
+      BitmapDescriptor icon;
+      if (model.contains("Truck") ) {
+
+        icon = driverTruckIcon; // Ya truck icon bana lo
+      } else if (model.contains("Car") ) {
+        icon = driverCarIcon;
+
+      }
+
+      else if (model.contains("Bike")){
+        icon = driverBikeIcon;
+      }
+
+      else if(model.contains("Auto")){
+        icon = driverAutoIcon;
+      } else{
+        icon = driverAutoIcon;
+      }
+      _markers.add(Marker(
+        markerId: MarkerId(markerId),
+        position: LatLng(finalLat, finalLon),
+        icon: icon,
+        anchor: const Offset(0.5, 0.5), // Center of icon
+        zIndex: i.toDouble(), // Higher index on top
+        infoWindow: InfoWindow(
+          title: "${driver.firstName} ${driver.lastName}",
+          snippet: "${driver.vehicleDetails?[0].model} • ${(driver.distance! / 1000).toStringAsFixed(1)} km",
+        ),
+        onTap: () {
+          Fluttertoast.showToast(
+            msg: "${driver.firstName} • ${driver.phone}",
+            toastLength: Toast.LENGTH_LONG,
+          );
+        },
+      ));
+    }
+
+    safeSetState(() {});
+    _fitAllMarkersAndDrivers();
+    log("Successfully added $totalDrivers drivers with circular offset");
+  }
+
+  void _fitAllMarkersAndDrivers() {
+    if (_markers.isEmpty || _mapController == null) return;
+    final positions = _markers.map((m) => m.position).toList();
+    if (positions.length == 1) {
+      _mapController!.animateCamera(CameraUpdate.newLatLngZoom(positions[0], 14));
+      return;
+    }
+    final bounds = _calculateBounds(positions);
+    _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
+  }
+
+  Future<void> _fetchRoute() async {
+    if (_currentLatlng == null) return;
+
+    const apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
+    double totalDistKm = 0.0;
+    int totalTimeMin = 0;
+    List<LatLng> points1 = [], points2 = [];
+
+    // Route 1: Current → Pickup
+    final url1 = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+      'origin': '${_currentLatlng!.latitude},${_currentLatlng!.longitude}',
+      'destination': '$pickupLat,$pickupLon',
+      'key': apiKey,
+    });
+
+    try {
+      final res = await http.get(url1);
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body);
+        if (data['status'] == 'OK') {
+          final poly = data['routes'][0]['overview_polyline']['points'];
+          points1 = _decodePolyline(poly);
+          final leg = data['routes'][0]['legs'][0];
+          toPickupDistance = leg['distance']['text'];
+          toPickupDuration = leg['duration']['text'];
+          totalDistKm += (leg['distance']['value'] as num) / 1000;
+          totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
+        }
+      }
+    } catch (e) { log("Route1 error: $e"); }
+
+    // Route 2: Pickup → Drop
+    final url2 = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+      'origin': '$pickupLat,$pickupLon',
+      'destination': '$dropLat,$dropLon',
+      'key': apiKey,
+    });
+
+    try {
+      final res = await http.get(url2);
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body);
+        if (data['status'] == 'OK') {
+          final poly = data['routes'][0]['overview_polyline']['points'];
+          points2 = _decodePolyline(poly);
+          final leg = data['routes'][0]['legs'][0];
+          pickupToDropDistance = leg['distance']['text'];
+          pickupToDropDuration = leg['duration']['text'];
+          totalDistKm += (leg['distance']['value'] as num) / 1000;
+          totalTimeMin += (leg['duration']['value'] as int) ~/ 60;
+        }
+      }
+    } catch (e) { log("Route2 error: $e"); }
+
+    safeSetState(() {
+      _polylines.clear();
+      if (points1.isNotEmpty) {
+        _polylines.add(Polyline(polylineId: const PolylineId('toPickup'), points: points1, color: Colors.green, width: 5));
+      }
+      if (points2.isNotEmpty) {
+        _polylines.add(Polyline(polylineId: const PolylineId('toDrop'), points: points2, color: Colors.blue, width: 5));
+      }
+      totalDistance = '${totalDistKm.toStringAsFixed(1)} km';
+      totalDuration = '$totalTimeMin min';
+      _routePoints = [...points1, ...points2];
+    });
+
+    if (_mapController != null && _routePoints.isNotEmpty) {
+      _fitAllMarkersAndDrivers();
+    }
+  }
+
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> points = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
+
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      points.add(LatLng(lat / 1E5, lng / 1E5));
+    }
+    return points;
+  }
+
+  LatLngBounds _calculateBounds(List<LatLng> points) {
+    double minLat = points[0].latitude, maxLat = points[0].latitude;
+    double minLng = points[0].longitude, maxLng = points[0].longitude;
+    for (var p in points) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+    return LatLngBounds(southwest: LatLng(minLat, minLng), northeast: LatLng(maxLat, maxLng));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final distanceProviderState = ref.watch(getDistanceProvider);
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: distanceProviderState.when(
+        data: (snp) {
+          final name = snp.data[0].name;
+          final phon = snp.data[0].mobNo;
+          final pickupAddress = snp.data[0].origName;
+          final dropAddress = snp.data[0].destName;
+
+          return _currentLatlng == null
+              ? const Center(child: CircularProgressIndicator())
+              : Stack(
+            children: [
+              GoogleMap(
+                initialCameraPosition: CameraPosition(target: _currentLatlng!, zoom: 15),
+                onMapCreated: (controller) {
+                  _mapController = controller;
+                  _addMarkers();
+                  _fetchRoute();
+                },
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+                markers: _markers,
+                polylines: _polylines,
+              ),
+
+              Positioned(
+                left: 10.w, top: 40.h,
+                child: FloatingActionButton(
+                  mini: true, backgroundColor: Colors.white,
+                  shape: const CircleBorder(),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
+                ),
+              ),
+
+              if (totalDistance != null)
+                Positioned(
+                  bottom: 70.h, left: 16.w, right: 16.w,
+                  child: Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (toPickupDistance != null)
+                          Text('To Pickup: $toPickupDistance | $toPickupDuration', style: GoogleFonts.inter(fontSize: 14.sp)),
+                        if (pickupToDropDistance != null)
+                          Text('Delivery: $pickupToDropDistance | $pickupToDropDuration', style: GoogleFonts.inter(fontSize: 14.sp)),
+                        Text('Total: $totalDistance | $totalDuration', style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                ),
+
+              DraggableScrollableSheet(
+                initialChildSize: 0.47,
+                minChildSize: 0.47,
+                maxChildSize: 0.47,
+                builder: (context, scrollController) {
+                  return Container(
+                    height: 400.h,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+                    ),
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 200.h,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: snp.data.length,
+                              itemBuilder: (context, index) {
+                                final isSelected = selectIndex == index;
+                                return GestureDetector(
+                                  // onTap: () async {
+                                  //   setState(() {
+                                  //     selectIndex = index;
+                                  //     isLoadingDrivers = true;
+                                  //   });
+                                  //
+                                  //   try {
+                                  //     final selectedVehicle = snp.data[index];
+                                  //     final body = NearByDriverModel(
+                                  //       lat: widget.pickupLat,
+                                  //       long: widget.pickupLon,
+                                  //       vehicleId: selectedVehicle.vehicleTypeId,
+                                  //     );
+                                  //
+                                  //     final drivers = await APIStateNetwork(callPrettyDio()).getNearByDriverList(body);
+                                  //
+                                  //     setState(() {
+                                  //       nearbyDrivers = drivers;
+                                  //       isLoadingDrivers = false;
+                                  //       _addNearbyDriverMarkers();
+                                  //     });
+                                  //
+                                  //     Fluttertoast.showToast(msg: "${drivers.data!.length} drivers nearby");
+                                  //   } catch (e) {
+                                  //     setState(() => isLoadingDrivers = false);
+                                  //     Fluttertoast.showToast(msg: "No drivers found");
+                                  //   }
+                                  // },
+
+                                  onTap: () async {
+                                    setState(() {
+                                      selectIndex = index;
+                                      isLoadingDrivers = true;
+
+                                      // PURANE DRIVERS KO MAP SE HATAAO
+                                      _markers.removeWhere((m) => m.markerId.value.startsWith('driver_'));
+                                      safeSetState(() {}); // Map update karo
+                                    });
+
+                                    try {
+                                      final selectedVehicle = snp.data[index];
+                                      final body = NearByDriverModel(
+                                        lat: widget.pickupLat,
+                                        long: widget.pickupLon,
+                                        vehicleId: selectedVehicle.vehicleTypeId,
+                                      );
+
+                                      final drivers = await APIStateNetwork(callPrettyDio()).getNearByDriverList(body);
+
+                                      setState(() {
+                                        nearbyDrivers = drivers;
+                                        isLoadingDrivers = false;
+
+                                        // Agar koi driver nahi mila → markers already clear hain
+                                        // Agar mile → naye add honge
+                                        if (drivers.data != null && drivers.data!.isNotEmpty) {
+                                          _addNearbyDriverMarkers();
+                                        } else {
+                                          log("No drivers found for this vehicle");
+                                          Fluttertoast.showToast(msg: "No drivers available");
+                                          // Map already clear from above
+                                        }
+                                      });
+
+                                    } catch (e) {
+                                      setState(() => isLoadingDrivers = false);
+                                      Fluttertoast.showToast(msg: "Error fetching drivers");
+                                      log("Error: $e");
+                                    }
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    margin: EdgeInsets.symmetric(horizontal: 10.w, vertical: isSelected ? 0 : 10.h),
+                                    width: 130.w,
+                                    height: isSelected ? 180.h : 170.h,
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? const Color(0xFFE5F0F1) : Colors.white,
+                                      borderRadius: BorderRadius.circular(15.r),
+                                      border: Border.all(
+                                        color: isSelected ? Colors.black : Colors.grey.shade400,
+                                        width: isSelected ? 1.5 : 1,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isSelected ? Colors.black26 : Colors.black12,
+                                          blurRadius: isSelected ? 8 : 4,
+                                          offset: const Offset(0, 4),
+                                        )
+                                      ],
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        const SizedBox(height: 10),
+                                        Text("In 2 min", style: GoogleFonts.inter(fontSize: isSelected ? 15.sp : 13.sp, fontWeight: FontWeight.w500)),
+                                        const SizedBox(height: 10),
+                                        AnimatedScale(
+                                          scale: isSelected ? 1.15 : 1.0,
+                                          duration: const Duration(milliseconds: 250),
+                                          child: Image.network(snp.data[index].image, width: 116.w, height: 70.h, fit: BoxFit.contain),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 10, top: 10),
+                                          child: Text(snp.data[index].name, style: GoogleFonts.inter(fontSize: isSelected ? 17.sp : 15.sp, fontWeight: FontWeight.w600)),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 10),
+                                          child: Text("₹${snp.data[index].price}", style: GoogleFonts.inter(fontSize: isSelected ? 16.sp : 14.sp)),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+
+                          SizedBox(height: 10.h),
+
+                          // Payment Methods
+                          Container(
+                            margin: EdgeInsets.only(top: 10.h),
+                            width: double.infinity,
+                            height: 50.h,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(color: Colors.grey, width: 1.w),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Row(children: [Image.asset("assets/cash.png", height: 20.h, width: 20.w), SizedBox(width: 10.w), Text("Cash", style: GoogleFonts.inter(fontSize: 14.sp))]),
+                                Row(children: [Image.asset("assets/promo.png", height: 20.h, width: 20.w), SizedBox(width: 10.w), Text("Promo Code", style: GoogleFonts.inter(fontSize: 14.sp))]),
+                                Row(children: [Image.asset("assets/note.png", height: 20.h, width: 20.w), SizedBox(width: 10.w), Text("Add Note", style: GoogleFonts.inter(fontSize: 14.sp))]),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 10.h),
+
+                          // Book Now Button
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 50),
+                              backgroundColor: const Color(0xFF006970),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.r)),
+                            ),
+                            onPressed: isBooking ? null : () async {
+                              setState(() => isBooking = true);
+                              try {
+                                final selectedVehicle = snp.data[selectIndex];
+                                final body = BookInstantDeliveryBodyModel(
+                                  vehicleTypeId: selectedVehicle.vehicleTypeId,
+                                  price: double.parse(selectedVehicle.price).toInt(),
+                                  isCopanCode: false,
+                                  copanId: null.toString(),
+                                  copanAmount: 0,
+                                  coinAmount: 0,
+                                  taxAmount: 18,
+                                  userPayAmount: double.parse(selectedVehicle.price).toInt(),
+                                  distance: selectedVehicle.distance,
+                                  mobNo: phon,
+                                  name: name,
+                                  origName: pickupAddress,
+                                  origLat: widget.pickupLat,
+                                  origLon: widget.pickupLon,
+                                  destName: dropAddress,
+                                  destLat: widget.dropLat,
+                                  destLon: widget.dropLon,
+                                  picUpType: selectedVehicle.picUpType,
+                                );
+
+                                final service = APIStateNetwork(callPrettyDio());
+                                final response = await service.bookInstantDelivery(body);
+
+                                if (response.code == 0) {
+                                  box.put("current_booking_txId", response.data!.txId);
+                                  Navigator.push(
+                                    context,
+                                    CupertinoPageRoute(
+                                      builder: (context) => WaitingForDriverScreen(
+                                        body: body,
+                                        socket: socket!,
+                                        pickupLat: pickupLat,
+                                        pickupLon: pickupLon,
+                                        dropLat: dropLat,
+                                        dropLon: dropLon,
+                                      ),
+                                    ),
+                                  );
+                                  Fluttertoast.showToast(msg: "Delivery booked!");
+                                } else {
+                                  Fluttertoast.showToast(msg: response.message ?? "Booking failed");
+                                }
+                              } catch (e) {
+                                Fluttertoast.showToast(msg: "Booking error");
+                              } finally {
+                                setState(() => isBooking = false);
+                              }
+                            },
+                            child: isBooking
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : Text("Book Now", style: GoogleFonts.inter(fontSize: 16.sp, color: Colors.white)),
+                          ),
+
+                          SizedBox(height: 20.h),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+        error: (e, s) => Center(child: Text(e.toString())),
+        loading: () => const Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+}
+
 
 class WaitingForDriverScreen extends StatefulWidget {
   final BookInstantDeliveryBodyModel body;
@@ -1038,7 +1950,6 @@ class WaitingForDriverScreen extends StatefulWidget {
   @override
   State<WaitingForDriverScreen> createState() => _WaitingForDriverScreenState();
 }
-
 class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
     with TickerProviderStateMixin {
   var box = Hive.box("folder");
