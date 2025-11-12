@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:delivery_mvp_app/CustomerScreen/deliveryHistory.screen.dart';
 import 'package:delivery_mvp_app/CustomerScreen/loginPage/login.screen.dart';
+import 'package:delivery_mvp_app/CustomerScreen/support.page.dart';
 
 import 'package:delivery_mvp_app/CustomerScreen/updateUserProfile.page.dart';
 import 'package:delivery_mvp_app/data/Model/getProfileModel.dart';
@@ -17,9 +18,8 @@ import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  final IO.Socket? socket;
-  const ProfileScreen(this.socket,{super.key});
-
+  final IO.Socket socket;
+  const ProfileScreen(this.socket, {super.key});
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -79,7 +79,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       },
     );
   }
-
   @override
   Widget build(BuildContext context) {
     var box = Hive.box("folder");
@@ -175,7 +174,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 );
               }),
 
-              buildProfile(Icons.contact_support, "Support/FAQ", () {}),
+              buildProfile(Icons.contact_support, "Support/FAQ", () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => SupportPage(widget.socket),
+                  ),
+                );
+              }),
               //buildProfile(Icons.settings, "Setting", () {}),
               // buildProfile(
               //   Icons.markunread_mailbox_rounded,

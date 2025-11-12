@@ -1031,6 +1031,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' hide log;
+import 'dart:ui' as ui;
 import 'package:delivery_mvp_app/CustomerScreen/pickup.screen.dart';
 import 'package:delivery_mvp_app/config/network/api.state.dart';
 import 'package:delivery_mvp_app/config/utils/pretty.dio.dart';
@@ -1465,7 +1466,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
         icon = driverBikeIcon;
       }
 
-      else if(model.contains("Auto")){
+      else if(model.contains("auto")){
         icon = driverAutoIcon;
       } else{
         icon = driverCycleIcon;
@@ -1933,6 +1934,7 @@ class _SelectTripScreenState extends ConsumerState<SelectTripScreen> {
   }
 }
 
+/*
 
 class WaitingForDriverScreen extends StatefulWidget {
   final BookInstantDeliveryBodyModel body;
@@ -2452,4 +2454,563 @@ class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
       ),
     );
   }
+}*/
+
+
+// import 'dart:async';
+// import 'dart:math';
+// import 'dart:ui' as ui;
+// import 'package:flutter/material.dart';
+// import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import 'package:socket_io_client/socket_io_client.dart' as IO;
+// import 'package:hive/hive.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:http/http.dart' as http;
+// import 'dart:convert';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'package:google_fonts/google_fonts.dart';
+
+class WaitingForDriverScreen extends StatefulWidget {
+  final BookInstantDeliveryBodyModel body;
+  final IO.Socket socket;
+  final double pickupLat;
+  final double pickupLon;
+  final double dropLat;
+  final double dropLon;
+
+  const WaitingForDriverScreen({
+    super.key,
+    required this.body,
+    required this.socket,
+    required this.pickupLat,
+    required this.pickupLon,
+    required this.dropLat,
+    required this.dropLon,
+  });
+
+  @override
+  State<WaitingForDriverScreen> createState() => _WaitingForDriverScreenState();
+}
+
+class _WaitingForDriverScreenState extends State<WaitingForDriverScreen>
+    with TickerProviderStateMixin {
+  var box = Hive.box("folder");
+  late IO.Socket _socket;
+  late Timer _dotTimer;
+  Timer? _searchTimer;
+  int _dotCount = 1;
+  bool _isSearching = true;
+  int _remainingSeconds = 300;
+  GoogleMapController? _mapController;
+  final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {};
+  List<LatLng> _routePoints = [];
+  String? pickupToDropDistance;
+  String? pickupToDropDuration;
+  bool _routeFetched = false;
+  late double pickupLat, pickupLon, dropLat, dropLon;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+  BitmapDescriptor? _pickupPulseIcon;
+  Timer? _pulseUpdateTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _socket = widget.socket;
+    pickupLat = widget.pickupLat;
+    pickupLon = widget.pickupLon;
+    dropLat = widget.dropLat;
+    dropLon = widget.dropLon;
+    // Pulse animation
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 40, end: 100).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
+    );
+
+    _setupEventListeners();
+
+    _startSearching();
+
+    _startPulseMarkerUpdater();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initMap();
+    });
+  }
+
+  void _startPulseMarkerUpdater() {
+    _pulseUpdateTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+      if (mounted && _mapController != null) {
+        _updatePulsatingPickupMarker();
+      }
+    });
+  }
+  Future<void> _updatePulsatingPickupMarker() async {
+    final icon = await _createPulsatingMarkerIcon();
+    if (mounted) {
+      setState(() {
+        _markers.removeWhere((m) => m.markerId.value == 'pickup_pulse');
+        _markers.add(Marker(
+          markerId: const MarkerId('pickup_pulse'),
+          position: LatLng(pickupLat, pickupLon),
+          icon: icon,
+          anchor: const Offset(0.5, 0.5),
+          zIndex: 100,
+        ));
+      });
+    }
+  }
+  Future<BitmapDescriptor> _createPulsatingMarkerIcon() async {
+    final size = 180.0;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    final center = Offset(size / 2, size / 2);
+
+    // Pulsating outer circle
+    final pulseRadius = _pulseAnimation.value / 2;
+    canvas.drawCircle(
+      center,
+      pulseRadius,
+      Paint()
+        ..color = Colors.blueAccent.withOpacity(0.3)
+        ..style = PaintingStyle.fill,
+    );
+
+    canvas.drawCircle(
+      center,
+      pulseRadius,
+      Paint()
+        ..color = Colors.blueAccent.withOpacity(0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4,
+    );
+
+    // Inner solid circle
+    canvas.drawCircle(
+      center,
+      24,
+      Paint()..color = Colors.blueAccent,
+    );
+
+    canvas.drawCircle(
+      center,
+      24,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4,
+    );
+
+    // Pin icon
+    final path = Path();
+    path.moveTo(center.dx, center.dy - 18);
+    path.lineTo(center.dx - 12, center.dy + 6);
+    path.lineTo(center.dx + 12, center.dy + 6);
+    path.close();
+    canvas.drawPath(path, Paint()..color = Colors.white);
+
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(size.toInt(), size.toInt());
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    final uint8List = byteData!.buffer.asUint8List();
+    return BitmapDescriptor.fromBytes(uint8List);
+  }
+  void _initMap() {
+    _addMarkers();
+    _fetchRoute();
+  }
+  void _addMarkers() {
+    _markers.clear();
+    // Drop marker
+    _markers.add(Marker(
+      markerId: const MarkerId('drop'),
+      position: LatLng(dropLat, dropLon),
+      infoWindow: const InfoWindow(title: 'Drop Location'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+    ));
+
+    // Static pickup marker (background)
+    _markers.add(Marker(
+      markerId: const MarkerId('pickup_static'),
+      position: LatLng(pickupLat, pickupLon),
+      infoWindow: const InfoWindow(title: 'Pickup Location'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      zIndex: 99,
+    ));
+
+    // Pulsating marker will be added via timer
+    _updatePulsatingPickupMarker();
+  }
+
+  void _setupEventListeners() {
+    _socket.on('user:driver_assigned', _handleAssigned);
+  }
+
+  Future<void> _handleAssigned(dynamic payload) async {
+    if (!mounted) return;
+
+    try {
+      if (payload is! Map) return;
+      final deliveryId = payload['deliveryId'] as String?;
+      if (deliveryId == null) return;
+      final driver = payload['driver'] ?? {};
+      final driverName =
+      '${driver['firstName'] ?? ''} ${driver['lastName'] ?? ''}'.trim();
+      final otp = payload['otp']?.toString() ?? 'N/A';
+      Fluttertoast.showToast(msg: "Driver Assigned: $driverName");
+      if (mounted) {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => PickupScreen(
+              socket: widget.socket,
+              deliveryId: deliveryId,
+              driver: driver as Map<String, dynamic>,
+              otp: otp,
+              pickup: payload['pickup'] ?? {},
+              dropoff: payload['dropoff'] ?? {},
+              amount: payload['amount'],
+              vehicleType: payload['vehicleType'] ?? {},
+              status: payload['status'].toString(),
+              txId: box.get("current_booking_txId")?.toString() ?? '',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(msg: "Error: $e");
+    }
+  }
+  Future<void> _fetchRoute() async {
+    const String apiKey = 'AIzaSyC2UYnaHQEwhzvibI-86f8c23zxgDTEX3g';
+    String origin = '$pickupLat,$pickupLon';
+    String dest = '$dropLat,$dropLon';
+    Uri url = Uri.https('maps.googleapis.com', '/maps/api/directions/json', {
+      'origin': origin,
+      'destination': dest,
+      'key': apiKey,
+    });
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'OK' && data['routes'].isNotEmpty) {
+          final String poly = data['routes'][0]['overview_polyline']['points'];
+          _routePoints = _decodePolyline(poly);
+          final leg = data['routes'][0]['legs'][0];
+          pickupToDropDistance = leg['distance']['text'];
+          pickupToDropDuration = leg['duration']['text'];
+          _routeFetched = true;
+
+          setState(() {
+            _polylines.clear();
+            _polylines.add(Polyline(
+              polylineId: const PolylineId('route'),
+              points: _routePoints,
+              color: Colors.blue,
+              width: 5,
+            ));
+          });
+
+          if (_mapController != null && _routePoints.isNotEmpty) {
+            LatLngBounds bounds = _calculateBounds(_routePoints);
+            _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Route error: $e');
+    }
+  }
+  LatLngBounds _calculateBounds(List<LatLng> points) {
+    double minLat = points[0].latitude, maxLat = points[0].latitude;
+    double minLng = points[0].longitude, maxLng = points[0].longitude;
+
+    for (LatLng p in points) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+  }
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> points = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
+
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      lat += (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      lng += (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+
+      points.add(LatLng(lat / 1E5, lng / 1E5));
+    }
+    return points;
+  }
+
+  void _startDotTimer() {
+    _dotTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (mounted) {
+        setState(() => _dotCount = (_dotCount % 3) + 1);
+      }
+    });
+  }
+
+  void _startSearchTimer() {
+    _searchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        if (_remainingSeconds > 0) {
+          setState(() => _remainingSeconds--);
+        } else {
+          _stopSearching();
+        }
+      }
+    });
+  }
+  void _startSearching() {
+    setState(() {
+      _isSearching = true;
+      _remainingSeconds = 300;
+      _dotCount = 1;
+    });
+    _pulseController.repeat(reverse: true);
+    _startDotTimer();
+    _startSearchTimer();
+  }
+  void _stopSearching() {
+    _dotTimer.cancel();
+    _searchTimer?.cancel();
+    _pulseController.stop();
+    setState(() => _isSearching = false);
+  }
+  void _retrySearch() async {
+    _stopSearching();
+    setState(() => _isSearching = true);
+    try {
+      final service = APIStateNetwork(callPrettyDio());
+      final response = await service.bookInstantDelivery(widget.body);
+      if (response.code == 0) {
+        box.put("current_booking_txId", response.data!.txId);
+        setState(() {
+          _remainingSeconds = 300;
+          _dotCount = 1;
+        });
+        _pulseController.repeat(reverse: true);
+        _startDotTimer();
+        _startSearchTimer();
+        Fluttertoast.showToast(msg: "Re-booking successful...");
+      } else {
+        setState(() => _isSearching = false);
+        Fluttertoast.showToast(msg: response.message);
+      }
+    } catch (e) {
+      setState(() => _isSearching = false);
+      Fluttertoast.showToast(msg: "Retry failed: $e");
+    }
+  }
+  String _formatTime(int seconds) {
+    int min = seconds ~/ 60;
+    int sec = seconds % 60;
+    return '$min:${sec.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  void dispose() {
+    _socket.off('user:driver_assigned');
+    _dotTimer.cancel();
+    _searchTimer?.cancel();
+    _pulseController.dispose();
+    _pulseUpdateTimer?.cancel();
+    _mapController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dots = '.' * _dotCount;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: _routeFetched
+          ?
+
+      Stack(
+        children: [
+          GoogleMap(
+            padding: EdgeInsets.only(top: 40.h, right: 16.w),
+            initialCameraPosition: CameraPosition(
+              target: LatLng(pickupLat, pickupLon),
+              zoom: 15,
+            ),
+            onMapCreated: (controller) {
+              _mapController = controller;
+              _centerCameraOnPickup();
+            },
+            markers: _markers,
+            polylines: _polylines,
+            myLocationEnabled: true,
+            zoomControlsEnabled: true,
+            mapType: MapType.normal,
+          ),
+
+          // Back Button
+          Positioned(
+            left: 10.w,
+            top: 40.h,
+            child: FloatingActionButton(
+              mini: true,
+              backgroundColor: Colors.white,
+              shape: const CircleBorder(),
+              onPressed: () => Navigator.pop(context),
+              child: const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Icon(Icons.arrow_back_ios, color: Color(0xFF1D3557)),
+              ),
+            ),
+          ),
+
+          // Route Info
+          if (pickupToDropDistance != null)
+            Positioned(
+              bottom: 170.h,
+              left: 16.w,
+              right: 16.w,
+              child: Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  'Route: $pickupToDropDistance | $pickupToDropDuration',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+
+          // Search Status Bottom Sheet
+          Positioned(
+            bottom: 10.h,
+            left: 16.w,
+            right: 16.w,
+            child: Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(12.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _isSearching
+                        ? "Searching for nearby drivers$dots"
+                        : "No drivers found nearby",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  _isSearching
+                      ? Text(
+                    "Please wait... (${_formatTime(_remainingSeconds)})",
+                    style: const TextStyle(fontSize: 15, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  )
+                      : const Text(
+                    "Try again or cancel request.",
+                    style: TextStyle(fontSize: 15, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  _isSearching
+                      ? const CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.blueAccent,
+                  )
+                      : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _retrySearch,
+                    child: const Text(
+                      "Try Again",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      )
+
+          : const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+
+
+  void _centerCameraOnPickup() {
+    _mapController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: LatLng(pickupLat, pickupLon), zoom: 15.5),
+      ),
+    );
+  }
+
+
 }

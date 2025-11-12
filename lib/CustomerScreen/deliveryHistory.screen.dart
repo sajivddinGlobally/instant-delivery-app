@@ -40,7 +40,6 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
         return const Color(0xFFE0E0E0); // gray fallback
     }
   }
-
   Color _getStatusTextColor(String? status) {
     switch (status?.toLowerCase()) {
       case "assigned":
@@ -56,94 +55,15 @@ class _DeliveryHistoryScreenState extends ConsumerState<DeliveryHistoryScreen> {
     }
   }
 
-/*
-  Future<void> _handleAssigned(
-      final IO.Socket? socket,
-      String id,
-      String status,
-      ) async {
-    try {
-      final dio = await callDio();
-      final service = APIStateNetwork(dio);
-      final response = await service.getDeliveryById(id);
-
-      if (response.error == false && response.data != null) {
-        final data = response.data!;
-
-        Widget targetPage;
-
-        if (status == "assigned") {
-          targetPage = RequestDetailsPage(
-            socket:   widget.socket,
-            deliveryData: data,
-            txtID: data.txId.toString(),
-          );
-        } else if (status == "ongoing") {
-          targetPage = MapLiveScreen(
-            socket: widget.socket,
-            deliveryData: data,
-            pickupLat: data.pickup?.lat,
-            pickupLong: data.pickup?.long,
-            dropLat: data.dropoff?.lat,
-            droplong: data.dropoff?.long,
-            txtid: data.txId.toString(),
-          );
-        } else if (status == "picked") {
-          targetPage = RequestDetailsPage(
-            socket:   widget.socket,
-            deliveryData: data,
-            txtID: data.txId.toString(),
-          );
-          // targetPage = MapRequestDetailsPage(
-          //   socket: widget.,
-          //   deliveryData: data,
-          //   pickupLat: data.pickup?.lat,
-          //   pickupLong: data.pickup?.long,
-          //   dropLat: data.dropoff?.lat,
-          //   droplong: data.dropoff?.long,
-          //   txtid: data.txId.toString(),
-          // );
-        } else {
-          // targetPage = DetailPage(
-          //
-          //   deliveryData: data,
-          //   txtID: data.txId.toString(),
-          //
-          //
-          // );
-          targetPage = RequestDetailsPage(
-            socket:   widget.socket,
-            deliveryData: data,
-            txtID: data.txId.toString(),
-          );
-        }
-
-        // Navigate
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => targetPage),
-        );
-
-        print('🔙 Back from details | Refreshing profile');
-        // Optionally refresh after returning
-        // getDriverProfile();
-      } else {
-        Fluttertoast.showToast(
-          msg: response.message ?? "Failed to fetch delivery details",
-        );
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Error fetching delivery details");
-      debugPrint('❌ Error in _handleAssigned: $e');
-    }
-  }*/
 
   @override
   Widget build(BuildContext context) {
     final historyProvier = ref.watch(getDeliveryHistoryController);
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
-      body: RefreshIndicator(
+      body:
+
+      RefreshIndicator(
         backgroundColor: Color(0xFF006970),
         color: Colors.white,
         onRefresh: () async {

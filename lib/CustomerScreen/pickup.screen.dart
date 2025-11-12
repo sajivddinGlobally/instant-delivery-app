@@ -87,6 +87,8 @@ class _PickupScreenState extends State<PickupScreen> {
     _setupEventListeners();
     _fetchDeliveryData();
   }
+
+
   Future<void> _fetchDeliveryData() async {
     try {
       setState(() {
@@ -123,7 +125,7 @@ class _PickupScreenState extends State<PickupScreen> {
         log("Status updated response: $data");
         // Handle success (e.g., update UI, stop loader, etc.)
         // Check if status is "completed"
-       status=  data['status'];
+       // status=  data['status'];
         if (data['status'] == 'completed' ) {
           // Navigate to Home screen
           _navigateToGiveRatingScreen();
@@ -527,6 +529,8 @@ class _PickupScreenState extends State<PickupScreen> {
     _addMarkers(); // Re-add markers after location is set
     _fetchRoute(); // Fetch route after location is set
   }
+
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
@@ -1215,6 +1219,8 @@ class _PickupScreenState extends State<PickupScreen> {
       Fluttertoast.showToast(msg: "Google Maps not installed");
     }
   }
+
+
 }
 
 

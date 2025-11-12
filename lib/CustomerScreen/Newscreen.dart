@@ -3682,10 +3682,10 @@ class PickupScreenNotification extends StatefulWidget {
     super.key,
     required this.deliveryId,
   });
-
   @override
   State<PickupScreenNotification> createState() => _PickupScreenNotificationState();
 }
+
 
 class _PickupScreenNotificationState extends State<PickupScreenNotification> {
   GoogleMapController? _mapController;
@@ -3696,14 +3696,11 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
   final List<Map<String, dynamic>> messages = [];
   Map<String, dynamic>? assignedDriver;
   bool isSocketConnected = false;
-
-  // Fetched data variables
   GetDeliveryByIdResModel? deliveryData;
   bool isLoadingData = true;
   String? error;
   late IO.Socket socket;
   String? driverToPickupETA = "Calculating...";
-
   @override
   void initState() {
     super.initState();
@@ -3789,7 +3786,6 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
     List<LatLng> points = <LatLng>[];
     int index = 0, len = encoded.length;
     int lat = 0, lng = 0;
-
     while (index < len) {
       int b, shift = 0, result = 0;
       do {
@@ -3799,7 +3795,6 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
       } while (b >= 0x20);
       int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
       lat += dlat;
-
       shift = 0;
       result = 0;
       do {
@@ -3809,13 +3804,16 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
       } while (b >= 0x20);
       int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
       lng += dlng;
-
       points.add(LatLng(lat / 1E5, lng / 1E5));
     }
     return points;
   }
 
   void _initializeSocket() {
+    // socket = IO.io('https://weloads.com', <String, dynamic>{
+    //   'transports': ['websocket'],
+    //   'autoConnect': false,
+    // });
     socket = IO.io('http://192.168.1.43:4567', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
@@ -3879,7 +3877,6 @@ class _PickupScreenNotificationState extends State<PickupScreenNotification> {
 
   void _addMarkers() {
     final markers = <Marker>{};
-
     if (_currentLatLng != null) {
       markers.add(
         Marker(

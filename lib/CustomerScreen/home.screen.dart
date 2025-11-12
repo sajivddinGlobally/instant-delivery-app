@@ -15,6 +15,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:intl/intl.dart';
+import '../data/controller/getDeliveryHistoryController.dart';
+import 'DetailPage.dart';
+import 'Newscreen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -25,7 +29,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 var box = Hive.box("folder");
 var id = box.get("id");
-
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int selectIndex = 0;
   List<Map<String, dynamic>> myList = [
@@ -78,14 +81,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isCheckingLocation = true;
   String? userId;
   late IO.Socket socket;
-
-
   @override
   void initState() {
     super.initState();
     _checkLocationPermission();
     userId = box.get("id")?.toString(); // fetch once
-    _connectSocket();                   // <-- start socket connection early
+    _connectSocket();
+    // Yeh line add karo - har baar screen aane par API refresh ho jayega
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+      ref.invalidate(getDeliveryHistoryController); // ya refresh()
+      _disconnectSocket();
+      _connectSocket();
+      // ya
+      // ref.refresh(getDeliveryHistoryController);
+    });
+  }
+
+  /// Disconnect and clean up old socket
+  void _disconnectSocket() {
+    if (socket != null) {
+      if (socket!.connected) {
+        socket!.disconnect();
+      }
+      socket!.clearListeners(); // Remove all listeners to prevent duplicates
+      socket!.dispose();
+
+    }
+
+    if (mounted) {
+      setState(() => isSocketConnected = false);
+    }
+    print('🔌 Old socket disconnected and cleaned');
+  }
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Har baar jab screen visible ho (route active ho), API call karo
+    final route = ModalRoute.of(context);
+    if (route is PageRoute && route.isCurrent) {
+      // Sirf jab yeh screen active ho
+      ref.invalidate(getDeliveryHistoryController);
+      _disconnectSocket();
+      _connectSocket();
+      // ya ref.refresh(getDeliveryHistoryController);
+    }
   }
 
   // -------------------------------------------------
@@ -263,8 +305,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
+
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case "assigned":
+        return const Color(0xFFE3F2FD); // light blue
+      case "ongoing":
+        return const Color(0xFF7DCF4A); // light blue
+      case "not_assigned":
+        return const Color(0xFFFFEBEE); // light red
+      case "completed":
+        return const Color(0xFFE8F5E9); // light green
+      case "pending":
+        return const Color(0xFFFFF4C7); // light yellow
+      default:
+        return const Color(0xFFE0E0E0); // gray fallback
+    }
+  }
+  Color _getStatusTextColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case "assigned":
+        return const Color(0xFF0D47A1); // dark blue
+      case "not_assigned":
+        return const Color(0xFFC62828); // dark red
+      case "completed":
+        return const Color(0xFF2E7D32); // dark green
+      case "pending":
+        return const Color(0xFF7E6604); // dark yellow-brown
+      default:
+        return const Color(0xFF424242); // dark gray
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final historyProvier = ref.watch(getDeliveryHistoryController);
     // 🔄 Show loader while checking
     if (_isCheckingLocation) {
       return Scaffold(
@@ -349,214 +425,440 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: Color(0xFFFFFFFF),
       body: selectIndex == 0
           ?
-      Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 200.h,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20.r),
-                      topRight: Radius.circular(20.r),
+
+      SingleChildScrollView(
+        child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 200.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20.r),
+                        topRight: Radius.circular(20.r),
+                      ),
+                      color: Color(0xFF006970),
                     ),
-                    color: Color(0xFF006970),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(height: 50.h),
-                      Text(
-                        "Hey ${box.get("firstName")}",
-                        style: GoogleFonts.inter(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 50.h),
+                        Text(
+                          "Hey ${box.get("firstName")}",
+                          style: GoogleFonts.inter(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      Text(
-                        "ready to book your next delivery?",
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(180.w, 50.h),
-                          backgroundColor: Colors.amber,
-                        ),
-                        onPressed: () {
-
-
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>InstantDeliveryScreen(socket)));
-
-
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) =>
-                          //
-                          //         InstantDeliveryScreen(),
-                          //   ),
-                          // );
-
-                        },
-                        child: Text(
-                          "Book",
+                        Text(
+                          "ready to book your next delivery?",
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w400,
-                            color: Colors.black,
+                            color: Colors.white,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 15.h),
-                Center(
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    "Choose the write vehical for your delivery - fast,reliable & affordable!",
-                    style: GoogleFonts.inter(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF006970),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 15.h),
-                Padding(
-                  padding: EdgeInsets.only(left: 15.w, right: 15.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      delivery("Local"),
-                      delivery("City"),
-                      delivery("Nationwide"),
-                      delivery("Home Shifting"),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: 15.w,
-                      right: 15.w,
-                      bottom: 10.h,
-                    ),
-                    child: GridView.builder(
-                      itemCount: myList.length,
-                      padding: EdgeInsets.zero,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 20.w,
-                        mainAxisSpacing: 20.w,
-                        childAspectRatio: 0.91,
-                      ),
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () {
-                            if (index == 4 || index == 5) {
-                              // Navigator.push(
-                              //   context,
-                              //   CupertinoPageRoute(
-                              //     builder: (context) => PackerMoverPage(),
-                              //   ),
-                              // );
-                              Fluttertoast.showToast(msg: "Comming Soon");
-                            } else {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (context) => InstantDeliveryScreen(socket),
-                                ),
-                              );
-                            }
+                        SizedBox(height: 16.h),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(180.w, 50.h),
+                            backgroundColor: Colors.amber,
+                          ),
+                          onPressed: () {
+
+
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>InstantDeliveryScreen(socket)));
+
+
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) =>
+                            //
+                            //         InstantDeliveryScreen(),
+                            //   ),
+                            // );
+
                           },
-                          child: Container(
-                            width: 160.w,
-                            height: 165.h,
-                            decoration: BoxDecoration(
-                              // gradient: LinearGradient(
-                              //   colors: [
-                              //     cardColors[index],
-                              //     cardColors[index].withOpacity(0.7),
-                              //   ],
-                              //   begin: Alignment.topLeft,
-                              //   end: Alignment.bottomRight,
-                              // ),
-                              borderRadius: BorderRadius.circular(10.r),
+                          child: Text(
+                            "Book",
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black,
                             ),
-                            child: Card(
-                              color: cardColors[index % cardColors.length],
-                              shape: RoundedRectangleBorder(
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 15.h),
+                  Center(
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      "Choose the write vehical for your delivery - fast,reliable & affordable!",
+                      style: GoogleFonts.inter(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF006970),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15.h),
+                  Padding(
+                    padding: EdgeInsets.only(left: 15.w, right: 15.w),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        delivery("Local"),
+                        delivery("City"),
+                        delivery("Nationwide"),
+                        delivery("Home Shifting"),
+                      ],
+                    ),
+                  ),
+
+
+
+                  SizedBox(height: 20.h),
+                  // Expanded(
+                  //   child:
+                    Padding(
+                      padding: EdgeInsets.only(
+                        left: 15.w,
+                        right: 15.w,
+                        bottom: 10.h,
+                      ),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        itemCount: myList.length,
+                        padding: EdgeInsets.zero,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 20.w,
+                          mainAxisSpacing: 20.w,
+                          childAspectRatio: 0.91,
+                        ),
+                        itemBuilder: (context, index) {
+
+
+                          return InkWell(
+                            onTap: () {
+                              if (index == 4 || index == 5) {
+                                Fluttertoast.showToast(msg: "Comming Soon");
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => InstantDeliveryScreen(socket),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Container(
+                              width: 160.w,
+                              height: 185.h,
+                              decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10.r),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: 30.h),
-                                  Center(
-                                    child:
-                                        myList[index]['image']
-                                            .toString()
-                                            .endsWith(".svg")
-                                        ? SvgPicture.asset(
-                                            myList[index]['image'],
-                                            width: 80.w,
-                                            height: 80.h,
-                                          )
-                                        : Image.asset(
-                                            myList[index]['image'],
-                                            width: 80.w,
-                                            height: 80.h,
-                                          ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      left: 9.w,
-                                      top: 4.h,
+                              child: Card(
+                                color: cardColors[index % cardColors.length],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+
+
+                                    SizedBox(height: 30.h),
+                                    Center(
+                                      child:
+                                          myList[index]['image']
+                                              .toString()
+                                              .endsWith(".svg")
+                                          ? SvgPicture.asset(
+                                              myList[index]['image'],
+                                              width: 80.w,
+                                              height: 80.h,
+                                            )
+                                          : Image.asset(
+                                              myList[index]['image'],
+                                              width: 80.w,
+                                              height: 80.h,
+                                            ),
                                     ),
-                                    child: Text(
-                                      // "Trucks",
-                                      myList[index]['name'].toString(),
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF000000),
-                                        letterSpacing: -1,
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                        left: 9.w,
+                                        top: 4.h,
+                                      ),
+                                      child: Text(
+                                        // "Trucks",
+                                        myList[index]['name'].toString(),
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF000000),
+                                          letterSpacing: -1,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 9.w),
-                                    child: Text(
-                                      //  "Choose from Our Fleet",
-                                      myList[index]['title'].toString(),
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xFF000000),
-                                        letterSpacing: -1,
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 9.w),
+                                      child: Text(
+                                        //  "Choose from Our Fleet",
+                                        myList[index]['title'].toString(),
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF000000),
+                                          letterSpacing: -1,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+
+
+                                  ],
+                                ),
                               ),
+                            ),
+                          );
+
+
+                        },
+                      ),
+                    ),
+                  // ),
+                  SizedBox(height: 20.h,),
+                  historyProvier.when(
+                    data: (history) {
+                      if (history.data.deliveries.isEmpty) {
+                        return Center(
+                          child: Text(
+                            "No History Available",
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w300,
+                              color: Colors.black,
                             ),
                           ),
                         );
-                      },
-                    ),
+                      }
+                      DateTime date = DateTime.fromMillisecondsSinceEpoch(
+                        1761395019837,
+                      );
+                      String formattedDate = DateFormat(
+                        "dd MMMM yyyy, h:mma",
+                      ).format(date);
+                      return
+                        // Expanded(
+                        // child:
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: history.data.deliveries.length,
+                          itemBuilder: (context, index) {
+                            return
+                              history.data.deliveries[index].status=="ongoing"?
+                              GestureDetector(
+                                onTap: (){
+
+                                  history.data.deliveries[index].status=="assigned" ||    history.data.deliveries[index].status=="ongoing"?
+
+                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>
+
+                                      PickupScreenNotification(
+                                          deliveryId: history.data.deliveries[index].id
+                                      )))
+
+                                      :   Navigator.push(context, MaterialPageRoute(builder: (context)=>
+
+                                      RequestDetailsPage(
+                                          deliveryId: history.data.deliveries[index].id
+                                      )));
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: 15.h,
+                                    left: 25.w,
+                                    right: 25.w,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            // "ORDB1234",
+                                            history.data.deliveries[index].id,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 15.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xFF0C341F),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "Receipient: ${history.data.deliveries[index].name ?? "Unknow"}",
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 13.sp,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xFF545454),
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              // if (index == 0)
+                                              Container(
+                                                padding: EdgeInsets.only(
+                                                  left: 6.w,
+                                                  right: 6.w,
+                                                  top: 2.h,
+                                                  bottom: 2.h,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(
+                                                    3.r,
+                                                  ),
+                                                  // color: Color(0xFFFFF4C7),
+                                                  color: _getStatusColor(
+                                                    history.data.deliveries[index].status,
+                                                  ),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    // "In progress",
+                                                    history.data.deliveries[index].status
+                                                        .toString(),
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 12.sp,
+                                                      fontWeight: FontWeight.w500,
+                                                      // color: Color(0xFF7E6604),
+                                                      color: _getStatusTextColor(
+                                                        history
+                                                            .data
+                                                            .deliveries[index]
+                                                            .status,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 10.h),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            width: 35.w,
+                                            height: 35.h,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(5.r),
+                                              color: Color(0xFFF7F7F7),
+                                            ),
+                                            child: Center(
+                                              child: SvgPicture.asset(
+                                                "assets/SvgImage/bikess.svg",
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 10.w),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.location_on,
+                                                      size: 16.sp,
+                                                      color: Color(0xFF27794D),
+                                                    ),
+                                                    SizedBox(width: 5.w),
+                                                    Text(
+                                                      "Drop off",
+                                                      style: GoogleFonts.inter(
+                                                        fontSize: 12.sp,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xFF545454),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                    left: 3.w,
+                                                    top: 2.h,
+                                                  ),
+                                                  child: Text(
+                                                    // "21b, Karimu Kotun Street, Victoria Island",
+                                                    history
+                                                        .data
+                                                        .deliveries[index]
+                                                        .dropoff
+                                                        .name
+                                                        .toString(),
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 14.sp,
+                                                      fontWeight: FontWeight.w400,
+                                                      color: Color(0xFF0C341F),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 2.h),
+                                                Text(
+                                                  //2 January 2020, 2:43pm",
+                                                  DateFormat("dd MMMM yyyy, h:mma")
+                                                      .format(
+                                                    DateTime.fromMillisecondsSinceEpoch(
+                                                      history
+                                                          .data
+                                                          .deliveries[index]
+                                                          .createdAt,
+                                                    ),
+                                                  )
+                                                      .toLowerCase(),
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12.sp,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xFF545454),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12.h),
+                                      Divider(color: Color(0xFFDCE8E9)),
+                                    ],
+                                  ),
+                                ),
+                              ):SizedBox();
+                          },
+                        );
+                      // );
+                    },
+                    error: (error, stackTrace) {
+                      log(stackTrace.toString());
+                      return Center(child: Text(error.toString()));
+                    },
+                    loading: () => Center(child: CircularProgressIndicator()),
                   ),
-                ),
-              ],
-            )
+                  SizedBox(height: 40.h,),
+                ],
+              ),
+      )
+
           : selectIndex == 1
           ? OrderListScreen()
           : selectIndex == 2
@@ -624,15 +926,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+
+
 }
+
+
 
 class Shipment extends StatefulWidget {
   const Shipment({super.key});
-
   @override
   State<Shipment> createState() => _ShipmentState();
 }
-
 class _ShipmentState extends State<Shipment> {
   @override
   Widget build(BuildContext context) {

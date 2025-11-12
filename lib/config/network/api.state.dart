@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:delivery_mvp_app/data/Model/UpdateAddressBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantDeliveryResModel.dart';
 import 'package:delivery_mvp_app/data/Model/bookInstantdeliveryBodyModel.dart';
+import 'package:delivery_mvp_app/data/Model/createTicketBodyModel.dart';
+import 'package:delivery_mvp_app/data/Model/createTicketResModel.dart';
 import 'package:delivery_mvp_app/data/Model/deliveryCancelByUserResModel..dart';
 import 'package:delivery_mvp_app/data/Model/forgotSendOTPBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/forgotSentOTPRestModel.dart';
@@ -9,12 +11,17 @@ import 'package:delivery_mvp_app/data/Model/getDeliveryHistoryResModel..dart';
 import 'package:delivery_mvp_app/data/Model/getDistanceBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/getDistanceResModel.dart';
 import 'package:delivery_mvp_app/data/Model/getProfileModel.dart';
+import 'package:delivery_mvp_app/data/Model/getTicketResModel.dart';
 import 'package:delivery_mvp_app/data/Model/loginBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/loginResModel.dart';
 import 'package:delivery_mvp_app/data/Model/loginVerifyBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/loginVerifyResModel.dart';
 import 'package:delivery_mvp_app/data/Model/registerBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/registerResModel.dart';
+import 'package:delivery_mvp_app/data/Model/ticketDetailsBodyModel.dart';
+import 'package:delivery_mvp_app/data/Model/ticketDetailsResModel.dart';
+import 'package:delivery_mvp_app/data/Model/ticketReplyBodyModel.dart';
+import 'package:delivery_mvp_app/data/Model/ticketReplyResModel.dart';
 import 'package:delivery_mvp_app/data/Model/updateUserProfileBodyModel.dart';
 import 'package:delivery_mvp_app/data/Model/updateUserProfileResModel.dart';
 import 'package:delivery_mvp_app/data/Model/uploadImageResModel.dart';
@@ -36,9 +43,7 @@ import '../../data/Model/SubmitRatingModel.dart';
 part 'api.state.g.dart';
 
 @RestApi(baseUrl: "http://192.168.1.43:4567/api") // local url
-
 // @RestApi(baseUrl: "https://weloads.com/api")
-
 abstract class APIStateNetwork {
   factory APIStateNetwork(Dio dio, {String baseUrl}) = _APIStateNetwork;
 
@@ -106,10 +111,8 @@ abstract class APIStateNetwork {
 
   @POST("/v1/user/getNearByDriverList")
   Future<GetNearByDriverResponse> getNearByDriverList(
-      @Body() NearByDriverModel body,
-      );
-
-
+    @Body() NearByDriverModel body,
+  );
 
   @POST("/v1/user/deleteAddress")
   Future<HttpResponse<dynamic>> deleteAddress(@Body() DeleteAddressModel body);
@@ -122,12 +125,18 @@ abstract class APIStateNetwork {
   Future<UpdateUserProfileResModel> updateCutomerProfile(
     @Body() UpdateUserProfileBodyModel body,
   );
+
+  @POST("/v1/ticket/createTicket")
+  Future<CreateTicketResModel> createTicket(@Body() CreateTicketBodyModel body);
+
+  @POST("/v1/ticket/getTicketList")
+  Future<GetTicketListResModel> getTicketList();
+
+  @POST("/v1/ticket/getTicketById")
+  Future<GetTicketDetailsResModel> ticketDetails(
+    @Body() TicketDetailsBodyModel body,
+  );
+
+  @POST("/v1/ticket/ticketReply")
+  Future<TicketReplyResModel> ticketReply(@Body() TicketReplyBodyModel body);
 }
-
-
-
-
-
-
-
-
